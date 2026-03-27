@@ -8,8 +8,8 @@
   --color-hig-gray-400: #86868b;
   --color-hig-gray-600: #1d1d1f;
 
-  --radius-hig: 20px;
-  --radius-hig-inner: 12px;
+  --radius-hig: 24px;
+  --radius-hig-inner: 16px;
 
   --shadow-hig: 0 4px 24px rgba(0, 0, 0, 0.04);
   --shadow-hig-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
@@ -20,19 +20,21 @@
 :root {
   --background: #ffffff;
   --foreground: #1d1d1f;
-  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-bg: rgba(255, 255, 255, 0.9);
   --border: rgba(0, 0, 0, 0.08);
   --muted: #f5f5f7;
   --sidebar-bg: #fafafa;
+  --hig-selection: rgba(0, 122, 255, 0.2);
 }
 
 .dark {
   --background: #000000;
   --foreground: #f5f5f7;
-  --card-bg: rgba(28, 28, 30, 0.85);
+  --card-bg: rgba(28, 28, 30, 0.9);
   --border: rgba(255, 255, 255, 0.1);
   --muted: #1c1c1e;
   --sidebar-bg: #0a0a0a;
+  --hig-selection: rgba(0, 122, 255, 0.4);
 }
 
 body {
@@ -45,7 +47,7 @@ body {
 
 @layer components {
   .hig-card {
-    @apply bg-[var(--card-bg)] backdrop-blur-2xl border border-[var(--border)] rounded-[var(--radius-hig)] shadow-[0_4px_16px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-500 hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1;
+    @apply bg-[var(--card-bg)] backdrop-blur-2xl border border-[var(--border)] rounded-[var(--radius-hig)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-500 hover:shadow-[0_12px_48px_rgba(0,0,0,0.08)] hover:-translate-y-1;
   }
 
   .hig-glass {
@@ -53,11 +55,11 @@ body {
   }
 
   .hig-button-primary {
-    @apply bg-hig-blue text-white px-6 py-2.5 rounded-full font-bold shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all active:scale-95 hover:shadow-[0_6px_20px_rgba(0,122,255,0.4)] hover:brightness-110;
+    @apply bg-hig-blue text-white px-8 py-3 rounded-full font-bold shadow-[0_4px_12px_rgba(0,122,255,0.25)] transition-all active:scale-95 hover:shadow-[0_8px_24px_rgba(0,122,255,0.35)] hover:brightness-110;
   }
 
   .hig-button-secondary {
-    @apply bg-[var(--muted)] text-hig-blue px-6 py-2.5 rounded-full font-bold transition-all active:scale-95 hover:brightness-95;
+    @apply bg-[var(--muted)] text-hig-blue px-8 py-3 rounded-full font-bold transition-all active:scale-95 hover:brightness-95 border border-[var(--border)];
   }
 
   .premium-gradient {
@@ -71,17 +73,61 @@ body {
   .pro-editorial {
     @apply border-t-8 border-amber-400;
   }
+
+  /* Improved Layout Utility */
+  .magazine-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 items-stretch;
+  }
 }
 
-/* Medium-like Typography */
+/* Medium-like Typography - Improved for Light Mode */
 article {
-  @apply max-w-2xl mx-auto;
+  @apply max-w-3xl mx-auto;
 }
 
 h1 {
-  @apply text-4xl md:text-5xl font-bold tracking-tight mb-6;
+  @apply text-5xl md:text-7xl font-black tracking-tight mb-10 leading-[1.05];
+}
+
+h2 {
+  @apply text-3xl md:text-4xl font-bold tracking-tight mt-16 mb-8;
 }
 
 p {
-  @apply text-lg leading-relaxed mb-4 text-zinc-700 dark:text-zinc-300;
+  @apply text-xl leading-relaxed mb-8 text-zinc-800 dark:text-zinc-200 font-medium;
+}
+
+a {
+  @apply transition-colors duration-200;
+}
+
+/* Selection improvements */
+::selection {
+  background: var(--hig-selection);
+}
+::-moz-selection {
+  background: var(--hig-selection);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hig-gray-400);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
