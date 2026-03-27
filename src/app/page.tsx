@@ -1,108 +1,167 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Clock, User, Bookmark, TrendingUp, Sparkles } from "lucide-react";
-import { ARTICLES, TRENDING } from "@/lib/data";
+import { ArrowUpRight, Clock, User, Bookmark, TrendingUp, Sparkles, ExternalLink } from "lucide-react";
+import { ARTICLES, TRENDING, INDUSTRY_TOOLS } from "@/lib/data";
 
 export default function Home() {
+  const featuredArticle = ARTICLES.find(a => a.featured) || ARTICLES[0];
+  const otherArticles = ARTICLES.filter(a => a.id !== featuredArticle.id);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="flex flex-col lg:flex-row gap-16">
-        {/* Main Feed */}
-        <div className="flex-1 space-y-20">
-          <section>
-             <div className="flex items-center gap-3 mb-10 text-hig-blue font-semibold uppercase tracking-widest text-xs">
-                <Sparkles className="w-4 h-4" />
-                <span>Selected for you</span>
+    <div className="max-w-7xl mx-auto px-6 py-8 md:py-16 space-y-16 md:space-y-24">
+      {/* Hero Section - Featured Story */}
+      <section className="relative group overflow-hidden rounded-[32px] md:rounded-[48px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+        <Link href={`/posts/${featuredArticle.id}`} className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] md:min-h-[600px]">
+          <div className="relative h-[300px] lg:h-full overflow-hidden">
+            <Image
+              src={featuredArticle.image}
+              alt={featuredArticle.title}
+              fill
+              className="object-cover transition-transform duration-1000 group-hover:scale-105"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent lg:hidden" />
+          </div>
+          <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center space-y-6 md:space-y-8">
+            <div className="flex items-center gap-3 text-hig-blue font-black uppercase tracking-[0.2em] text-[10px] md:text-xs">
+              <Sparkles className="w-4 h-4" />
+              <span>STORY OF THE DAY</span>
+            </div>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-zinc-900 dark:text-white leading-[1.1] tracking-tight group-hover:text-hig-blue transition-colors">
+              {featuredArticle.title}
+            </h1>
+            <p className="text-base md:text-xl text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-3 font-medium">
+              {featuredArticle.excerpt}
+            </p>
+            <div className="flex items-center justify-between pt-4 md:pt-8 border-t border-zinc-200 dark:border-zinc-800">
+               <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center">
+                    <User className="w-5 h-5 md:w-6 md:h-6 text-zinc-500" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sm md:text-base text-zinc-900 dark:text-white">{featuredArticle.author}</span>
+                    <span className="text-xs text-zinc-500 font-medium">{featuredArticle.category} • {featuredArticle.time}</span>
+                  </div>
+               </div>
+               <div className="hidden md:flex gap-4">
+                 <button className="hig-button-secondary p-3 rounded-full"><Bookmark className="w-5 h-5" /></button>
+                 <button className="hig-button-primary p-3 rounded-full"><ArrowUpRight className="w-5 h-5" /></button>
+               </div>
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-16 md:gap-24">
+        {/* Main Feed - Magazine Layout */}
+        <div className="space-y-16 md:space-y-24">
+          <section className="space-y-10 md:space-y-16">
+             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
+                <h2 className="text-xl md:text-2xl font-black tracking-tight text-zinc-900 dark:text-white italic">Human stories and ideas</h2>
+                <Link href="/news" className="text-xs font-bold text-hig-blue uppercase tracking-widest hover:underline">Explore More</Link>
              </div>
 
-             <div className="space-y-16">
-               {ARTICLES.map((article) => (
-                 <Link key={article.id} href={`/posts/${article.id}`} className="group block">
-                   <article className="grid grid-cols-1 md:grid-cols-[1fr,240px] gap-8 items-start">
-                     <div className="space-y-4">
-                       <div className="flex items-center gap-3 text-sm">
-                         <div className="w-6 h-6 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center">
-                            <User className="w-3.5 h-3.5 text-zinc-500" />
-                         </div>
-                         <span className="font-semibold text-zinc-900 dark:text-zinc-100">{article.author}</span>
-                         <span className="text-zinc-400">in</span>
-                         <span className="font-medium text-zinc-700 dark:text-zinc-300">{article.category}</span>
-                       </div>
-
-                       <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white group-hover:text-hig-blue transition-colors leading-tight">
-                         {article.title}
-                       </h2>
-
-                       <p className="text-zinc-500 dark:text-zinc-400 line-clamp-3 leading-relaxed">
-                         {article.excerpt}
-                       </p>
-
-                       <div className="flex items-center justify-between pt-4">
-                         <div className="flex items-center gap-4 text-xs font-medium text-zinc-400">
-                           <div className="flex items-center gap-1.5">
-                             <Clock className="w-3.5 h-3.5" />
-                             {article.time}
-                           </div>
-                           <span className="bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-md text-zinc-500">Popular</span>
-                         </div>
-                         <div className="flex gap-4">
-                           <button className="text-zinc-400 hover:text-hig-blue"><Bookmark className="w-5 h-5" /></button>
-                           <button className="text-zinc-400 hover:text-hig-blue"><ArrowUpRight className="w-5 h-5" /></button>
-                         </div>
-                       </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16 md:gap-y-20">
+               {otherArticles.map((article) => (
+                 <Link key={article.id} href={`/posts/${article.id}`} className="group block space-y-6">
+                   <div className="relative aspect-[16/10] rounded-[24px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                     <Image
+                       src={article.image}
+                       alt={article.title}
+                       fill
+                       className="object-cover transition-transform duration-700 group-hover:scale-110"
+                     />
+                   </div>
+                   <div className="space-y-4">
+                     <div className="flex items-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">
+                       <span className="text-hig-blue">{article.category}</span>
+                       <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                       <span>{article.time}</span>
                      </div>
-
-                     <div className="relative order-first md:order-last h-[160px] md:h-full rounded-2xl overflow-hidden border border-zinc-100 dark:border-zinc-800">
-                       <Image
-                         src={article.image}
-                         alt={article.title}
-                         fill
-                         className="object-cover transition-transform duration-700 group-hover:scale-105"
-                       />
-                     </div>
-                   </article>
+                     <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white group-hover:text-hig-blue transition-colors leading-tight">
+                       {article.title}
+                     </h3>
+                     <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                       {article.excerpt}
+                     </p>
+                   </div>
                  </Link>
                ))}
              </div>
           </section>
+
+          {/* Industry Tools - Placement section */}
+          <section className="bg-zinc-900 dark:bg-black rounded-[32px] md:rounded-[48px] p-8 md:p-16 text-white overflow-hidden relative shadow-[0_32px_64px_-12px_rgba(0,122,255,0.2)]">
+            <div className="relative z-10">
+               <div className="flex items-center gap-3 mb-10 text-hig-blue font-black uppercase tracking-[0.2em] text-[10px]">
+                  <Sparkles className="w-4 h-4" />
+                  <span>EMOTIONAL INTELLIGENCE</span>
+               </div>
+               <h2 className="text-3xl md:text-5xl font-black mb-12 tracking-tight leading-tight">Crafting the future of marketing with heart.</h2>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                  {INDUSTRY_TOOLS.map((tool) => (
+                    <Link key={tool.id} href={tool.link} className="hig-card bg-white/5 border-white/10 hover:bg-white/10 p-6 space-y-6 block group">
+                       <div className="relative w-full aspect-square rounded-[24px] overflow-hidden">
+                          <Image src={tool.image} alt={tool.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                       </div>
+                       <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                             <h4 className="font-bold text-lg">{tool.name}</h4>
+                             <ExternalLink className="w-4 h-4 text-zinc-500" />
+                          </div>
+                          <p className="text-xs text-zinc-400 font-medium leading-relaxed">{tool.description}</p>
+                       </div>
+                       <div className="pt-2">
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-hig-blue text-white px-3 py-1.5 rounded-full">{tool.category}</span>
+                       </div>
+                    </Link>
+                  ))}
+               </div>
+            </div>
+            {/* Background Accent */}
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-hig-blue/10 blur-[120px] -z-0 rounded-full" />
+          </section>
         </div>
 
         {/* Sidebar */}
-        <aside className="w-full lg:w-[320px] space-y-12">
-          <div className="hig-card p-6 sticky top-24">
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="w-4 h-4 text-hig-blue" />
-              <h3 className="font-bold text-sm uppercase tracking-wider text-zinc-400">Trending Intelligence</h3>
+        <aside className="w-full space-y-16">
+          <div className="hig-card p-8 sticky top-24 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl border-white/20">
+            <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
+              <TrendingUp className="w-5 h-5 text-hig-blue" />
+              <h3 className="font-black text-xs uppercase tracking-[0.1em] text-zinc-900 dark:text-white">Trending Vibes</h3>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               {TRENDING.map((tag, i) => (
-                <Link key={tag} href={`/news?q=${tag}`} className="flex gap-4 group">
-                  <span className="text-3xl font-black text-zinc-100 dark:text-zinc-900 group-hover:text-hig-blue transition-colors">0{i+1}</span>
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-sm leading-tight text-zinc-800 dark:text-zinc-200 group-hover:text-hig-blue transition-colors line-clamp-2">
+                <Link key={tag} href={`/news?q=${tag}`} className="flex gap-6 group">
+                  <span className="text-4xl font-black text-zinc-100 dark:text-zinc-800 group-hover:text-hig-blue transition-colors shrink-0">0{i+1}</span>
+                  <div className="space-y-2 pt-1">
+                    <h4 className="font-bold text-sm leading-snug text-zinc-900 dark:text-zinc-200 group-hover:text-hig-blue transition-colors line-clamp-3">
                       {tag}
                     </h4>
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">Updated 2h ago</p>
+                    <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest flex items-center gap-1.5">
+                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                       LIVE INSIGHT
+                    </p>
                   </div>
                 </Link>
               ))}
             </div>
 
-            <div className="mt-8 pt-8 border-t border-zinc-100 dark:border-zinc-800">
-              <Link href="/news" className="text-sm font-semibold text-hig-blue hover:underline">
-                See all news insights
+            <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-zinc-800">
+              <Link href="/news" className="hig-button-primary w-full text-center block text-sm">
+                Open Dashboard
               </Link>
             </div>
           </div>
 
-          <div className="p-6 space-y-6">
-             <h3 className="font-bold text-sm uppercase tracking-wider text-zinc-400">Personalization</h3>
-             <p className="text-xs text-zinc-500 leading-relaxed">
-               Rusability tracks your interests in real-time to surface the most relevant marketing tools and industry news.
+          <div className="hig-card p-8 bg-hig-blue text-white space-y-6">
+             <h3 className="font-black text-xs uppercase tracking-[0.2em] opacity-80">PERSONALIZATION</h3>
+             <p className="text-sm font-bold leading-relaxed">
+               Get content and tools tailored to your PR & Search Strategy goals.
              </p>
-             <Link href="/profile/jdoe" className="inline-flex items-center gap-2 text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:text-hig-blue transition-colors">
-               Manage Interests <ArrowUpRight className="w-3 h-3" />
+             <Link href="/profile" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white text-hig-blue px-6 py-3 rounded-full hover:bg-zinc-100 transition-colors">
+               Customize My Feed <ArrowUpRight className="w-4 h-4" />
              </Link>
           </div>
         </aside>

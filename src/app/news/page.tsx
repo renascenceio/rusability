@@ -39,11 +39,11 @@ export default function NewsPage() {
       <header className="mb-16">
         <div className="flex items-center gap-2 text-hig-blue font-bold text-xs uppercase tracking-widest mb-4">
           <Sparkles className="w-4 h-4" />
-          <span>AI Generated Insights</span>
+          <span>Human stories and ideas</span>
         </div>
-        <h1 className="text-5xl font-black mb-4">Intelligence Feed</h1>
-        <p className="text-xl text-zinc-500 max-w-2xl leading-relaxed">
-          Real-time, professionally curated news snippets for marketing and PR professionals, powered by the Rusability AI Engine.
+        <h1 className="text-5xl font-black mb-4 italic">The Pulse of Marketing</h1>
+        <p className="text-xl text-zinc-500 max-w-2xl leading-relaxed font-medium">
+          Where data meets emotion. Explore the latest shifts in the industry through the lens of human experience.
         </p>
 
         <div className="mt-10 flex gap-4">

@@ -1,8 +1,9 @@
-import { Clock, User, Share2, Heart, MessageCircle, Bookmark, ArrowUpRight } from "lucide-react";
+import { Clock, User, Share2, Heart, MessageCircle, Bookmark, ArrowUpRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { ARTICLES } from "@/lib/data";
+import { ARTICLES, INDUSTRY_TOOLS } from "@/lib/data";
 import { notFound } from "next/navigation";
+import { ArticlePlugin } from "@/components/ArticlePlugin";
 
 export default async function PostPage(props: { params: Promise<{ slug: string }> }) {
   const { slug } = await props.params;
@@ -24,8 +25,18 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
     image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200"
   };
 
+  const isProPost = displayData.isProAuthor;
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 animate-in fade-in duration-500">
+    <div className={`max-w-7xl mx-auto px-6 py-12 md:py-20 animate-in fade-in duration-500 ${isProPost ? 'pro-editorial' : ''}`}>
+      {isProPost && (
+        <div className="flex justify-center mb-8">
+          <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
+            <Sparkles className="w-3 h-3 fill-white" />
+            Premium Perspective
+          </span>
+        </div>
+      )}
       <header className="mb-16 text-center">
         <div className="flex items-center justify-center gap-4 mb-10 text-hig-blue font-bold text-xs uppercase tracking-widest">
           <span className="bg-hig-blue/10 px-3 py-1.5 rounded-full">{displayData.category}</span>
@@ -97,6 +108,20 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
             <p>
               In the rapidly evolving landscape of digital marketing, the integration of artificial intelligence (AI) has shifted from a futuristic concept to a present-day necessity. The ability of machine learning algorithms to process vast datasets in real-time is enabling brands to deliver content that resonates on a deeply individual level.
             </p>
+
+            {!isProPost && (
+              <ArticlePlugin
+                type="tool"
+                data={{
+                  id: INDUSTRY_TOOLS[0].id,
+                  name: INDUSTRY_TOOLS[0].name,
+                  description: INDUSTRY_TOOLS[0].description,
+                  image: INDUSTRY_TOOLS[0].image,
+                  category: INDUSTRY_TOOLS[0].category,
+                  link: INDUSTRY_TOOLS[0].link
+                }}
+              />
+            )}
 
             <h2 className="text-3xl font-bold tracking-tight pt-10">The Algorithmic Approach to Empathy</h2>
 
