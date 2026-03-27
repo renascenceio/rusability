@@ -2,15 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Bell, User, Menu, X, Command, Edit3 } from "lucide-react";
+import Image from "next/image";
+import { Search, Bell, User, Menu, X, Command, Edit3, Shield } from "lucide-react";
 import { SpotlightSearch } from "./SpotlightSearch";
+import { ThemeToggle } from "./ThemeToggle";
+import { useTheme } from "next-themes";
+import { CURRENT_USER } from "@/lib/data";
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -27,14 +34,27 @@ export const Header = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const logoSrc = resolvedTheme === "dark" ? "/branding/logo-white.png" : "/branding/logo-black.png";
+  const isAdmin = CURRENT_USER.membership === "pro"; // For demo purposes, Pro is superadmin
+
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled ? "hig-glass py-2" : "bg-transparent py-4"
       }`}>
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
-          <Link href="/" className="text-2xl font-bold tracking-tight text-black dark:text-white shrink-0">
-            rusability
+          <Link href="/" className="relative h-6 w-32 md:w-40 shrink-0">
+             {mounted ? (
+               <Image
+                src={logoSrc}
+                alt="Rusability"
+                fill
+                className="object-contain"
+                priority
+               />
+             ) : (
+               <span className="text-2xl font-bold tracking-tight text-black dark:text-white">rusability</span>
+             )}
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-hig-gray-400">
@@ -66,14 +86,21 @@ export const Header = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
-            {/* New Write Button */}
+          <div className="flex items-center gap-3 shrink-0">
+            {isAdmin && (
+              <Link href="/admin" className="p-2.5 rounded-full bg-amber-400/10 text-amber-600 hover:bg-amber-400 hover:text-white transition-all border border-amber-400/20" title="Admin Dashboard">
+                <Shield className="w-5 h-5" />
+              </Link>
+            )}
+
+            <ThemeToggle />
+
             <Link href="/editor" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-hig-blue text-white text-xs font-black uppercase tracking-widest hover:bg-hig-blue-dark transition-all shadow-lg hover:shadow-hig-blue/20 group">
               <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
               Write
             </Link>
 
-            <button className="p-2 text-hig-gray-400 hover:text-foreground transition-colors">
+            <button className="p-2 text-hig-gray-400 hover:text-foreground transition-colors hidden sm:block">
               <Bell className="w-5 h-5" />
             </button>
             <Link href="/profile/jdoe" className="p-2 text-hig-gray-400 hover:text-foreground transition-colors">
@@ -92,6 +119,8 @@ export const Header = () => {
              <Link href="/news" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>News</Link>
              <Link href="/events" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Events</Link>
              <Link href="/tools" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Tools</Link>
+             {isAdmin && <Link href="/admin" className="text-lg font-semibold text-amber-500" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</Link>}
+             <div className="h-px bg-zinc-100 dark:bg-zinc-800 w-full" />
              <Link href="/editor" className="text-lg font-semibold flex items-center gap-2 text-hig-blue" onClick={() => setIsMobileMenuOpen(false)}>
                 <Edit3 className="w-5 h-5" /> Write Article
              </Link>
