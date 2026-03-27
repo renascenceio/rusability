@@ -1,6 +1,6 @@
 import { User, Settings, Sparkles, Heart, Clock, Layout, Sliders, ChevronRight, TrendingUp, Users, Target } from "lucide-react";
 import Image from "next/image";
-import { CURRENT_USER, ARTICLES } from "@/lib/data";
+import { CURRENT_USER } from "@/lib/data";
 
 export default async function ProfilePage(props: { params: Promise<{ id: string }> }) {
   await props.params;
