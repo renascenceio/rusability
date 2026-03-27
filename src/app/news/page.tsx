@@ -1,5 +1,4 @@
 import { Clock, TrendingUp, Sparkles, Filter, Newspaper, Flame, Zap } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { ARTICLES, INDUSTRY_NEWS } from "@/lib/data";
 import { ArticlePlugin } from "@/components/ArticlePlugin";

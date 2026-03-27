@@ -9,21 +9,16 @@ import {
   Globe,
   Settings2,
   Palette,
-  Plus,
-  TrendingUp,
   Eye,
   UserPlus,
   Trash2,
   Search,
   Sparkles,
   Zap,
-  CheckCircle2,
-  XCircle,
   MoreVertical,
   Flag,
   PenTool,
   LifeBuoy,
-  ChevronRight,
   ShieldCheck,
   SearchCode,
   LineChart,
@@ -417,39 +412,77 @@ export default function AdminDashboard() {
                    <h1 className="text-5xl font-black tracking-tighter leading-none capitalize">{activeTab.replace('-', ' ')} Hub.</h1>
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                   <div className="hig-card p-10 flex flex-col justify-between border-dashed min-h-[300px] group cursor-pointer hover:border-hig-blue transition-all">
-                      <div className="space-y-6">
-                        <div className="w-14 h-14 rounded-[20px] bg-hig-blue/10 flex items-center justify-center">
-                           <Zap className="w-6 h-6 text-hig-blue" />
-                        </div>
-                        <h3 className="text-xl font-bold">Configure Engine</h3>
-                        <p className="text-sm text-zinc-500 font-medium leading-relaxed">Adjust the automated weights and AI parameters for {activeTab}.</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                   {/* Interactive Config Panel */}
+                   <div className="lg:col-span-2 hig-card p-10 space-y-8 border-zinc-100 dark:border-zinc-800">
+                      <div className="flex items-center justify-between">
+                         <h3 className="text-2xl font-black tracking-tight italic">Engine Configuration</h3>
+                         <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">System Ready</span>
+                         </div>
                       </div>
-                      <button className="w-full py-4 bg-zinc-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest mt-8">Open Config</button>
+
+                      <div className="space-y-6">
+                         {[
+                           { label: "AI Creativity Index", value: 85, desc: "Controls the variation in generated headlines and content hooks." },
+                           { label: "SEO Keyword Density", value: 1.8, desc: "Optimal target for automated semantic injections.", unit: "%" },
+                           { label: "Global Brand Variance", value: 12, desc: "Allowed deviation from core style guide for localized content.", unit: "%" }
+                         ].map((item, i) => (
+                           <div key={i} className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 space-y-4 group">
+                              <div className="flex items-center justify-between">
+                                 <div>
+                                    <h4 className="font-black text-sm text-zinc-900 dark:text-zinc-100">{item.label}</h4>
+                                    <p className="text-xs text-zinc-400 font-medium">{item.desc}</p>
+                                 </div>
+                                 <span className="text-lg font-black text-hig-blue">{item.value}{item.unit || ""}</span>
+                              </div>
+                              <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                 <div
+                                    style={{ width: `${(item.value / (item.unit === '%' ? 100 : item.value * 1.2)) * 100}%` }}
+                                    className="h-full bg-hig-blue rounded-full transition-all group-hover:brightness-110"
+                                 />
+                              </div>
+                           </div>
+                         ))}
+                      </div>
+
+                      <div className="flex gap-4">
+                         <button className="hig-button-primary flex-1">Save Global Config</button>
+                         <button className="hig-button-secondary border-none bg-zinc-100 dark:bg-zinc-800 flex-1">Reset Defaults</button>
+                      </div>
                    </div>
 
-                   <div className="hig-card p-10 flex flex-col justify-between border-dashed min-h-[300px] group cursor-pointer hover:border-hig-blue transition-all">
-                      <div className="space-y-6">
-                        <div className="w-14 h-14 rounded-[20px] bg-amber-400/10 flex items-center justify-center">
-                           <BarChart3 className="w-6 h-6 text-amber-500" />
-                        </div>
-                        <h3 className="text-xl font-bold">Audit History</h3>
-                        <p className="text-sm text-zinc-500 font-medium leading-relaxed">Review the last 24 hours of autonomous activity and changes.</p>
+                   {/* Quick Info & Stats */}
+                   <div className="space-y-10">
+                      <div className="hig-card p-10 bg-hig-blue text-white border-none shadow-2xl relative overflow-hidden group cursor-pointer">
+                         <div className="relative z-10 space-y-6">
+                           <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                              <Sparkles className="w-6 h-6 text-white" />
+                           </div>
+                           <h3 className="text-xl font-black italic">Optimization Score</h3>
+                           <p className="text-4xl font-black tracking-tighter">98.2</p>
+                           <p className="text-xs text-white/60 font-medium leading-relaxed">Your current {activeTab} strategy is performing in the top 1% of the industry.</p>
+                         </div>
+                         <Zap className="absolute -bottom-10 -right-10 w-40 h-40 text-white/10 -rotate-12 group-hover:scale-125 transition-transform duration-700" />
                       </div>
-                      <button className="w-full py-4 bg-zinc-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest mt-8">View Logs</button>
-                   </div>
 
-                   <div className="hig-card p-10 flex flex-col justify-between border-zinc-100 dark:border-zinc-800 bg-hig-blue text-white shadow-2xl shadow-hig-blue/20 min-h-[300px] group cursor-pointer">
-                      <div className="space-y-6 relative z-10">
-                        <div className="w-14 h-14 rounded-[20px] bg-white/20 flex items-center justify-center">
-                           <Sparkles className="w-6 h-6 text-white" />
-                        </div>
-                        <h3 className="text-xl font-bold">Optimization Suggestion</h3>
-                        <p className="text-sm text-white/80 font-medium leading-relaxed">AI has detected a 14% improvement path for your {activeTab} strategy.</p>
+                      <div className="hig-card p-10 border-zinc-100 dark:border-zinc-800 space-y-6">
+                         <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Recent Audit Logs</h4>
+                         <div className="space-y-4">
+                            {[
+                              { event: "Global SEO Re-index", time: "2m ago" },
+                              { event: "Brand Asset Sync", time: "1h ago" },
+                              { event: "Auto-content Flush", time: "4h ago" }
+                            ].map((log, i) => (
+                              <div key={i} className="flex items-center justify-between border-b border-zinc-50 dark:border-zinc-900 pb-3 last:border-0">
+                                 <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">{log.event}</span>
+                                 <span className="text-[10px] text-zinc-400 font-bold">{log.time}</span>
+                              </div>
+                            ))}
+                         </div>
+                         <button className="w-full py-3 bg-zinc-50 dark:bg-zinc-900 text-zinc-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-hig-blue transition-colors">View All Logs</button>
                       </div>
-                      <button className="w-full py-4 bg-white text-hig-blue rounded-2xl text-[10px] font-black uppercase tracking-widest mt-8 relative z-10 group-hover:scale-105 transition-transform">Run Auto-Optimize</button>
-                      <Zap className="absolute -bottom-10 -right-10 w-40 h-40 text-white/10 -rotate-12 group-hover:scale-125 transition-transform duration-700" />
                    </div>
                 </div>
              </div>
