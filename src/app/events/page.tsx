@@ -1,45 +1,13 @@
 import { Calendar, MapPin, Search, Filter, ArrowUpRight, Clock, Star } from "lucide-react";
 import Image from "next/image";
-
-const EVENTS = [
-  {
-    id: 1,
-    title: "Global Marketing AI Summit 2024",
-    description: "The premier event for AI-driven marketing strategies and next-gen tools. Join 5,000+ professionals for a 3-day experience.",
-    location: "San Francisco, CA",
-    date: "June 12-14, 2024",
-    type: "Conference",
-    featured: true,
-    image: "https://images.unsplash.com/photo-1540575861501-7ad0582373f2?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 2,
-    title: "Future of PR: Digital First Strategy",
-    description: "A specialized workshop for PR agency leaders to transition into data-centric media relations and AI-assisted pitching.",
-    location: "London, UK",
-    date: "July 5, 2024",
-    type: "Workshop",
-    featured: false,
-    image: "https://images.unsplash.com/photo-1591115765373-520b7a2172d7?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 3,
-    title: "SaaS Marketing Excellence Webinar",
-    description: "Deep dive into product-led growth strategies for the current SaaS market, featuring CMOs from leading tech companies.",
-    location: "Online / Virtual",
-    date: "August 20, 2024",
-    type: "Webinar",
-    featured: false,
-    image: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&fit=crop&q=80&w=800",
-  },
-];
+import { EVENTS } from "@/lib/data";
 
 export default function EventsPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <header className="mb-16 flex flex-col md:flex-row items-end justify-between gap-12">
+      <header className="mb-16 flex flex-col md:flex-row items-end justify-between gap-8 md:gap-12">
         <div className="space-y-6 max-w-2xl">
-          <h1 className="text-5xl font-black">Industry Events</h1>
+          <h1 className="text-4xl md:text-5xl font-black">Industry Events</h1>
           <p className="text-xl text-zinc-500 leading-relaxed">
             The most significant marketing, PR, and advertising events worldwide, gathered in one place.
           </p>
@@ -83,9 +51,9 @@ export default function EventsPage() {
                   </span>
                </div>
 
-               <h2 className="text-5xl font-bold text-white max-w-3xl leading-tight">{EVENTS[0].title}</h2>
+               <h2 className="text-3xl md:text-5xl font-bold text-white max-w-3xl leading-tight">{EVENTS[0].title}</h2>
 
-               <div className="flex items-center gap-8 text-white/80 font-medium">
+               <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 text-white/80 font-medium">
                   <div className="flex items-center gap-2.5">
                     <Calendar className="w-5 h-5 text-hig-blue" />
                     {EVENTS[0].date}

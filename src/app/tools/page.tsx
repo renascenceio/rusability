@@ -1,40 +1,13 @@
 import { Search, ExternalLink, Sparkles, Sliders, Layout, MessageSquare, PieChart, ShieldCheck } from "lucide-react";
 import Image from "next/image";
+import { INDUSTRY_TOOLS } from "@/lib/data";
 
-const TOOLS = [
-  {
-    id: 1,
-    name: "Persona AI",
-    description: "Deep audience segmentation tool that uses LLMs to simulate focus groups and predict marketing campaign success.",
-    category: "AI Marketing",
-    icon: <Sparkles className="w-6 h-6 text-hig-blue" />,
-    image: "https://images.unsplash.com/photo-1620712943543-bcc4638d9985?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 2,
-    name: "PR Pulse",
-    description: "Real-time sentiment tracking and automated media outreach management for modern PR agencies.",
-    category: "Public Relations",
-    icon: <MessageSquare className="w-6 h-6 text-hig-blue" />,
-    image: "https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 3,
-    name: "Metric Flow",
-    description: "Multi-touch attribution dashboard that connects directly to your ad platforms and CRM to show true ROI.",
-    category: "Analytics",
-    icon: <PieChart className="w-6 h-6 text-hig-blue" />,
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 4,
-    name: "Safe Brand",
-    description: "AI-powered brand safety monitor that scans social media and news for potential PR crises and mentions.",
-    category: "Brand Protection",
-    icon: <ShieldCheck className="w-6 h-6 text-hig-blue" />,
-    image: "https://images.unsplash.com/photo-1508921334172-b1fad997384b?auto=format&fit=crop&q=80&w=800",
-  },
-];
+const ICON_MAP: Record<string, React.ReactNode> = {
+  Sparkles: <Sparkles className="w-6 h-6 text-hig-blue" />,
+  MessageSquare: <MessageSquare className="w-6 h-6 text-hig-blue" />,
+  PieChart: <PieChart className="w-6 h-6 text-hig-blue" />,
+  ShieldCheck: <ShieldCheck className="w-6 h-6 text-hig-blue" />,
+};
 
 const CATEGORIES = ["All", "AI Marketing", "Public Relations", "Analytics", "Brand Protection", "Social Media", "SEO"];
 
@@ -42,7 +15,7 @@ export default function ToolsPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       <header className="mb-16">
-        <h1 className="text-5xl font-black mb-6">Marketing Tools</h1>
+        <h1 className="text-4xl md:text-5xl font-black mb-6">Marketing Tools</h1>
         <p className="text-xl text-zinc-500 max-w-2xl leading-relaxed">
           The essential toolkit for digital marketing and PR professionals. Hand-curated, AI-vetted, and community-reviewed.
         </p>
@@ -96,7 +69,7 @@ export default function ToolsPage() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {TOOLS.map((tool) => (
+              {INDUSTRY_TOOLS.map((tool) => (
                 <div key={tool.id} className="hig-card group overflow-hidden flex flex-col">
                    <div className="h-[180px] overflow-hidden relative">
                       <Image
@@ -108,7 +81,7 @@ export default function ToolsPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-md flex items-center justify-center">
-                              {tool.icon}
+                              {tool.icon ? ICON_MAP[tool.icon] : <Sparkles className="w-6 h-6 text-hig-blue" />}
                            </div>
                            <span className="text-xs font-black uppercase tracking-widest text-white">{tool.category}</span>
                         </div>

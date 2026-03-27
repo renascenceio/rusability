@@ -73,15 +73,15 @@ export const Header = () => {
           </nav>
 
           <div className="flex-1 max-w-md hidden lg:flex items-center relative group">
-            <Search className="absolute left-3 w-4 h-4 text-zinc-400" />
+            <Search className="absolute left-3 w-4 h-4 text-zinc-300 dark:text-zinc-500" />
             <input
               onClick={() => setIsSearchOpen(true)}
               readOnly
-              className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2 pl-10 pr-12 text-sm text-zinc-900 dark:text-zinc-100 cursor-pointer focus:ring-2 focus:ring-hig-blue/20 transition-all"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border-none rounded-xl py-2 pl-10 pr-12 text-sm text-zinc-900 dark:text-zinc-100 cursor-pointer focus:ring-2 focus:ring-hig-blue/10 transition-all"
               placeholder="Search anything..."
             />
-            <div className="absolute right-3 flex items-center gap-1 px-1.5 py-0.5 border border-zinc-200 dark:border-zinc-700 rounded-md bg-white dark:bg-black">
-               <Command className="w-2.5 h-2.5 text-zinc-400" />
+            <div className="absolute right-3 flex items-center gap-1 px-1.5 py-0.5 border border-zinc-100 dark:border-zinc-700 rounded-md bg-white dark:bg-black">
+               <Command className="w-2.5 h-2.5 text-zinc-300 dark:text-zinc-500" />
                <span className="text-[10px] text-zinc-400">K</span>
             </div>
           </div>

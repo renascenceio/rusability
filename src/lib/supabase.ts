@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 // This is a placeholder for future Supabase integration as requested by the user.
@@ -45,7 +44,7 @@ export interface Tool {
 export const supabase = {
   from: (table: string) => ({
     select: (query: string = "*") => ({
-      eq: (column: string, value: any) => ({
+      eq: (column: string, value: string | number) => ({
         single: async () => ({ data: null, error: null }),
         limit: async (n: number) => ({ data: [], error: null }),
       }),
@@ -53,7 +52,7 @@ export const supabase = {
         limit: async (n: number) => ({ data: [], error: null }),
       }),
     }),
-    insert: async (data: any) => ({ data, error: null }),
-    update: async (data: any) => ({ data, error: null }),
+    insert: async (data: Record<string, unknown>) => ({ data, error: null }),
+    update: async (data: Record<string, unknown>) => ({ data, error: null }),
   }),
 };

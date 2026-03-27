@@ -4,6 +4,36 @@ import Image from "next/image";
 import { ARTICLES, INDUSTRY_TOOLS, type Article, INDUSTRY_NEWS } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { ArticlePlugin } from "@/components/ArticlePlugin";
+import { Metadata, ResolvingMetadata } from 'next';
+
+export async function generateMetadata(
+  props: { params: Promise<{ slug: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { slug } = await props.params;
+  const article = ARTICLES.find(a => a.id.toString() === slug);
+
+  const title = article ? `${article.title} | Rusability Magazine` : 'The Future of Marketing | Rusability Magazine';
+  const description = article ? article.excerpt : 'Exploring the next frontier of digital marketing.';
+  const image = article ? article.image : 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200';
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [image],
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function PostPage(props: { params: Promise<{ slug: string }> }) {
   const { slug } = await props.params;
@@ -48,7 +78,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
           <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> {displayData.time}</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-black mb-12 leading-tight tracking-tight">
+        <h1 className="text-3xl md:text-7xl font-black mb-12 leading-tight tracking-tight">
           {displayData.title}
         </h1>
 
@@ -85,7 +115,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
          />
       </div>
 
-      <div className="flex flex-col lg:grid lg:grid-cols-[120px,1fr,320px] gap-20">
+      <div className="flex flex-col lg:grid lg:grid-cols-[120px,1fr,320px] gap-10 md:gap-20">
          {/* Left Side: Actions */}
          <aside className="hidden lg:block sticky top-32 h-fit space-y-8">
             <div className="flex flex-col items-start gap-8">
