@@ -1,7 +1,7 @@
 import { Clock, User, Share2, Heart, MessageCircle, Bookmark, ArrowUpRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { ARTICLES, INDUSTRY_TOOLS } from "@/lib/data";
+import { ARTICLES, INDUSTRY_TOOLS, type Article } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { ArticlePlugin } from "@/components/ArticlePlugin";
 
@@ -17,12 +17,15 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
     }
   }
 
-  const displayData = article || {
+  const displayData: Article = article || {
+    id: 0,
     title: "The Future of Marketing: How AI is Redefining Personalization",
+    excerpt: "Exploring the next frontier of digital marketing.",
     category: "Search Strategy",
     time: "8 min read",
     author: "Elena Rossi",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200"
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200",
+    isProAuthor: true
   };
 
   const isProPost = displayData.isProAuthor;
