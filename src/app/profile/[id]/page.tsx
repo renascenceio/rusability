@@ -1,6 +1,7 @@
-import { User, Settings, Sparkles, Heart, Clock, Layout, Sliders, ChevronRight, TrendingUp, Users, Target } from "lucide-react";
+import { User, Settings, Sparkles, Heart, Clock, Layout, Sliders, ChevronRight, TrendingUp, Users, Target, Edit3, BookOpen } from "lucide-react";
 import Image from "next/image";
 import { CURRENT_USER } from "@/lib/data";
+import Link from "next/link";
 
 export default async function ProfilePage(props: { params: Promise<{ id: string }> }) {
   await props.params;
@@ -41,32 +42,41 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
          <section className="space-y-12">
             <div>
                <div className="flex items-center justify-between mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
-                  <div className="flex items-center gap-8">
-                     <button className="font-bold text-sm text-hig-blue border-b-2 border-hig-blue pb-4">Saved Articles</button>
-                     <button className="font-bold text-sm text-zinc-400 hover:text-zinc-900 pb-4">History</button>
-                     <button className="font-bold text-sm text-zinc-400 hover:text-zinc-900 pb-4">Activity</button>
+                  <div className="flex items-center gap-8 overflow-x-auto no-scrollbar pb-1">
+                     <button className="font-bold text-sm text-hig-blue border-b-2 border-hig-blue pb-4 whitespace-nowrap">Saved Articles</button>
+                     <button className="font-bold text-sm text-zinc-400 hover:text-zinc-900 pb-4 whitespace-nowrap">My Drafts</button>
+                     <button className="font-bold text-sm text-zinc-400 hover:text-zinc-900 pb-4 whitespace-nowrap">Published</button>
+                     <button className="font-bold text-sm text-zinc-400 hover:text-zinc-900 pb-4 whitespace-nowrap">Activity</button>
                   </div>
-                  <button className="text-sm font-bold text-zinc-400 flex items-center gap-1">
-                     Manage <ChevronRight className="w-4 h-4" />
-                  </button>
+                  <Link href="/editor" className="hidden md:flex items-center gap-2 text-xs font-black uppercase tracking-widest text-hig-blue">
+                     <Edit3 className="w-4 h-4" /> New Article
+                  </Link>
                </div>
 
                <div className="space-y-6">
                   {[
-                    { title: "The Shift in SEO Strategy for 2024", time: "5 min read", cat: "Search Strategy" },
-                    { title: "Generative AI for Media Outreach", time: "8 min read", cat: "Public Relations" },
-                    { title: "Return of Long-Form Content", time: "12 min read", cat: "Content Strategy" },
+                    { title: "The Shift in SEO Strategy for 2024", time: "5 min read", cat: "Search Strategy", type: "saved" },
+                    { title: "Generative AI for Media Outreach", time: "8 min read", cat: "Public Relations", type: "saved" },
+                    { title: "Future of Content Economics", time: "Pending Review", cat: "Monetization", type: "draft" },
                   ].map((article) => (
                     <div key={article.title} className="hig-card p-6 flex items-center justify-between group">
                        <div className="space-y-2">
-                          <h3 className="font-bold text-lg group-hover:text-hig-blue transition-colors">{article.title}</h3>
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-bold text-lg group-hover:text-hig-blue transition-colors">{article.title}</h3>
+                            {article.type === "draft" && <span className="text-[8px] font-black uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded">Draft</span>}
+                          </div>
                           <div className="flex items-center gap-4 text-xs text-zinc-400 font-medium">
                              <span className="text-hig-blue font-bold uppercase">{article.cat}</span>
                              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {article.time}</span>
                           </div>
                        </div>
                        <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 text-rose-500 hover:bg-rose-50 rounded-full transition-colors"><Heart className="w-5 h-5 fill-rose-500" /></button>
+                          {article.type === "draft" ? (
+                             <Link href="/editor" className="p-2 text-hig-blue hover:bg-hig-blue/5 rounded-full transition-colors"><Edit3 className="w-5 h-5" /></Link>
+                          ) : (
+                             <button className="p-2 text-rose-500 hover:bg-rose-50 rounded-full transition-colors"><Heart className="w-5 h-5 fill-rose-500" /></button>
+                          )}
+                          <button className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors"><ChevronRight className="w-5 h-5" /></button>
                        </div>
                     </div>
                   ))}
@@ -76,32 +86,35 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
             {isPro && (
               <div className="space-y-8">
                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-black tracking-tight">Author Insights</h3>
+                    <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                       <BookOpen className="w-6 h-6 text-hig-blue" />
+                       Author Insights
+                    </h3>
                     <span className="text-xs font-bold text-amber-500 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 uppercase tracking-widest">Live Metrics</span>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="hig-card p-8 space-y-2">
+                    <div className="hig-card p-8 space-y-2 bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-900 dark:to-zinc-950">
                        <div className="flex items-center gap-2 text-zinc-400">
                           <TrendingUp className="w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-widest">Total Views</span>
                        </div>
-                       <p className="text-3xl font-black">42.8K</p>
+                       <p className="text-4xl font-black">42.8K</p>
                        <p className="text-xs text-emerald-500 font-bold">+12.4% this week</p>
                     </div>
-                    <div className="hig-card p-8 space-y-2">
+                    <div className="hig-card p-8 space-y-2 bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-900 dark:to-zinc-950">
                        <div className="flex items-center gap-2 text-zinc-400">
                           <Target className="w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-widest">Engagement Rate</span>
                        </div>
-                       <p className="text-3xl font-black">8.2%</p>
+                       <p className="text-4xl font-black">8.2%</p>
                        <p className="text-xs text-emerald-500 font-bold">Above industry avg</p>
                     </div>
-                    <div className="hig-card p-8 space-y-2">
+                    <div className="hig-card p-8 space-y-2 bg-gradient-to-br from-white to-zinc-50/50 dark:from-zinc-900 dark:to-zinc-950">
                        <div className="flex items-center gap-2 text-zinc-400">
                           <Users className="w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-widest">Reach</span>
                        </div>
-                       <p className="text-3xl font-black">156.2K</p>
+                       <p className="text-4xl font-black">156.2K</p>
                        <p className="text-xs text-rose-500 font-bold">-2.1% this week</p>
                     </div>
                  </div>
@@ -111,7 +124,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
             <div className="space-y-8">
                <h3 className="text-xl font-bold tracking-tight">Personalization Engine</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="hig-card p-6 bg-hig-blue/5 border-hig-blue/10">
+                  <div className="hig-card p-6 bg-hig-blue/5 border-hig-blue/10 group cursor-pointer hover:bg-hig-blue/10 transition-colors">
                      <Sparkles className="w-6 h-6 text-hig-blue mb-4" />
                      <div className="flex items-center justify-between mb-2">
                         <h4 className="font-bold text-sm uppercase tracking-wider">AI Copilot</h4>
@@ -121,7 +134,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
                         We&apos;ve identified 3 new tools that match your &quot;Search Engine Marketing&quot; interest.
                      </p>
                   </div>
-                  <div className="hig-card p-6 bg-emerald-50/50 border-emerald-100">
+                  <div className="hig-card p-6 bg-emerald-50/50 border-emerald-100 group cursor-pointer hover:bg-emerald-50 transition-colors">
                      <Layout className="w-6 h-6 text-emerald-500 mb-4" />
                      <h4 className="font-bold text-sm mb-2 uppercase tracking-wider text-emerald-600">Smart Layout</h4>
                      <p className="text-xs text-zinc-500 leading-relaxed">

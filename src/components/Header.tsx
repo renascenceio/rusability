@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Bell, User, Menu, X, Command } from "lucide-react";
+import { Search, Bell, User, Menu, X, Command, Edit3 } from "lucide-react";
 import { SpotlightSearch } from "./SpotlightSearch";
 
 export const Header = () => {
@@ -67,6 +67,12 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
+            {/* New Write Button */}
+            <Link href="/editor" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-hig-blue text-white text-xs font-black uppercase tracking-widest hover:bg-hig-blue-dark transition-all shadow-lg hover:shadow-hig-blue/20 group">
+              <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              Write
+            </Link>
+
             <button className="p-2 text-hig-gray-400 hover:text-foreground transition-colors">
               <Bell className="w-5 h-5" />
             </button>
@@ -86,6 +92,9 @@ export const Header = () => {
              <Link href="/news" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>News</Link>
              <Link href="/events" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Events</Link>
              <Link href="/tools" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Tools</Link>
+             <Link href="/editor" className="text-lg font-semibold flex items-center gap-2 text-hig-blue" onClick={() => setIsMobileMenuOpen(false)}>
+                <Edit3 className="w-5 h-5" /> Write Article
+             </Link>
           </div>
         )}
       </header>
