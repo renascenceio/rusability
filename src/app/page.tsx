@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 md:py-16 space-y-16 md:space-y-24">
       {/* Hero Section - Featured Story */}
-      <section className="relative group overflow-hidden rounded-[32px] md:rounded-[48px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+      <section className="relative group overflow-hidden rounded-[32px] md:rounded-[48px] border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
         <Link href={`/posts/${featuredArticle.id}`} className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] md:min-h-[600px]">
           <div className="relative h-[300px] lg:h-full overflow-hidden">
             <Image
@@ -77,12 +77,15 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-16 md:gap-24">
+      <div className="flex flex-col gap-16 md:gap-24">
         {/* Main Feed */}
         <div className="space-y-16 md:space-y-24">
           <section className="space-y-10 md:space-y-16">
              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
-                <h2 className="text-xl md:text-2xl font-black tracking-tight text-zinc-900 dark:text-white italic">Human stories and ideas</h2>
+                <div className="space-y-1">
+                   <h2 className="text-2xl md:text-3xl font-black tracking-tight text-zinc-900 dark:text-white italic">Human stories and ideas</h2>
+                   <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">The rusability perspective</p>
+                </div>
                 <Link href="/news" className="text-xs font-bold text-hig-blue uppercase tracking-widest hover:underline">Explore More</Link>
              </div>
 
@@ -200,13 +203,13 @@ export default function Home() {
           </section>
         </div>
 
-        {/* Sidebar */}
-        <aside className="w-full space-y-16">
+        {/* Industry Pulse & Trending - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Industry Pulse News */}
-          <div className="hig-card p-8 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800">
+          <div className="hig-card p-8 bg-white dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800 shadow-sm">
              <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                 <Flame className="w-5 h-5 text-orange-500" />
-                <h3 className="font-black text-xs uppercase tracking-[0.1em] text-zinc-900 dark:text-white">Pulse News</h3>
+                <h3 className="font-black text-xl text-zinc-900 dark:text-white">Pulse News</h3>
              </div>
              <div className="space-y-6">
                 {INDUSTRY_NEWS.map((item) => (
@@ -221,10 +224,10 @@ export default function Home() {
              </div>
           </div>
 
-          <div className="hig-card p-8 sticky top-24 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl border-white/20">
+          <div className="hig-card p-8 bg-white dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800 shadow-sm">
             <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
               <TrendingUp className="w-5 h-5 text-hig-blue" />
-              <h3 className="font-black text-xs uppercase tracking-[0.1em] text-zinc-900 dark:text-white">Trending Vibes</h3>
+              <h3 className="font-black text-xl text-zinc-900 dark:text-white">Trending Vibes</h3>
             </div>
 
             <div className="space-y-8">
@@ -235,7 +238,7 @@ export default function Home() {
                     <h4 className="font-bold text-sm leading-snug text-zinc-900 dark:text-zinc-200 group-hover:text-hig-blue transition-colors line-clamp-3">
                       {tag}
                     </h4>
-                    <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest flex items-center gap-1.5">
+                    <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest flex items-center gap-1.5">
                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                        LIVE INSIGHT
                     </p>
@@ -244,17 +247,24 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </div>
 
-          <div className="hig-card p-8 bg-hig-blue text-white space-y-6">
-             <h3 className="font-black text-xs uppercase tracking-[0.2em] opacity-80">PERSONALIZATION</h3>
-             <p className="text-sm font-bold leading-relaxed">
-               Get content and tools tailored to your PR & Search Strategy goals.
-             </p>
-             <Link href="/profile" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white text-hig-blue px-6 py-3 rounded-full hover:bg-zinc-100 transition-colors">
-               Customize My Feed <ArrowUpRight className="w-4 h-4" />
-             </Link>
-          </div>
-        </aside>
+        {/* Full Width Personalization */}
+        <div className="hig-card p-12 bg-hig-blue text-white overflow-hidden relative">
+           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="space-y-4">
+                 <h3 className="font-black text-xs uppercase tracking-[0.2em] opacity-80">Tailored For You</h3>
+                 <h2 className="text-3xl md:text-5xl font-black leading-tight">Your Personalization Engine.</h2>
+                 <p className="text-lg font-medium opacity-90 max-w-xl">
+                   Get content and tools tailored to your PR & Search Strategy goals. We use AI to analyze your reading patterns.
+                 </p>
+              </div>
+              <Link href="/profile" className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest bg-white text-hig-blue px-10 py-5 rounded-full hover:bg-zinc-100 transition-colors shadow-2xl shrink-0">
+                Customize My Feed <ArrowUpRight className="w-5 h-5" />
+              </Link>
+           </div>
+           <div className="absolute top-0 right-0 w-1/3 h-full bg-white/10 blur-[100px] -z-0 rounded-full" />
+        </div>
       </div>
     </div>
   );
