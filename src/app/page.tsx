@@ -55,7 +55,7 @@ export default function Home() {
         </Link>
       </section>
 
-      {/* Popular Authors - New Section */}
+      {/* Popular Authors Section */}
       <section className="space-y-8">
         <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
           <Users className="w-5 h-5 text-hig-blue" />
@@ -78,7 +78,7 @@ export default function Home() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-16 md:gap-24">
-        {/* Main Feed - Magazine Layout */}
+        {/* Main Feed */}
         <div className="space-y-16 md:space-y-24">
           <section className="space-y-10 md:space-y-16">
              <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
@@ -86,11 +86,11 @@ export default function Home() {
                 <Link href="/news" className="text-xs font-bold text-hig-blue uppercase tracking-widest hover:underline">Explore More</Link>
              </div>
 
-             {/* Randomised Grid Layout */}
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+             {/* 2/3 and 1/3 Content Grid - Matched Height Refinement */}
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
                {/* 2/3 Width Article */}
-               <Link href={`/posts/${otherArticles[0].id}`} className="md:col-span-2 group block space-y-6">
-                 <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+               <Link href={`/posts/${otherArticles[0].id}`} className="md:col-span-2 group flex flex-col space-y-6">
+                 <div className="relative flex-1 min-h-[300px] md:min-h-[440px] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
                     <Image src={otherArticles[0].image} alt={otherArticles[0].title} fill className="object-cover transition-transform duration-1000 group-hover:scale-105" />
                  </div>
                  <div className="space-y-4">
@@ -108,26 +108,32 @@ export default function Home() {
                  </div>
                </Link>
 
-               {/* 1/3 Width Article */}
-               <Link href={`/posts/${otherArticles[1].id}`} className="md:col-span-1 group block space-y-6">
-                 <div className="relative aspect-square rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+               {/* 1/3 Width Article - Now matched height with 2/3 visually */}
+               <Link href={`/posts/${otherArticles[1].id}`} className="md:col-span-1 group flex flex-col space-y-6">
+                 <div className="relative flex-1 min-h-[300px] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
                     <Image src={otherArticles[1].image} alt={otherArticles[1].title} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" />
                  </div>
                  <div className="space-y-4">
                     <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-hig-blue">
                        <span>{otherArticles[1].category}</span>
                     </div>
-                    <h3 className="text-xl font-bold leading-tight group-hover:text-hig-blue transition-colors">
+                    <h3 className="text-xl md:text-2xl font-bold leading-tight group-hover:text-hig-blue transition-colors">
                        {otherArticles[1].title}
                     </h3>
+                    <p className="text-sm text-zinc-500 font-medium line-clamp-2 leading-relaxed">
+                       {otherArticles[1].excerpt}
+                    </p>
                  </div>
                </Link>
+             </div>
 
-               {/* Injection: Tool Card */}
+             {/* Secondary Grid - Continuous Content */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+               {/* Injection Tool Card */}
                {(() => {
                  const tool = getRandomTool();
                  return (
-                  <div className="md:col-span-1 bg-hig-blue rounded-[32px] p-8 text-white flex flex-col justify-between group cursor-pointer relative overflow-hidden">
+                  <div className="bg-hig-blue rounded-[32px] p-8 text-white flex flex-col justify-between group cursor-pointer relative overflow-hidden h-full min-h-[340px]">
                     <div className="relative z-10 space-y-6">
                       <div className="bg-white/20 w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Tool</div>
                       <h4 className="text-2xl font-black leading-tight group-hover:underline">{tool.name}</h4>
@@ -141,15 +147,20 @@ export default function Home() {
                  );
                })()}
 
-               {/* Remaining Articles */}
+               {/* Remaining Articles in the expanded list */}
                {otherArticles.slice(2).map((article) => (
-                 <Link key={article.id} href={`/posts/${article.id}`} className="group block space-y-6">
-                   <div className="relative aspect-[4/3] rounded-[24px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                 <Link key={article.id} href={`/posts/${article.id}`} className="group flex flex-col space-y-6 h-full">
+                   <div className="relative aspect-[4/3] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800 shrink-0">
                      <Image src={article.image} alt={article.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
                    </div>
-                   <div className="space-y-4">
-                     <h3 className="text-xl font-bold leading-tight group-hover:text-hig-blue transition-colors">{article.title}</h3>
-                     <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">{article.category}</p>
+                   <div className="space-y-3 flex-1">
+                     <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-hig-blue">
+                        <span>{article.category}</span>
+                        <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                        <span className="text-zinc-400">{article.time}</span>
+                     </div>
+                     <h3 className="text-xl font-bold leading-tight group-hover:text-hig-blue transition-colors line-clamp-2">{article.title}</h3>
+                     <p className="text-sm text-zinc-500 font-medium line-clamp-2 leading-relaxed">{article.excerpt}</p>
                    </div>
                  </Link>
                ))}
@@ -191,7 +202,7 @@ export default function Home() {
 
         {/* Sidebar */}
         <aside className="w-full space-y-16">
-          {/* Industry News - New Block */}
+          {/* Industry Pulse News */}
           <div className="hig-card p-8 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800">
              <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                 <Flame className="w-5 h-5 text-orange-500" />
