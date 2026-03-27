@@ -1,10 +1,13 @@
-import { User, Settings, Sparkles, Heart, Clock, Layout, Sliders, ChevronRight } from "lucide-react";
+import { User, Settings, Sparkles, Heart, Clock, Layout, Sliders, ChevronRight, TrendingUp, Users, Target } from "lucide-react";
 import Image from "next/image";
+import { CURRENT_USER, ARTICLES } from "@/lib/data";
 
 export default async function ProfilePage(props: { params: Promise<{ id: string }> }) {
   await props.params;
 
-  const INTERESTS = ["AI Marketing", "PR Strategy", "Content Growth", "SEO", "Search Engine Marketing"];
+  const user = CURRENT_USER;
+  const isPro = user.membership === "pro";
+  const INTERESTS = user.interests;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -14,11 +17,15 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
          </div>
          <div className="flex-1 space-y-4">
             <div className="flex flex-col md:flex-row items-center gap-4">
-               <h1 className="text-4xl font-black mb-0">Jane Doe</h1>
-               <div className="bg-hig-blue text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">Rusability Pro</div>
+               <h1 className="text-4xl font-black mb-0">{user.name}</h1>
+               {isPro && (
+                 <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-md">
+                   Pro Member
+                 </div>
+               )}
             </div>
             <p className="text-xl text-zinc-500 leading-relaxed max-w-2xl">
-              Chief Marketing Officer at CloudScale. Passionate about AI-driven customer journeys and predictive analytics.
+              {user.role}. {user.bio}
             </p>
             <div className="flex items-center justify-center md:justify-start gap-6 pt-4">
                <button className="hig-button-primary">Edit Profile</button>
@@ -66,12 +73,50 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
                </div>
             </div>
 
+            {isPro && (
+              <div className="space-y-8">
+                 <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-black tracking-tight">Author Insights</h3>
+                    <span className="text-xs font-bold text-amber-500 bg-amber-50 px-3 py-1 rounded-full border border-amber-100 uppercase tracking-widest">Live Metrics</span>
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="hig-card p-8 space-y-2">
+                       <div className="flex items-center gap-2 text-zinc-400">
+                          <TrendingUp className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Total Views</span>
+                       </div>
+                       <p className="text-3xl font-black">42.8K</p>
+                       <p className="text-xs text-emerald-500 font-bold">+12.4% this week</p>
+                    </div>
+                    <div className="hig-card p-8 space-y-2">
+                       <div className="flex items-center gap-2 text-zinc-400">
+                          <Target className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Engagement Rate</span>
+                       </div>
+                       <p className="text-3xl font-black">8.2%</p>
+                       <p className="text-xs text-emerald-500 font-bold">Above industry avg</p>
+                    </div>
+                    <div className="hig-card p-8 space-y-2">
+                       <div className="flex items-center gap-2 text-zinc-400">
+                          <Users className="w-4 h-4" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Reach</span>
+                       </div>
+                       <p className="text-3xl font-black">156.2K</p>
+                       <p className="text-xs text-rose-500 font-bold">-2.1% this week</p>
+                    </div>
+                 </div>
+              </div>
+            )}
+
             <div className="space-y-8">
                <h3 className="text-xl font-bold tracking-tight">Personalization Engine</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="hig-card p-6 bg-hig-blue/5 border-hig-blue/10">
                      <Sparkles className="w-6 h-6 text-hig-blue mb-4" />
-                     <h4 className="font-bold text-sm mb-2 uppercase tracking-wider">AI Suggestions</h4>
+                     <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-bold text-sm uppercase tracking-wider">AI Copilot</h4>
+                        {isPro && <span className="text-[8px] font-black bg-hig-blue text-white px-1.5 py-0.5 rounded uppercase">Unlimited</span>}
+                     </div>
                      <p className="text-xs text-zinc-500 leading-relaxed">
                         We&apos;ve identified 3 new tools that match your &quot;Search Engine Marketing&quot; interest.
                      </p>
