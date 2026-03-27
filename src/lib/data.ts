@@ -39,6 +39,13 @@ export interface Author {
   isPopular?: boolean;
 }
 
+export interface NewsItem {
+  id: number;
+  title: string;
+  category: string;
+  isHot?: boolean;
+}
+
 export const POPULAR_AUTHORS: Author[] = [
   {
     id: "elena-rossi",
@@ -65,13 +72,6 @@ export const POPULAR_AUTHORS: Author[] = [
     isPopular: true
   }
 ];
-
-export interface NewsItem {
-  id: number;
-  title: string;
-  category: string;
-  isHot?: boolean;
-}
 
 export const INDUSTRY_NEWS: NewsItem[] = [
   { id: 1, title: "OpenAI announces GPT-5 release date", category: "AI", isHot: true },
@@ -131,6 +131,51 @@ export const ARTICLES: Article[] = [
     time: "10 min read",
     image: "https://images.unsplash.com/photo-1557838923-2985c318be48?auto=format&fit=crop&q=80&w=800",
   },
+  {
+    id: 6,
+    title: "TikTok for B2B: Is the Industrial Complex Ready for Fun?",
+    excerpt: "How manufacturing and logistics companies are finding massive ROI in short-form video by embracing 'Industrial ASMR' and behind-the-scenes transparency.",
+    author: "Elena Rossi",
+    category: "Social Strategy",
+    time: "6 min read",
+    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 7,
+    title: "The Ethics of AI Influencers: Who Owns the Digital Soul?",
+    excerpt: "As virtual influencers gain millions of followers, we examine the legal and moral implications of non-human brand ambassadors in luxury marketing.",
+    author: "Marc Dubois",
+    category: "Digital Ethics",
+    time: "9 min read",
+    image: "https://images.unsplash.com/photo-1614728263952-84ea206f99b6?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 8,
+    title: "Email Marketing's Second Renaissance",
+    excerpt: "Why the newsletter is replacing the social feed as the primary source of high-intent leads for PR and SaaS professionals.",
+    author: "Sarah Jenkins",
+    category: "Content Strategy",
+    time: "7 min read",
+    image: "https://images.unsplash.com/photo-1563986768494-0dee2763ff3f?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 9,
+    title: "Zero-Click Search and the End of Web Traffic as We Know It",
+    excerpt: "How to survive when Google answers the query without the user ever clicking through to your site. A new playbook for the AI era.",
+    author: "Elena Rossi",
+    category: "Search Strategy",
+    time: "11 min read",
+    image: "https://images.unsplash.com/photo-1551288049-bbbda5366392?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 10,
+    title: "The Rise of Niche Communities in a Fragmented Social Landscape",
+    excerpt: "Why marketing professionals are abandoning X and Facebook for gated communities like Discord and specialized Slack channels.",
+    author: "Amina Kadi",
+    category: "Community Management",
+    time: "8 min read",
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
+  }
 ];
 
 export const TRENDING = [
