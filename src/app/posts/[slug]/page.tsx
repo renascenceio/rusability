@@ -41,29 +41,29 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
           </span>
         </div>
       )}
-      <header className="mb-16 text-center">
-        <div className="flex items-center justify-center gap-4 mb-10 text-hig-blue font-bold text-xs uppercase tracking-widest">
+      <header className="mb-16 text-left max-w-5xl mx-auto lg:mx-0">
+        <div className="flex items-center gap-4 mb-10 text-hig-blue font-bold text-xs uppercase tracking-widest">
           <span className="bg-hig-blue/10 px-3 py-1.5 rounded-full">{displayData.category}</span>
           <span className="text-zinc-400">•</span>
           <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> {displayData.time}</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-black mb-10 leading-tight max-w-5xl mx-auto tracking-tight">
+        <h1 className="text-5xl md:text-7xl font-black mb-12 leading-tight tracking-tight">
           {displayData.title}
         </h1>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-           <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center border-2 border-white dark:border-zinc-900 shadow-lg">
-                 <User className="w-6 h-6 text-zinc-500" />
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
+           <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-2 border-white dark:border-zinc-900 shadow-xl">
+                 <User className="w-7 h-7 text-zinc-400" />
               </div>
-              <div className="text-left">
-                 <p className="font-bold text-zinc-900 dark:text-zinc-100">{displayData.author}</p>
+              <div className="space-y-0.5">
+                 <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-none">{displayData.author}</p>
                  <p className="text-sm text-zinc-500 font-medium tracking-tight">Chief Content Strategist</p>
               </div>
            </div>
 
-           <div className="hidden md:block h-8 w-px bg-zinc-200 dark:bg-zinc-800" />
+           <div className="hidden md:block h-10 w-px bg-zinc-200 dark:border-zinc-800" />
 
            <div className="flex items-center gap-4">
               <button className="hig-button-primary py-2 px-6 text-sm flex items-center gap-2">Follow</button>
@@ -88,19 +88,19 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
       <div className="flex flex-col lg:grid lg:grid-cols-[120px,1fr,320px] gap-20">
          {/* Left Side: Actions */}
          <aside className="hidden lg:block sticky top-32 h-fit space-y-8">
-            <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-start gap-8">
                <div className="flex flex-col items-center gap-2">
                   <button className="p-4 text-zinc-400 hover:text-rose-500 transition-colors rounded-full bg-white dark:bg-zinc-900 shadow-hig border border-zinc-100 dark:border-zinc-800 group">
                     <Heart className="w-6 h-6 group-hover:fill-rose-500" />
                   </button>
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">1.2K</span>
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">1.2K</span>
                </div>
 
                <div className="flex flex-col items-center gap-2">
                   <button className="p-4 text-zinc-400 hover:text-hig-blue transition-colors rounded-full bg-white dark:bg-zinc-900 shadow-hig border border-zinc-100 dark:border-zinc-800 group">
                     <MessageCircle className="w-6 h-6" />
                   </button>
-                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">48</span>
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">48</span>
                </div>
             </div>
          </aside>

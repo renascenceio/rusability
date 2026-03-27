@@ -55,13 +55,13 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative w-full max-w-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
+        className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden"
       >
-        <div className="flex items-center p-4 gap-3 border-b border-zinc-200 dark:border-zinc-800">
-          <Search className="w-5 h-5 text-zinc-400" />
+        <div className="flex items-center p-6 gap-4 border-b border-zinc-100 dark:border-zinc-800">
+          <Search className="w-6 h-6 text-zinc-400" />
           <input
             autoFocus
-            className="flex-1 bg-transparent border-none outline-none text-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+            className="flex-1 bg-transparent border-none outline-none text-2xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-300 font-medium"
             placeholder="Search anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

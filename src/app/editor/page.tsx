@@ -57,7 +57,7 @@ export default function EditorPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 md:py-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header className="flex items-center justify-between mb-16 border-b border-zinc-100 dark:border-zinc-800 pb-8 sticky top-24 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-xl -mx-6 px-6">
+      <header className="flex items-center justify-between mb-16 border-b border-zinc-100 dark:border-zinc-800 pb-8 sticky top-0 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-xl -mx-6 px-6 pt-12">
         <div className="flex items-center gap-4">
           <Link href="/" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors text-zinc-400 hover:text-hig-blue">
             <X className="w-6 h-6" />
@@ -169,7 +169,7 @@ export default function EditorPage() {
             placeholder="Type your compelling headline..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-5xl md:text-8xl font-black bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-900 resize-none leading-[0.95] tracking-tight py-4"
+            className="w-full text-5xl md:text-8xl font-black bg-transparent border-none outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-900 resize-none leading-[0.95] tracking-tight py-4 whitespace-pre-wrap"
             rows={1}
           />
 
@@ -178,23 +178,35 @@ export default function EditorPage() {
             placeholder="Sum it up for the home page feed..."
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
-            className="w-full text-xl md:text-3xl font-medium text-zinc-500 bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-900 resize-none leading-relaxed border-l-4 border-zinc-100 dark:border-zinc-800 pl-10"
+            className="w-full text-xl md:text-3xl font-medium text-zinc-500 bg-transparent border-none outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-800 resize-none leading-relaxed border-l-4 border-zinc-100 dark:border-zinc-800 pl-10 whitespace-pre-wrap"
             rows={1}
           />
 
           {/* Real Textarea for Content */}
           <div className="relative min-h-[600px] pt-10 group/content">
-            <div className="absolute top-0 left-0 -translate-x-16 translate-y-12 opacity-0 group-hover/content:opacity-100 transition-all duration-500">
-               <div className="flex flex-col gap-3">
-                  <button className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-lg transition-all"><Plus className="w-5 h-5" /></button>
-                  <button className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-lg transition-all"><Wand2 className="w-5 h-5" /></button>
+            <div className="absolute top-0 left-0 -translate-x-20 translate-y-10 opacity-0 group-hover/content:opacity-100 transition-all duration-500">
+               <div className="flex flex-col gap-4">
+                  <button
+                    onClick={() => setContent(prev => prev + "\n\n")}
+                    className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-xl transition-all hover:scale-110 active:scale-90"
+                    title="Add block"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setContent(prev => prev + "\nAI Suggestion: Improving this paragraph for better engagement...")}
+                    className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-xl transition-all hover:scale-110 active:scale-90"
+                    title="AI Enhance"
+                  >
+                    <Wand2 className="w-5 h-5" />
+                  </button>
                </div>
             </div>
             <textarea
               placeholder="Tell the story. This is where insights are born. AI is ready to assist..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full text-xl md:text-2xl font-medium text-zinc-800 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-900 resize-none h-full min-h-[600px] leading-relaxed selection:bg-hig-blue/10"
+              className="w-full text-xl md:text-2xl font-medium text-zinc-800 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-900 resize-none h-full min-h-[600px] leading-relaxed selection:bg-hig-blue/10 whitespace-pre-wrap"
             />
           </div>
         </div>
