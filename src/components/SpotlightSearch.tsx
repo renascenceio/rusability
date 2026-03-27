@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Sparkles, Command, X, ArrowRight } from "lucide-react";
+import { Search, Sparkles, Command, X, ArrowRight, Zap, ShieldCheck, PenTool, Target } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
@@ -77,29 +77,61 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
 
         <div className="p-4">
           {query.length === 0 ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>AI Suggestions</span>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>AI Recommended Actions</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    { title: "Generate Q4 Strategy", desc: "Using live market data", icon: Zap },
+                    { title: "Review SEO Health", desc: "Instant site-wide audit", icon: ShieldCheck },
+                    { title: "Draft News Briefing", desc: "Based on current trends", icon: PenTool },
+                    { title: "Analyze Competitors", desc: "AI-infused pattern detection", icon: Target }
+                  ].map((item) => (
+                    <button key={item.title} className="flex items-center gap-4 p-4 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl transition-all group border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
+                      <div className="w-10 h-10 rounded-xl bg-hig-blue/10 flex items-center justify-center text-hig-blue group-hover:scale-110 transition-transform">
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-black text-zinc-900 dark:text-zinc-100 block">{item.title}</span>
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{item.desc}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {["Marketing Trends 2024", "Social Media ROI", "AI Copywriting Tools", "PR Strategy"].map((item) => (
-                  <button key={item} className="flex items-center gap-3 p-3 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
-                    <Search className="w-4 h-4 text-zinc-400" />
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300">{item}</span>
-                  </button>
-                ))}
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                  <Command className="w-3.5 h-3.5" />
+                  <span>Recent Knowledge</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {["Marketing Trends 2024", "Social Media ROI", "AI Copywriting Tools", "PR Strategy"].map((item) => (
+                    <button key={item} className="flex items-center gap-3 p-3 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                      <Search className="w-4 h-4 text-zinc-400" />
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{item}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
               {suggestions.map((suggestion) => (
-                <button key={suggestion} className="w-full flex items-center justify-between p-3 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl group transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="w-4 h-4 text-hig-blue" />
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300">{suggestion}</span>
+                <button key={suggestion} className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl group transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center text-amber-500">
+                       <Sparkles className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{suggestion}</span>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <span className="text-[10px] font-black uppercase tracking-widest text-hig-blue">Ask AI</span>
+                     <ArrowRight className="w-4 h-4 text-hig-blue" />
+                  </div>
                 </button>
               ))}
             </div>

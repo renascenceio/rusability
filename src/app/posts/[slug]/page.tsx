@@ -106,12 +106,12 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
          </aside>
 
          {/* Middle: Content */}
-         <article className="flex-1 space-y-10">
-            <p className="text-2xl font-medium leading-relaxed text-zinc-800 dark:text-zinc-200 italic border-l-4 border-hig-blue pl-8 py-2">
+         <article className="flex-1 space-y-10 max-w-2xl mx-auto lg:mx-0">
+            <p className="text-xl md:text-2xl font-medium leading-relaxed text-zinc-900 dark:text-zinc-100 italic border-l-4 border-hig-blue pl-8 py-2">
               The era of mass marketing is ending. AI is not just another tool; it&apos;s the bridge between raw data and hyper-personalized customer experiences.
             </p>
 
-            <p>
+            <p className="text-zinc-900 dark:text-zinc-100">
               In the rapidly evolving landscape of digital marketing, the integration of artificial intelligence (AI) has shifted from a futuristic concept to a present-day necessity. The ability of machine learning algorithms to process vast datasets in real-time is enabling brands to deliver content that resonates on a deeply individual level.
             </p>
 
@@ -128,9 +128,9 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
               }}
             />
 
-            <h2 className="text-3xl font-bold tracking-tight pt-10">The Algorithmic Approach to Empathy</h2>
+            <h2 className="text-3xl font-bold tracking-tight pt-10 text-zinc-900 dark:text-zinc-100">The Algorithmic Approach to Empathy</h2>
 
-            <p>
+            <p className="text-zinc-900 dark:text-zinc-100">
               One of the most profound impacts of AI in marketing is its role in sentiment analysis and emotional intelligence. By monitoring social signals and engagement patterns, AI engines can now predict the emotional state of a user and adjust the tone of the messaging accordingly. This &quot;algorithmic empathy&quot; is what separates modern personalization from the basic &quot;First Name&quot; tags of the past decade.
             </p>
 
