@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Clock, User, Bookmark, TrendingUp, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowUpRight, User, Bookmark, TrendingUp, Sparkles, ExternalLink } from "lucide-react";
 import { ARTICLES, TRENDING, INDUSTRY_TOOLS } from "@/lib/data";
 
 export default function Home() {

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // This is a placeholder for future Supabase integration as requested by the user.
 // Replace with actual Supabase client initialization when moving to production.
 
