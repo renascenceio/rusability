@@ -48,7 +48,7 @@ export default function NewsPage() {
                            <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{news.category}</span>
                            <span className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m ago</span>
                         </div>
-                        <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors">{news.title}</h3>
+                        <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-zinc-900 dark:text-white">{news.title}</h3>
                         <p className="text-zinc-500 text-sm leading-relaxed font-medium">
                            Recent developments in {news.category} are signaling a major shift for enterprise marketers. Analysts suggest immediate action.
                         </p>
@@ -76,7 +76,7 @@ export default function NewsPage() {
                            <span className="text-[10px] font-black uppercase text-hig-blue tracking-widest">{news.category}</span>
                            <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h ago</span>
                         </div>
-                        <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug">{news.title}</h3>
+                        <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug text-zinc-900 dark:text-white">{news.title}</h3>
                         <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
                      </div>
                      <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative shrink-0">
@@ -120,7 +120,7 @@ export default function NewsPage() {
             </div>
           </div>
 
-          <div className="hig-card p-8 bg-zinc-900 text-white space-y-6">
+          <div className="hig-card p-8 bg-zinc-900 dark:bg-zinc-950 text-white space-y-6">
              <div className="flex items-center gap-2 text-hig-blue font-black text-[10px] uppercase tracking-widest">
                <Sparkles className="w-4 h-4" />
                <span>AI COPILOT</span>
