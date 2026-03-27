@@ -30,6 +30,57 @@ export interface IndustryTool {
   link: string;
 }
 
+export interface Author {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  articlesCount: number;
+  isPopular?: boolean;
+}
+
+export const POPULAR_AUTHORS: Author[] = [
+  {
+    id: "elena-rossi",
+    name: "Elena Rossi",
+    role: "Chief Content Strategist",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
+    articlesCount: 42,
+    isPopular: true
+  },
+  {
+    id: "marc-dubois",
+    name: "Marc Dubois",
+    role: "Digital PR Specialist",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
+    articlesCount: 28,
+    isPopular: true
+  },
+  {
+    id: "amina-kadi",
+    name: "Amina Kadi",
+    role: "Brand Psychologist",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200",
+    articlesCount: 15,
+    isPopular: true
+  }
+];
+
+export interface NewsItem {
+  id: number;
+  title: string;
+  category: string;
+  isHot?: boolean;
+}
+
+export const INDUSTRY_NEWS: NewsItem[] = [
+  { id: 1, title: "OpenAI announces GPT-5 release date", category: "AI", isHot: true },
+  { id: 2, title: "Google rolls out new core update for Search", category: "SEO", isHot: true },
+  { id: 3, title: "Apple expands privacy tracking on iOS 18", category: "Privacy" },
+  { id: 4, title: "Meta launches new VR workspace for professionals", category: "AR/VR" },
+  { id: 5, title: "LinkedIn introduces AI-powered job matching", category: "Social Media", isHot: true }
+];
+
 export const ARTICLES: Article[] = [
   {
     id: 1,

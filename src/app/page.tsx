@@ -1,11 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, User, Bookmark, TrendingUp, Sparkles, ExternalLink } from "lucide-react";
-import { ARTICLES, TRENDING, INDUSTRY_TOOLS } from "@/lib/data";
+import { ArrowUpRight, User, Bookmark, TrendingUp, Sparkles, ExternalLink, Flame, Users } from "lucide-react";
+import { ARTICLES, TRENDING, INDUSTRY_TOOLS, POPULAR_AUTHORS, INDUSTRY_NEWS } from "@/lib/data";
 
 export default function Home() {
   const featuredArticle = ARTICLES.find(a => a.featured) || ARTICLES[0];
   const otherArticles = ARTICLES.filter(a => a.id !== featuredArticle.id);
+
+  // Helper to get random content for injection
+  const getRandomTool = () => INDUSTRY_TOOLS[Math.floor(Math.random() * INDUSTRY_TOOLS.length)];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 md:py-16 space-y-16 md:space-y-24">
@@ -52,6 +55,28 @@ export default function Home() {
         </Link>
       </section>
 
+      {/* Popular Authors - New Section */}
+      <section className="space-y-8">
+        <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
+          <Users className="w-5 h-5 text-hig-blue" />
+          <h2 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">Voices to follow</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {POPULAR_AUTHORS.map((author) => (
+            <Link key={author.id} href={`/profile/${author.id}`} className="hig-card p-6 flex items-center gap-6 group hover:bg-hig-blue/[0.02]">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-md ring-1 ring-zinc-100 dark:ring-zinc-800 group-hover:ring-hig-blue/30 transition-all">
+                <Image src={author.avatar} alt={author.name} fill className="object-cover" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-zinc-900 dark:text-white group-hover:text-hig-blue transition-colors">{author.name}</h4>
+                <p className="text-xs text-zinc-500 font-medium">{author.role}</p>
+                <p className="text-[10px] font-black uppercase tracking-tighter text-hig-blue">{author.articlesCount} Articles</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-16 md:gap-24">
         {/* Main Feed - Magazine Layout */}
         <div className="space-y-16 md:space-y-24">
@@ -61,36 +86,77 @@ export default function Home() {
                 <Link href="/news" className="text-xs font-bold text-hig-blue uppercase tracking-widest hover:underline">Explore More</Link>
              </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16 md:gap-y-20">
-               {otherArticles.map((article) => (
+             {/* Randomised Grid Layout */}
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+               {/* 2/3 Width Article */}
+               <Link href={`/posts/${otherArticles[0].id}`} className="md:col-span-2 group block space-y-6">
+                 <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                    <Image src={otherArticles[0].image} alt={otherArticles[0].title} fill className="object-cover transition-transform duration-1000 group-hover:scale-105" />
+                 </div>
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-hig-blue">
+                       <span>{otherArticles[0].category}</span>
+                       <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                       <span className="text-zinc-400">{otherArticles[0].time}</span>
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-bold leading-tight group-hover:text-hig-blue transition-colors">
+                       {otherArticles[0].title}
+                    </h3>
+                    <p className="text-zinc-500 leading-relaxed font-medium line-clamp-2">
+                       {otherArticles[0].excerpt}
+                    </p>
+                 </div>
+               </Link>
+
+               {/* 1/3 Width Article */}
+               <Link href={`/posts/${otherArticles[1].id}`} className="md:col-span-1 group block space-y-6">
+                 <div className="relative aspect-square rounded-[32px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                    <Image src={otherArticles[1].image} alt={otherArticles[1].title} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" />
+                 </div>
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-hig-blue">
+                       <span>{otherArticles[1].category}</span>
+                    </div>
+                    <h3 className="text-xl font-bold leading-tight group-hover:text-hig-blue transition-colors">
+                       {otherArticles[1].title}
+                    </h3>
+                 </div>
+               </Link>
+
+               {/* Injection: Tool Card */}
+               {(() => {
+                 const tool = getRandomTool();
+                 return (
+                  <div className="md:col-span-1 bg-hig-blue rounded-[32px] p-8 text-white flex flex-col justify-between group cursor-pointer relative overflow-hidden">
+                    <div className="relative z-10 space-y-6">
+                      <div className="bg-white/20 w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Tool</div>
+                      <h4 className="text-2xl font-black leading-tight group-hover:underline">{tool.name}</h4>
+                      <p className="text-white/80 text-sm font-medium leading-relaxed">{tool.description}</p>
+                      <Link href={tool.link} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white text-hig-blue px-6 py-3 rounded-full">
+                        Try Now <ExternalLink className="w-4 h-4" />
+                      </Link>
+                    </div>
+                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                  </div>
+                 );
+               })()}
+
+               {/* Remaining Articles */}
+               {otherArticles.slice(2).map((article) => (
                  <Link key={article.id} href={`/posts/${article.id}`} className="group block space-y-6">
-                   <div className="relative aspect-[16/10] rounded-[24px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
-                     <Image
-                       src={article.image}
-                       alt={article.title}
-                       fill
-                       className="object-cover transition-transform duration-700 group-hover:scale-110"
-                     />
+                   <div className="relative aspect-[4/3] rounded-[24px] overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                     <Image src={article.image} alt={article.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
                    </div>
                    <div className="space-y-4">
-                     <div className="flex items-center gap-3 text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">
-                       <span className="text-hig-blue">{article.category}</span>
-                       <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                       <span>{article.time}</span>
-                     </div>
-                     <h3 className="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white group-hover:text-hig-blue transition-colors leading-tight">
-                       {article.title}
-                     </h3>
-                     <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                       {article.excerpt}
-                     </p>
+                     <h3 className="text-xl font-bold leading-tight group-hover:text-hig-blue transition-colors">{article.title}</h3>
+                     <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">{article.category}</p>
                    </div>
                  </Link>
                ))}
              </div>
           </section>
 
-          {/* Industry Tools - Placement section */}
+          {/* Emotional Intelligence / Vision Section */}
           <section className="bg-zinc-900 dark:bg-black rounded-[32px] md:rounded-[48px] p-8 md:p-16 text-white overflow-hidden relative shadow-[0_32px_64px_-12px_rgba(0,122,255,0.2)]">
             <div className="relative z-10">
                <div className="flex items-center gap-3 mb-10 text-hig-blue font-black uppercase tracking-[0.2em] text-[10px]">
@@ -125,6 +191,25 @@ export default function Home() {
 
         {/* Sidebar */}
         <aside className="w-full space-y-16">
+          {/* Industry News - New Block */}
+          <div className="hig-card p-8 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800">
+             <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <h3 className="font-black text-xs uppercase tracking-[0.1em] text-zinc-900 dark:text-white">Pulse News</h3>
+             </div>
+             <div className="space-y-6">
+                {INDUSTRY_NEWS.map((item) => (
+                  <div key={item.id} className="group cursor-pointer space-y-2 border-b border-zinc-100 dark:border-zinc-800 pb-4 last:border-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-hig-blue">{item.category}</span>
+                      {item.isHot && <span className="bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><Flame className="w-2 h-2" /> HOT</span>}
+                    </div>
+                    <h4 className="text-sm font-bold leading-snug group-hover:text-hig-blue transition-colors">{item.title}</h4>
+                  </div>
+                ))}
+             </div>
+          </div>
+
           <div className="hig-card p-8 sticky top-24 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl border-white/20">
             <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
               <TrendingUp className="w-5 h-5 text-hig-blue" />
@@ -146,12 +231,6 @@ export default function Home() {
                   </div>
                 </Link>
               ))}
-            </div>
-
-            <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-zinc-800">
-              <Link href="/news" className="hig-button-primary w-full text-center block text-sm">
-                Open Dashboard
-              </Link>
             </div>
           </div>
 

@@ -1,7 +1,7 @@
-import { Clock, User, Share2, Heart, MessageCircle, Bookmark, ArrowUpRight, Sparkles } from "lucide-react";
+import { Clock, User, Share2, Heart, MessageCircle, Bookmark, ArrowUpRight, Sparkles, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { ARTICLES, INDUSTRY_TOOLS, type Article } from "@/lib/data";
+import { ARTICLES, INDUSTRY_TOOLS, type Article, INDUSTRY_NEWS } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { ArticlePlugin } from "@/components/ArticlePlugin";
 
@@ -11,7 +11,6 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
   const article = ARTICLES.find(a => a.id.toString() === slug);
 
   if (!article) {
-    // For demo purposes, we can also check for specific slugs used in search
     if (slug !== "future-of-marketing-ai") {
        notFound();
     }
@@ -29,6 +28,8 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
   };
 
   const isProPost = displayData.isProAuthor;
+  const authorArticles = ARTICLES.filter(a => a.author === displayData.author && a.id !== displayData.id);
+  const relatedNews = INDUSTRY_NEWS.slice(0, 3);
 
   return (
     <div className={`max-w-7xl mx-auto px-6 py-12 md:py-20 animate-in fade-in duration-500 ${isProPost ? 'pro-editorial' : ''}`}>
@@ -84,8 +85,9 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
          />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-20">
-         <aside className="w-full lg:w-[120px] hidden lg:block sticky top-32 h-fit space-y-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-[120px,1fr,320px] gap-20">
+         {/* Left Side: Actions */}
+         <aside className="hidden lg:block sticky top-32 h-fit space-y-8">
             <div className="flex flex-col items-center gap-8">
                <div className="flex flex-col items-center gap-2">
                   <button className="p-4 text-zinc-400 hover:text-rose-500 transition-colors rounded-full bg-white dark:bg-zinc-900 shadow-hig border border-zinc-100 dark:border-zinc-800 group">
@@ -103,6 +105,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
             </div>
          </aside>
 
+         {/* Middle: Content */}
          <article className="flex-1 space-y-10">
             <p className="text-2xl font-medium leading-relaxed text-zinc-800 dark:text-zinc-200 italic border-l-4 border-hig-blue pl-8 py-2">
               The era of mass marketing is ending. AI is not just another tool; it&apos;s the bridge between raw data and hyper-personalized customer experiences.
@@ -112,19 +115,18 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
               In the rapidly evolving landscape of digital marketing, the integration of artificial intelligence (AI) has shifted from a futuristic concept to a present-day necessity. The ability of machine learning algorithms to process vast datasets in real-time is enabling brands to deliver content that resonates on a deeply individual level.
             </p>
 
-            {!isProPost && (
-              <ArticlePlugin
-                type="tool"
-                data={{
-                  id: INDUSTRY_TOOLS[0].id,
-                  name: INDUSTRY_TOOLS[0].name,
-                  description: INDUSTRY_TOOLS[0].description,
-                  image: INDUSTRY_TOOLS[0].image,
-                  category: INDUSTRY_TOOLS[0].category,
-                  link: INDUSTRY_TOOLS[0].link
-                }}
-              />
-            )}
+            {/* Contextual Injected Content */}
+            <ArticlePlugin
+              type="tool"
+              data={{
+                id: INDUSTRY_TOOLS[0].id,
+                name: INDUSTRY_TOOLS[0].name,
+                description: INDUSTRY_TOOLS[0].description,
+                image: INDUSTRY_TOOLS[0].image,
+                category: INDUSTRY_TOOLS[0].category,
+                link: INDUSTRY_TOOLS[0].link
+              }}
+            />
 
             <h2 className="text-3xl font-bold tracking-tight pt-10">The Algorithmic Approach to Empathy</h2>
 
@@ -148,40 +150,84 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
                </ul>
             </div>
 
+            {/* Another Injected Content: Multi-article suggest */}
+            <div className="space-y-6 pt-12">
+               <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400">Related Briefings</h4>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {ARTICLES.slice(1, 3).map(a => (
+                     <ArticlePlugin
+                        key={a.id}
+                        type="article"
+                        layout="mini"
+                        data={{
+                           id: a.id,
+                           title: a.title,
+                           description: a.excerpt,
+                           image: a.image,
+                           category: a.category
+                        }}
+                     />
+                  ))}
+               </div>
+            </div>
+
             <p>
               As we move further into 2024, the challenge for marketers will be balancing the efficiency of AI with the authenticity that human oversight provides. The brands that succeed will be those that use AI to enhance human creativity, not replace it.
             </p>
 
             <div className="pt-20 border-t border-zinc-100 dark:border-zinc-800 space-y-12">
-               <h3 className="text-2xl font-bold tracking-tight">More from Elena Rossi</h3>
+               <h3 className="text-2xl font-bold tracking-tight">More from {displayData.author}</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <Link href="/posts/zero-click-search" className="hig-card p-8 group">
-                     <div className="space-y-4">
-                        <div className="flex items-center gap-3 text-xs text-hig-blue font-black uppercase tracking-widest">
-                           <span>SEO</span>
-                           <span className="text-zinc-400">•</span>
-                           <span>4 min read</span>
+                  {(authorArticles.length > 0 ? authorArticles : ARTICLES.slice(3, 5)).map(a => (
+                     <Link key={a.id} href={`/posts/${a.id}`} className="hig-card p-8 group">
+                        <div className="space-y-4">
+                           <div className="flex items-center gap-3 text-xs text-hig-blue font-black uppercase tracking-widest">
+                              <span>{a.category}</span>
+                              <span className="text-zinc-400">•</span>
+                              <span>{a.time}</span>
+                           </div>
+                           <h4 className="text-xl font-bold group-hover:text-hig-blue transition-colors leading-tight">{a.title}</h4>
+                           <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">{a.excerpt}</p>
+                           <div className="inline-flex items-center gap-2 text-sm font-bold text-hig-blue pt-4">Read Now <ArrowUpRight className="w-4 h-4" /></div>
                         </div>
-                        <h4 className="text-xl font-bold group-hover:text-hig-blue transition-colors">The Zero-Click Search Paradox</h4>
-                        <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">How to maintain brand visibility when users don&apos;t need to click through to your website.</p>
-                        <div className="inline-flex items-center gap-2 text-sm font-bold text-hig-blue pt-4">Read Now <ArrowUpRight className="w-4 h-4" /></div>
-                     </div>
-                  </Link>
-                  <Link href="/posts/ai-agent-era" className="hig-card p-8 group">
-                     <div className="space-y-4">
-                        <div className="flex items-center gap-3 text-xs text-hig-blue font-black uppercase tracking-widest">
-                           <span>Future Tech</span>
-                           <span className="text-zinc-400">•</span>
-                           <span>6 min read</span>
-                        </div>
-                        <h4 className="text-xl font-bold group-hover:text-hig-blue transition-colors">Marketing in the Era of AI Agents</h4>
-                        <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">When the customer is an AI agent, how do your marketing strategies change?</p>
-                        <div className="inline-flex items-center gap-2 text-sm font-bold text-hig-blue pt-4">Read Now <ArrowUpRight className="w-4 h-4" /></div>
-                     </div>
-                  </Link>
+                     </Link>
+                  ))}
                </div>
             </div>
          </article>
+
+         {/* Right Side: Pulse / Contextual news */}
+         <aside className="space-y-12 sticky top-32 h-fit">
+            <div className="hig-card p-8 bg-zinc-50 dark:bg-zinc-900/40">
+               <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-8 pb-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  Live Industry Pulse
+               </h4>
+               <div className="space-y-6">
+                  {relatedNews.map(news => (
+                     <div key={news.id} className="group cursor-pointer">
+                        <span className="text-[9px] font-black uppercase text-hig-blue tracking-tighter mb-1 block">{news.category}</span>
+                        <h5 className="text-sm font-bold leading-tight group-hover:text-hig-blue transition-colors line-clamp-2">{news.title}</h5>
+                        <div className="mt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                           <span className="text-[10px] text-zinc-400 font-bold uppercase">Briefing</span>
+                           <ChevronRight className="w-4 h-4 text-hig-blue" />
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+
+            <div className="hig-card p-8 bg-hig-blue text-white relative overflow-hidden">
+               <div className="relative z-10 space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-white/60">Pro Perspective</h4>
+                  <p className="font-bold text-sm leading-relaxed">
+                     Get the full analysis on how privacy tracking will impact your Q4 ROI.
+                  </p>
+                  <button className="bg-white text-hig-blue text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full w-full">Unlock Now</button>
+               </div>
+               <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </div>
+         </aside>
       </div>
     </div>
   );
