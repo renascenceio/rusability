@@ -59,11 +59,11 @@ export default function Home() {
       <section className="space-y-8">
         <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-4">
           <Users className="w-5 h-5 text-hig-blue" />
-          <h2 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">Voices to follow</h2>
+          <h2 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100">Voices to follow</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {POPULAR_AUTHORS.map((author) => (
-            <Link key={author.id} href={`/profile/${author.id}`} className="hig-card p-6 flex items-center gap-6 group hover:bg-hig-blue/[0.02]">
+            <Link key={author.id} href={`/profile/${author.id}`} className="hig-card p-6 flex items-center gap-6 group hover:bg-hig-blue/[0.02] bg-white dark:bg-zinc-900/50">
               <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white dark:border-zinc-800 shadow-md ring-1 ring-zinc-100 dark:ring-zinc-800 group-hover:ring-hig-blue/30 transition-all">
                 <Image src={author.avatar} alt={author.name} fill className="object-cover" />
               </div>
@@ -180,19 +180,19 @@ export default function Home() {
                <h2 className="text-3xl md:text-5xl font-black mb-12 tracking-tight leading-tight">Crafting the future of marketing with heart.</h2>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                   {INDUSTRY_TOOLS.map((tool) => (
-                    <Link key={tool.id} href={tool.link} className="hig-card bg-white/5 border-white/10 hover:bg-white/10 p-6 space-y-6 block group">
+                    <Link key={tool.id} href={tool.link} className="hig-card bg-white/10 border-white/10 hover:bg-white/20 p-6 space-y-6 block group">
                        <div className="relative w-full aspect-square rounded-[24px] overflow-hidden">
                           <Image src={tool.image} alt={tool.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
                        </div>
                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between text-white">
                              <h4 className="font-bold text-lg">{tool.name}</h4>
-                             <ExternalLink className="w-4 h-4 text-zinc-500" />
+                             <ExternalLink className="w-4 h-4 text-white/50" />
                           </div>
-                          <p className="text-xs text-zinc-400 font-medium leading-relaxed">{tool.description}</p>
+                          <p className="text-xs text-zinc-300 font-medium leading-relaxed">{tool.description}</p>
                        </div>
                        <div className="pt-2">
-                          <span className="text-[10px] font-black uppercase tracking-widest bg-hig-blue text-white px-3 py-1.5 rounded-full">{tool.category}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest bg-white text-hig-blue px-3 py-1.5 rounded-full">{tool.category}</span>
                        </div>
                     </Link>
                   ))}
@@ -206,7 +206,7 @@ export default function Home() {
         {/* Industry Pulse & Trending - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Industry Pulse News */}
-          <div className="hig-card p-8 bg-[var(--pulse-bg)] border-zinc-100 dark:border-zinc-800 shadow-sm">
+          <div className="hig-card p-8 bg-white dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800 shadow-sm">
              <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                 <Flame className="w-5 h-5 text-orange-500" />
                 <h3 className="font-black text-xl text-zinc-900 dark:text-white">Pulse News</h3>
@@ -218,13 +218,13 @@ export default function Home() {
                       <span className="text-[9px] font-black uppercase tracking-widest text-hig-blue">{item.category}</span>
                       {item.isHot && <span className="bg-rose-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><Flame className="w-2 h-2" /> HOT</span>}
                     </div>
-                    <h4 className="text-sm font-bold leading-snug group-hover:text-hig-blue transition-colors">{item.title}</h4>
+                    <h4 className="text-sm font-bold leading-snug text-zinc-900 dark:text-zinc-100 group-hover:text-hig-blue transition-colors">{item.title}</h4>
                   </div>
                 ))}
              </div>
           </div>
 
-          <div className="hig-card p-8 bg-[var(--pulse-bg)] border-zinc-100 dark:border-zinc-800 shadow-sm">
+          <div className="hig-card p-8 bg-white dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800 shadow-sm">
             <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
               <TrendingUp className="w-5 h-5 text-hig-blue" />
               <h3 className="font-black text-xl text-zinc-900 dark:text-white">Trending Vibes</h3>
@@ -238,7 +238,7 @@ export default function Home() {
                     <h4 className="font-bold text-sm leading-snug text-zinc-900 dark:text-zinc-200 group-hover:text-hig-blue transition-colors line-clamp-3">
                       {tag}
                     </h4>
-                    <p className="text-[8px] text-zinc-400 uppercase font-bold tracking-widest flex items-center gap-1.5">
+                    <p className="text-[8px] text-zinc-500 dark:text-zinc-400 uppercase font-black tracking-widest flex items-center gap-1.5">
                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                        LIVE INSIGHT
                     </p>
