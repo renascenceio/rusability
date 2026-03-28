@@ -3,11 +3,11 @@
 
 @theme {
   --color-hig-blue: #007aff;
-  --color-hig-gray-100: #f5f5f7;
-  --color-hig-gray-200: #e8e8ed;
-  --color-hig-gray-300: #d2d2d7;
-  --color-hig-gray-400: #86868b;
-  --color-hig-gray-600: #1d1d1f;
+  --color-hig-gray-100: #ffffff;
+  --color-hig-gray-200: #ffffff;
+  --color-hig-gray-300: #ffffff;
+  --color-hig-gray-400: #000000;
+  --color-hig-gray-600: #000000;
 
   --radius-hig: 24px;
   --radius-hig-inner: 16px;
@@ -47,7 +47,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
@@ -126,7 +125,7 @@ a {
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--hig-gray-400);
+  background: var(--foreground);
 }
 
 .no-scrollbar::-webkit-scrollbar {

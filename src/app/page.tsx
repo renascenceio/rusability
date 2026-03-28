@@ -42,8 +42,8 @@ export default function Home() {
             </p>
             <div className="flex items-center justify-between pt-4 md:pt-8 border-t border-[var(--border)] dark:border-[var(--border)]">
                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center">
-                    <User className="w-5 h-5 md:w-6 md:h-6 text-black dark:text-white" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--background)] border border-[var(--border)] flex items-center justify-center">
+                    <User className="w-5 h-5 md:w-6 md:h-6 text-[var(--foreground)]" />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-bold text-sm md:text-base text-black dark:text-white">{featuredArticle.author}</span>
@@ -140,7 +140,7 @@ export default function Home() {
                {(() => {
                  const tool = getRandomTool();
                  return (
-                  <div className="bg-white dark:bg-zinc-900 rounded-[32px] p-8 text-[var(--foreground)] flex flex-col justify-between group cursor-pointer relative overflow-hidden h-full min-h-[340px] border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-[var(--background)] rounded-[32px] p-8 text-[var(--foreground)] flex flex-col justify-between group cursor-pointer relative overflow-hidden h-full min-h-[340px] border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow">
                     <div className="relative z-10 space-y-6">
                       <div className="bg-hig-blue/10 text-hig-blue w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Tool</div>
                       <h4 className="text-2xl font-bold leading-tight group-hover:text-hig-blue transition-colors">{tool.name}</h4>
@@ -294,7 +294,7 @@ export default function Home() {
         </div>
 
         {/* Full Width Personalization - Refined White Version */}
-        <div className="rounded-[48px] p-12 bg-white dark:bg-zinc-900 border border-[var(--border)] text-[var(--foreground)] overflow-hidden relative shadow-sm">
+        <div className="rounded-[48px] p-12 bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] overflow-hidden relative shadow-sm">
            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-6">
                  <div className="flex items-center gap-2 text-hig-blue font-black text-[10px] uppercase tracking-[0.2em]">

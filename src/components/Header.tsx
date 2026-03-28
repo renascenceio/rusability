@@ -57,7 +57,7 @@ export const Header = () => {
              )}
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-hig-gray-400">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[var(--foreground)]/60 font-black uppercase tracking-widest">
             <Link href="/" className="flex items-center gap-2 hover:text-foreground transition-colors">
               Home
             </Link>
@@ -73,11 +73,11 @@ export const Header = () => {
           </nav>
 
           <div className="flex-1 max-w-md hidden lg:flex items-center relative group">
-            <Search className="absolute left-3 w-4 h-4 text-[var(--foreground)]/40 dark:text-white/40" />
+            <Search className="absolute left-3 w-4 h-4 text-[var(--foreground)]/40 dark:text-[var(--foreground)]/40" />
             <input
               onClick={() => setIsSearchOpen(true)}
               readOnly
-              className="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl py-2 pl-10 pr-12 text-sm text-[var(--foreground)] placeholder:text-black/60 dark:placeholder:white/60 cursor-pointer focus:ring-2 focus:ring-hig-blue/10 transition-all shadow-sm font-black"
+              className="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl py-2 pl-10 pr-12 text-sm text-[var(--foreground)] placeholder:text-black/60 dark:placeholder:text-white/60 cursor-pointer focus:ring-2 focus:ring-hig-blue/10 transition-all shadow-sm font-black"
               placeholder="Search anything..."
             />
             <div className="absolute right-3 flex items-center gap-1 px-1.5 py-0.5 border border-[var(--border)] rounded-md bg-[var(--background)]">
@@ -100,13 +100,13 @@ export const Header = () => {
               Write
             </Link>
 
-            <button className="p-2 text-hig-gray-400 hover:text-foreground transition-colors hidden sm:block">
+            <button className="p-2 text-[var(--foreground)]/40 hover:text-foreground transition-colors hidden sm:block">
               <Bell className="w-5 h-5" />
             </button>
-            <Link href="/profile/jdoe" className="p-2 text-hig-gray-400 hover:text-foreground transition-colors">
-              <User className="w-5 h-5 border border-[var(--border)] dark:border-[var(--border)] rounded-full" />
+            <Link href="/profile/jdoe" className="p-2 text-[var(--foreground)]/40 hover:text-foreground transition-colors">
+              <User className="w-5 h-5 border border-[var(--border)] rounded-full" />
             </Link>
-            <button className="md:hidden p-2 text-hig-gray-400 hover:text-foreground" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            <button className="md:hidden p-2 text-[var(--foreground)]/40 hover:text-foreground" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>

@@ -43,7 +43,7 @@ export default function NewsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                {mainNews.map((news) => (
-                  <div key={news.id} className="hig-card p-10 bg-white dark:bg-transparent border-[var(--border)] dark:border-[var(--border)] group cursor-pointer relative overflow-hidden">
+                  <div key={news.id} className="hig-card p-10 bg-[var(--background)] border-[var(--border)] group cursor-pointer relative overflow-hidden">
                      <div className="relative z-10 space-y-6">
                         <div className="flex items-center justify-between">
                            <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{news.category}</span>
@@ -80,7 +80,7 @@ export default function NewsPage() {
                         <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug text-[var(--foreground)] dark:text-white">{news.title}</h3>
                         <p className="text-[var(--foreground)] text-sm leading-relaxed line-clamp-2">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
                      </div>
-                     <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-white dark:bg-white relative shrink-0">
+                     <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--background)] border border-[var(--border)] relative shrink-0">
                         <div className="absolute inset-0 flex items-center justify-center opacity-20"><Zap className="w-12 h-12" /></div>
                      </div>
                   </div>
@@ -91,8 +91,8 @@ export default function NewsPage() {
 
         {/* Sidebar: Articles in News */}
         <aside className="space-y-16">
-          <div className="hig-card p-8 sticky top-24 bg-transparent dark:bg-transparent backdrop-blur-3xl border-white/20">
-            <div className="flex items-center gap-2 mb-8 border-b border-[var(--border)] dark:border-[var(--border)] pb-4">
+          <div className="hig-card p-8 sticky top-24 bg-[var(--background)] border-[var(--border)]">
+            <div className="flex items-center gap-2 mb-8 border-b border-[var(--border)] pb-4">
               <TrendingUp className="w-5 h-5 text-hig-blue" />
               <h3 className="font-black text-xs uppercase tracking-[0.1em] text-[var(--foreground)] dark:text-white">Deep Dives</h3>
             </div>
@@ -132,7 +132,7 @@ export default function NewsPage() {
                </p>
                <button className="hig-button-primary w-full text-[10px] bg-white text-hig-blue py-3 border-none shadow-none hover:bg-white hover:text-hig-blue">Prepare Summary</button>
              </div>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
+             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--background)]/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
           </div>
         </aside>
       </div>

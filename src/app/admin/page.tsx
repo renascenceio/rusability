@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                 className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-black transition-all group relative overflow-hidden ${
                   activeTab === tab.id
                     ? "bg-hig-blue text-white shadow-xl shadow-hig-blue/20"
-                    : "text-[var(--foreground)] hover:text-hig-blue hover:bg-white dark:bg-white/5 border border-black/10 dark:border-white/10"
+                    : "text-[var(--foreground)] hover:text-hig-blue hover:bg-[var(--foreground)]/5 border border-[var(--border)]/10"
                 }`}
               >
                 <tab.icon className={`w-5 h-5 relative z-10 ${activeTab === tab.id ? "text-white scale-110" : "text-[var(--foreground)]/40 group-hover:text-hig-blue group-hover:scale-110"} transition-all`} />
@@ -161,9 +161,9 @@ export default function AdminDashboard() {
                      </div>
                      <div className="flex-1 flex items-end gap-4 pb-8">
                         {[40, 60, 45, 90, 65, 80, 55, 75, 95, 100, 85, 70, 90, 80, 60, 40].map((h, i) => (
-                          <div key={i} className="flex-1 bg-[var(--muted)] rounded-t-[20px] relative group transition-all">
+                          <div key={i} className="flex-1 bg-[var(--muted)] border-x border-t border-[var(--border)]/5 rounded-t-[20px] relative group transition-all">
                              <div style={{ height: `${h}%` }} className="w-full bg-hig-blue/40 group-hover:bg-hig-blue transition-all duration-500 rounded-t-[20px] relative">
-                                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-t from-transparent to-white/10 rounded-t-[20px]" />
+                                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-t from-transparent to-[var(--background)]/10 rounded-t-[20px]" />
                              </div>
                              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[var(--foreground)] text-[var(--background)] px-3 py-1.5 rounded-xl text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-[var(--border)]">
                                {h}k
@@ -188,8 +188,8 @@ export default function AdminDashboard() {
                           { name: "Sarah Jenkins", views: "62k", engagement: "8.1%", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956" },
                           { name: "David Chen", views: "54k", engagement: "7.8%", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" },
                         ].map((author, i) => (
-                          <div key={i} className="flex items-center gap-4 group cursor-pointer p-2 rounded-2xl transition-all border border-transparent hover:bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 hover:border-[var(--border)]">
-                             <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-white dark:border-[var(--border)] shadow-lg group-hover:scale-110 transition-transform">
+                          <div key={i} className="flex items-center gap-4 group cursor-pointer p-2 rounded-2xl transition-all border border-[var(--border)]/10 hover:bg-[var(--foreground)]/5">
+                             <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-[var(--background)] shadow-lg group-hover:scale-110 transition-transform">
                                 <Image src={`${author.img}?auto=format&fit=crop&q=80&w=100`} alt={author.name} fill className="object-cover" />
                              </div>
                              <div className="flex-1">
@@ -356,7 +356,7 @@ export default function AdminDashboard() {
                           <tr key={i} className="group hover:bg-[var(--muted)] transition-all">
                              <td className="px-10 py-8">
                                 <div className="flex items-center gap-5">
-                                   <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-white dark:border-[var(--border)] shadow-lg group-hover:scale-110 transition-transform">
+                                   <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-[var(--background)] shadow-lg group-hover:scale-110 transition-transform">
                                       <Image src={`${user.img}?auto=format&fit=crop&q=80&w=100`} alt={user.name} fill className="object-cover" />
                                    </div>
                                    <div>
