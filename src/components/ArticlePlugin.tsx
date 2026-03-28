@@ -26,7 +26,7 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
 
   if (layout === "mini") {
     return (
-      <Link href={href} className="flex items-center gap-4 p-4 hig-card hover:bg-zinc-50 dark:hover:bg-zinc-900 group/mini transition-all border-dashed">
+      <Link href={href} className="flex items-center gap-4 p-4 hig-card hover:bg-[var(--background)] dark:hover:bg-[var(--background)] group/mini transition-all border-dashed">
         <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0">
           <Image src={data.image} alt={title || ""} fill className="object-cover" />
         </div>
@@ -37,7 +37,7 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
           </div>
           <h5 className="text-sm font-bold truncate group-hover/mini:text-hig-blue transition-colors">{title}</h5>
         </div>
-        <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover/mini:text-hig-blue" />
+        <ArrowUpRight className="w-4 h-4 text-[var(--foreground)] group-hover/mini:text-hig-blue" />
       </Link>
     );
   }
@@ -54,7 +54,7 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
         </div>
         <div className="p-8 space-y-4">
            <h4 className="text-xl font-bold leading-tight group-hover/vertical:text-hig-blue transition-colors">{title}</h4>
-           <p className="text-sm text-zinc-500 leading-relaxed line-clamp-3">{data.description}</p>
+           <p className="text-sm text-[var(--foreground)] leading-relaxed line-clamp-3">{data.description}</p>
            <Link href={href} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-hig-blue pt-4">
               Explore Now <ArrowUpRight className="w-4 h-4" />
            </Link>
@@ -79,10 +79,10 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
             <Sparkles className="w-3 h-3" />
             <span>Featured {isTool ? "Resource" : (isNews ? "Briefing" : "Perspective")}</span>
           </div>
-          <h4 className="text-xl font-bold text-zinc-900 dark:text-white group-hover/plugin:text-hig-blue transition-colors">
+          <h4 className="text-xl font-bold text-[var(--foreground)] dark:text-white group-hover/plugin:text-hig-blue transition-colors">
             {title}
           </h4>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2">
+          <p className="text-sm text-[var(--foreground)] dark:text-[var(--foreground)] leading-relaxed line-clamp-2">
             {data.description}
           </p>
           <Link

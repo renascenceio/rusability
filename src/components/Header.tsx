@@ -53,7 +53,7 @@ export const Header = () => {
                 priority
                />
              ) : (
-               <span className="text-2xl font-bold tracking-tight text-black dark:text-white">rusability</span>
+               <span className="text-2xl font-bold tracking-tight text-[var(--foreground)]">rusability</span>
              )}
           </Link>
 
@@ -73,16 +73,16 @@ export const Header = () => {
           </nav>
 
           <div className="flex-1 max-w-md hidden lg:flex items-center relative group">
-            <Search className="absolute left-3 w-4 h-4 text-black/80 dark:text-black/90" />
+            <Search className="absolute left-3 w-4 h-4 text-[var(--foreground)]/40 dark:text-white/40" />
             <input
               onClick={() => setIsSearchOpen(true)}
               readOnly
-              className="w-full bg-white dark:bg-white border border-black/5 dark:border-black/5 rounded-xl py-2 pl-10 pr-12 text-sm text-black dark:text-white cursor-pointer focus:ring-2 focus:ring-hig-blue/10 transition-all shadow-sm group-hover:border-black/5 dark:group-hover:border-black/5 font-black"
+              className="w-full bg-[var(--background)] border border-[var(--border)] rounded-xl py-2 pl-10 pr-12 text-sm text-[var(--foreground)] placeholder:text-black/60 dark:placeholder:white/60 cursor-pointer focus:ring-2 focus:ring-hig-blue/10 transition-all shadow-sm font-black"
               placeholder="Search anything..."
             />
-            <div className="absolute right-3 flex items-center gap-1 px-1.5 py-0.5 border border-black/5 dark:border-black/5 rounded-md bg-white dark:bg-white">
-               <Command className="w-2.5 h-2.5 text-black/80 dark:text-black/90" />
-               <span className="text-[10px] text-black font-black">K</span>
+            <div className="absolute right-3 flex items-center gap-1 px-1.5 py-0.5 border border-[var(--border)] rounded-md bg-[var(--background)]">
+               <Command className="w-2.5 h-2.5 text-[var(--foreground)]/40 dark:text-white/40" />
+               <span className="text-[10px] text-[var(--foreground)] font-black">K</span>
             </div>
           </div>
 
@@ -104,7 +104,7 @@ export const Header = () => {
               <Bell className="w-5 h-5" />
             </button>
             <Link href="/profile/jdoe" className="p-2 text-hig-gray-400 hover:text-foreground transition-colors">
-              <User className="w-5 h-5 border border-black/5 dark:border-black/5 rounded-full" />
+              <User className="w-5 h-5 border border-[var(--border)] dark:border-[var(--border)] rounded-full" />
             </Link>
             <button className="md:hidden p-2 text-hig-gray-400 hover:text-foreground" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -114,7 +114,7 @@ export const Header = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white dark:bg-black border-t border-black/5 dark:border-black/5 p-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
+          <div className="md:hidden bg-white dark:bg-black border-t border-[var(--border)] dark:border-[var(--border)] p-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
              <Link href="/" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
              <Link href="/news" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>News</Link>
              <Link href="/events" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Events</Link>
