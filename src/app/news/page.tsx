@@ -15,7 +15,7 @@ export default function NewsPage() {
           <Newspaper className="w-5 h-5" />
           <span>The Pulse of Marketing</span>
         </div>
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
+        <h1 className="text-4xl md:text-7xl font-black tracking-tight leading-tight">
           Industry News & Real-time Insights.
         </h1>
         <p className="text-xl text-zinc-500 font-medium leading-relaxed">

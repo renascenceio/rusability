@@ -28,6 +28,18 @@ export interface IndustryTool {
   category: string;
   image: string;
   link: string;
+  icon?: string;
+}
+
+export interface EventItem {
+  id: number;
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  type: string;
+  featured: boolean;
+  image: string;
 }
 
 export interface Author {
@@ -198,26 +210,71 @@ export const CURRENT_USER: UserProfile = {
 export const INDUSTRY_TOOLS: IndustryTool[] = [
   {
     id: 1,
-    name: "AetherMetrics",
-    description: "Next-gen attribution for multi-channel campaigns.",
-    category: "Analytics",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400",
-    link: "/tools/aethermetrics",
+    name: "Persona AI",
+    description: "Deep audience segmentation tool that uses LLMs to simulate focus groups and predict marketing campaign success.",
+    category: "AI Marketing",
+    icon: "Sparkles",
+    image: "https://images.unsplash.com/photo-1620712943543-bcc4638d9985?auto=format&fit=crop&q=80&w=800",
+    link: "/tools/persona-ai",
   },
   {
     id: 2,
-    name: "PersonaFlow",
-    description: "AI-powered customer journey mapping.",
-    category: "Strategy",
-    image: "https://images.unsplash.com/photo-1551288049-bbbda5366392?auto=format&fit=crop&q=80&w=400",
-    link: "/tools/personaflow",
+    name: "PR Pulse",
+    description: "Real-time sentiment tracking and automated media outreach management for modern PR agencies.",
+    category: "Public Relations",
+    icon: "MessageSquare",
+    image: "https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&q=80&w=800",
+    link: "/tools/pr-pulse",
   },
   {
     id: 3,
-    name: "Sentience PR",
-    description: "Real-time brand sentiment tracking.",
-    category: "PR",
-    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=400",
-    link: "/tools/sentience",
-  }
+    name: "Metric Flow",
+    description: "Multi-touch attribution dashboard that connects directly to your ad platforms and CRM to show true ROI.",
+    category: "Analytics",
+    icon: "PieChart",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
+    link: "/tools/metric-flow",
+  },
+  {
+    id: 4,
+    name: "Safe Brand",
+    description: "AI-powered brand safety monitor that scans social media and news for potential PR crises and mentions.",
+    category: "Brand Protection",
+    icon: "ShieldCheck",
+    image: "https://images.unsplash.com/photo-1508921334172-b1fad997384b?auto=format&fit=crop&q=80&w=800",
+    link: "/tools/safe-brand",
+  },
+];
+
+export const EVENTS: EventItem[] = [
+  {
+    id: 1,
+    title: "Global Marketing AI Summit 2024",
+    description: "The premier event for AI-driven marketing strategies and next-gen tools. Join 5,000+ professionals for a 3-day experience.",
+    location: "San Francisco, CA",
+    date: "June 12-14, 2024",
+    type: "Conference",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1540575861501-7ad0582373f2?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 2,
+    title: "Future of PR: Digital First Strategy",
+    description: "A specialized workshop for PR agency leaders to transition into data-centric media relations and AI-assisted pitching.",
+    location: "London, UK",
+    date: "July 5, 2024",
+    type: "Workshop",
+    featured: false,
+    image: "https://images.unsplash.com/photo-1591115765373-520b7a2172d7?auto=format&fit=crop&q=80&w=800",
+  },
+  {
+    id: 3,
+    title: "SaaS Marketing Excellence Webinar",
+    description: "Deep dive into product-led growth strategies for the current SaaS market, featuring CMOs from leading tech companies.",
+    location: "Online / Virtual",
+    date: "August 20, 2024",
+    type: "Webinar",
+    featured: false,
+    image: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&fit=crop&q=80&w=800",
+  },
 ];

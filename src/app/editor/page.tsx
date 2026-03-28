@@ -166,10 +166,10 @@ export default function EditorPage() {
           {/* Functional Inputs */}
           <textarea
             ref={titleRef}
-            placeholder="Type your compelling headline..."
+            placeholder="Type your compelling headliner"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-5xl md:text-8xl font-black bg-transparent border-none outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-900 resize-none leading-[0.95] tracking-tight py-4 whitespace-pre-wrap"
+            className="w-full text-3xl md:text-6xl font-black bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-800 resize-none leading-[1.1] tracking-tight py-2 overflow-hidden"
             rows={1}
           />
 
@@ -212,18 +212,19 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {/* Improved AI Floating Toolbar */}
-      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 z-40">
-         <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl px-8 py-5 rounded-[32px] shadow-2xl border border-zinc-100 dark:border-zinc-800 flex items-center gap-10">
-            <div className="flex items-center gap-8 border-r border-zinc-100 dark:border-zinc-800 pr-10">
+      {/* Improved AI Floating Toolbar - Moved to Bottom-Left */}
+      <div className="fixed bottom-6 left-6 right-6 md:right-auto md:bottom-12 md:left-12 flex items-center gap-4 z-40">
+         <div className="w-full md:w-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-3xl px-4 md:px-8 py-3 md:py-5 rounded-[24px] md:rounded-[32px] shadow-2xl border border-zinc-100 dark:border-zinc-800 flex items-center justify-between md:justify-start gap-4 md:gap-10">
+            <div className="flex items-center gap-4 md:gap-8 md:border-r border-zinc-100 dark:border-zinc-800 md:pr-10">
                <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors"><Type className="w-5 h-5" /></button>
                <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors font-black">B</button>
                <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors font-black italic">I</button>
             </div>
 
-            <button className="flex items-center gap-3 text-hig-blue font-black text-xs uppercase tracking-widest group bg-hig-blue/5 px-6 py-3 rounded-2xl hover:bg-hig-blue/10 transition-all border border-hig-blue/10">
+            <button className="flex items-center gap-3 text-hig-blue font-black text-[10px] md:text-xs uppercase tracking-widest group bg-hig-blue/5 px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl hover:bg-hig-blue/10 transition-all border border-hig-blue/10">
                <Sparkles className="w-4 h-4 animate-pulse group-hover:scale-110 transition-transform" />
-               AI Refine & Optimize
+               <span className="hidden xs:inline">AI Refine & Optimize</span>
+               <span className="xs:hidden">AI Refine</span>
             </button>
          </div>
       </div>
