@@ -20,6 +20,26 @@ export default function EditorPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const excerptRef = useRef<HTMLTextAreaElement>(null);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+
+  const applyFormat = (prefix: string, suffix: string = "") => {
+    if (!contentRef.current) return;
+    const textarea = contentRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const beforeText = textarea.value.substring(0, start);
+    const afterText = textarea.value.substring(end);
+
+    const newText = beforeText + prefix + selectedText + suffix + afterText;
+    setContent(newText);
+
+    // Focus and reset selection (simplified)
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+    }, 0);
+  };
 
   useEffect(() => {
     if (titleRef.current) {
@@ -201,34 +221,52 @@ export default function EditorPage() {
                   <div className="h-px w-8 bg-[var(--border)] mx-auto my-1" />
 
                   <button
-                    onClick={() => setContent(prev => prev + "\nAI: Refining for clarity...")}
+                    onClick={() => {
+                      if (!content) return;
+                      setContent(prev => prev + "\n\nAI Analysis: This section could benefit from more data-driven examples to strengthen the 'Search Strategy' narrative. Would you like me to suggest some industry benchmarks?");
+                    }}
                     className="p-4 rounded-full bg-hig-blue text-white shadow-xl shadow-hig-blue/30 transition-all hover:scale-110 active:scale-90"
                     title="AI Enhance"
                   >
                     <Wand2 className="w-6 h-6" />
                   </button>
 
-                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="AI Rewrite">
+                  <button
+                    onClick={() => {
+                      if (!content) return;
+                      setContent("AI is rewriting your story for maximum impact and clarity...");
+                      setTimeout(() => setContent(content + "\n\n(AI Rewrite complete: Optimized for executive readability)"), 1000);
+                    }}
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="AI Rewrite">
                     <Sparkles className="w-6 h-6" />
                   </button>
 
                   <div className="h-px w-8 bg-[var(--border)] mx-auto my-1" />
 
-                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Bold">
+                  <button
+                    onClick={() => applyFormat("**", "**")}
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Bold">
                     <Bold className="w-6 h-6" />
                   </button>
-                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Italic">
+                  <button
+                    onClick={() => applyFormat("_", "_")}
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Italic">
                     <Italic className="w-6 h-6" />
                   </button>
-                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Quote">
+                  <button
+                    onClick={() => applyFormat("> ", "")}
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Quote">
                     <Quote className="w-6 h-6" />
                   </button>
-                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Link">
+                  <button
+                    onClick={() => applyFormat("[", "](https://)")}
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Link">
                     <LinkIcon className="w-6 h-6" />
                   </button>
                </div>
             </div>
             <textarea
+              ref={contentRef}
               placeholder="Tell the story. This is where insights are born. AI is ready to assist..."
               value={content}
               onChange={(e) => setContent(e.target.value)}

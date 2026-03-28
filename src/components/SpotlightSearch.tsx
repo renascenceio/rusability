@@ -61,7 +61,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
           <Search className="w-6 h-6 text-zinc-400" />
           <input
             autoFocus
-            className="flex-1 bg-transparent border-none outline-none text-2xl text-[var(--foreground)] placeholder:text-zinc-300 font-medium"
+            className="flex-1 bg-transparent border-none outline-none text-2xl text-[var(--foreground)] placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium"
             placeholder="Search anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -71,7 +71,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
             <span className="text-xs font-medium text-zinc-400">K</span>
           </div>
           <button onClick={onClose}>
-            <X className="w-5 h-5 text-zinc-300 hover:text-zinc-500" />
+            <X className="w-5 h-5 text-zinc-400 hover:text-zinc-600" />
           </button>
         </div>
 
