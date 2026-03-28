@@ -206,7 +206,7 @@ export default function Home() {
         {/* Industry Pulse & Trending - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Industry Pulse News */}
-          <div className="hig-card p-8 bg-white dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800 shadow-sm">
+          <div className="hig-card p-8 bg-[var(--pulse-bg)] border-zinc-100 dark:border-zinc-800 shadow-sm">
              <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                 <Flame className="w-5 h-5 text-orange-500" />
                 <h3 className="font-black text-xl text-zinc-900 dark:text-white">Pulse News</h3>
@@ -224,7 +224,7 @@ export default function Home() {
              </div>
           </div>
 
-          <div className="hig-card p-8 bg-white dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800 shadow-sm">
+          <div className="hig-card p-8 bg-[var(--pulse-bg)] border-zinc-100 dark:border-zinc-800 shadow-sm">
             <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
               <TrendingUp className="w-5 h-5 text-hig-blue" />
               <h3 className="font-black text-xl text-zinc-900 dark:text-white">Trending Vibes</h3>
