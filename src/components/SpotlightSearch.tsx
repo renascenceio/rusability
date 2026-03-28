@@ -57,21 +57,21 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
         exit={{ scale: 0.95, opacity: 0 }}
         className="relative w-full max-w-2xl bg-[var(--background)] rounded-3xl shadow-2xl border border-[var(--border)] overflow-hidden"
       >
-        <div className="flex items-center p-6 gap-4 border-b border-[var(--border)]">
-          <Search className="w-6 h-6 text-zinc-400" />
+        <div className="flex items-center p-6 gap-4 border-b border-black/5 dark:border-black/5">
+          <Search className="w-6 h-6 text-black/80 dark:text-black/90" />
           <input
             autoFocus
-            className="flex-1 bg-transparent border-none outline-none text-2xl text-[var(--foreground)] placeholder:text-zinc-400 dark:placeholder:text-zinc-600 font-medium"
+            className="flex-1 bg-transparent border-none outline-none text-2xl text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-black/40 font-black"
             placeholder="Search anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--muted)] rounded-md border border-[var(--border)]">
-            <Command className="w-3 h-3 text-zinc-400" />
-            <span className="text-xs font-medium text-zinc-400">K</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-white rounded-md border border-black/5 dark:border-black/5">
+            <Command className="w-3 h-3 text-black/80 dark:text-black/90" />
+            <span className="text-xs font-black text-black dark:text-black/90">K</span>
           </div>
           <button onClick={onClose}>
-            <X className="w-5 h-5 text-zinc-400 hover:text-zinc-600" />
+            <X className="w-5 h-5 text-black/80 hover:text-black" />
           </button>
         </div>
 
@@ -79,7 +79,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
           {query.length === 0 ? (
             <div className="space-y-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                <div className="flex items-center gap-2 text-black/90 text-[10px] font-black uppercase tracking-[0.2em]">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   <span>AI Recommended Actions</span>
                 </div>
@@ -96,7 +96,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
                       </div>
                       <div>
                         <span className="text-sm font-black text-[var(--foreground)] block">{item.title}</span>
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{item.desc}</span>
+                        <span className="text-[10px] text-black/90 font-bold uppercase tracking-widest">{item.desc}</span>
                       </div>
                     </button>
                   ))}
@@ -104,14 +104,14 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                <div className="flex items-center gap-2 text-black/90 text-[10px] font-black uppercase tracking-[0.2em]">
                   <Command className="w-3.5 h-3.5" />
                   <span>Recent Knowledge</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {["Marketing Trends 2024", "Social Media ROI", "AI Copywriting Tools", "PR Strategy"].map((item) => (
                     <button key={item} className="flex items-center gap-3 p-3 text-left hover:bg-[var(--muted)] rounded-xl transition-colors">
-                      <Search className="w-4 h-4 text-zinc-400" />
+                      <Search className="w-4 h-4 text-black/90" />
                       <span className="text-sm font-medium text-[var(--foreground)]">{item}</span>
                     </button>
                   ))}
@@ -139,10 +139,10 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
         </div>
 
         <div className="bg-[var(--muted)]/50 p-4 border-t border-[var(--border)] flex justify-between items-center">
-          <p className="text-[10px] text-zinc-400">Press Esc to close</p>
+          <p className="text-[10px] text-black/90">Press Esc to close</p>
           <div className="flex gap-4">
              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-zinc-500">Powered by Rusability AI</span>
+                <span className="text-[10px] text-black/90">Powered by Rusability AI</span>
              </div>
           </div>
         </div>

@@ -78,18 +78,18 @@ export default function AdminDashboard() {
                 className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-bold transition-all group relative overflow-hidden ${
                   activeTab === tab.id
                     ? "bg-hig-blue text-white shadow-xl shadow-hig-blue/20"
-                    : "text-zinc-500 hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+                    : "text-black/90 hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
                 }`}
               >
-                <tab.icon className={`w-5 h-5 relative z-10 ${activeTab === tab.id ? "text-white scale-110" : "text-zinc-400 group-hover:text-hig-blue group-hover:scale-110"} transition-all`} />
+                <tab.icon className={`w-5 h-5 relative z-10 ${activeTab === tab.id ? "text-white scale-110" : "text-black/90 group-hover:text-hig-blue group-hover:scale-110"} transition-all`} />
                 <span className="relative z-10">{tab.label}</span>
                 {activeTab === tab.id && <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/10" />}
               </button>
             ))}
           </div>
 
-          <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800">
-             <button className="flex items-center gap-3 text-zinc-400 hover:text-rose-500 text-[10px] font-black uppercase tracking-widest px-5 py-4 transition-all hover:translate-x-1">
+          <div className="pt-8 border-t border-black/5 dark:border-black/5">
+             <button className="flex items-center gap-3 text-black/90 hover:text-rose-500 text-[10px] font-black uppercase tracking-widest px-5 py-4 transition-all hover:translate-x-1">
                 <Trash2 className="w-4 h-4" /> Reset Environment
              </button>
           </div>
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
                         className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                           activeAnalyticsSubTab === sub
                           ? "bg-[var(--card-bg-solid)] text-hig-blue shadow-lg"
-                          : "text-zinc-400 hover:text-[var(--foreground)]"
+                          : "text-black/90 hover:text-[var(--foreground)]"
                         }`}
                       >
                         {sub}
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
                        </div>
                        <div className="space-y-1">
                           <p className="text-4xl font-black tracking-tighter text-[var(--foreground)]">{stat.val}</p>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{stat.label}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-black/90">{stat.label}</p>
                        </div>
                     </div>
                   ))}
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
                         </h3>
                         <div className="flex items-center gap-2">
                            <span className="w-2 h-2 rounded-full bg-hig-blue animate-pulse" />
-                           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Live Stream</span>
+                           <span className="text-[10px] font-black uppercase tracking-widest text-black/90">Live Stream</span>
                         </div>
                      </div>
                      <div className="flex-1 flex items-end gap-4 pb-8">
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                              <div style={{ height: `${h}%` }} className="w-full bg-hig-blue/40 group-hover:bg-hig-blue transition-all duration-500 rounded-t-[20px] relative">
                                 <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-t from-transparent to-white/10 rounded-t-[20px]" />
                              </div>
-                             <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                             <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-white px-3 py-1.5 rounded-xl text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                {h}k
                              </div>
                           </div>
@@ -188,15 +188,15 @@ export default function AdminDashboard() {
                           { name: "Sarah Jenkins", views: "62k", engagement: "8.1%", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956" },
                           { name: "David Chen", views: "54k", engagement: "7.8%", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" },
                         ].map((author, i) => (
-                          <div key={i} className="flex items-center gap-4 group cursor-pointer p-2 rounded-2xl transition-all border border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:border-zinc-100 dark:hover:border-zinc-800">
-                             <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-white dark:border-zinc-800 shadow-lg group-hover:scale-110 transition-transform">
+                          <div key={i} className="flex items-center gap-4 group cursor-pointer p-2 rounded-2xl transition-all border border-transparent hover:bg-white dark:hover:bg-white hover:border-black/5 dark:hover:border-black/5">
+                             <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-white dark:border-black/5 shadow-lg group-hover:scale-110 transition-transform">
                                 <Image src={`${author.img}?auto=format&fit=crop&q=80&w=100`} alt={author.name} fill className="object-cover" />
                              </div>
                              <div className="flex-1">
                                 <p className="font-black text-sm text-[var(--foreground)]">{author.name}</p>
-                                <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">{author.views} Views • {author.engagement} Eng</p>
+                                <p className="text-[10px] text-black/90 font-black uppercase tracking-widest">{author.views} Views • {author.engagement} Eng</p>
                              </div>
-                             <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover:text-hig-blue group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                             <ArrowUpRight className="w-4 h-4 text-black/80 group-hover:text-hig-blue group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
                           </div>
                         ))}
                      </div>
@@ -223,9 +223,9 @@ export default function AdminDashboard() {
                              <div key={i} className="w-6 h-6 rounded-full bg-[var(--background)] border-2 border-[var(--border)]" />
                            ))}
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">3 AI Agents Active</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-black/90">3 AI Agents Active</span>
                      </div>
-                     <button className="hig-button-primary bg-zinc-900 dark:bg-zinc-100 dark:text-black">Sync Core</button>
+                     <button className="hig-button-primary bg-white dark:bg-white dark:text-black">Sync Core</button>
                   </div>
                </header>
 
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
                      <div className="hig-card overflow-hidden border-[var(--border)]">
                         <div className="bg-[var(--muted)] p-6 flex items-center justify-between border-b border-[var(--border)]">
                            <div className="flex items-center gap-4 flex-1">
-                              <SearchCode className="w-5 h-5 text-zinc-400" />
+                              <SearchCode className="w-5 h-5 text-black/90" />
                               <input placeholder="Search audit logs by signature..." className="bg-transparent border-none outline-none text-sm w-full font-medium text-[var(--foreground)]" />
                            </div>
                            <div className="flex items-center gap-2">
@@ -262,15 +262,15 @@ export default function AdminDashboard() {
                                          <span className="font-black text-sm text-[var(--foreground)]">{log.user}</span>
                                          <span className="px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 text-[9px] font-black uppercase tracking-widest">{log.reason}</span>
                                       </div>
-                                      <p className="text-[10px] text-zinc-400 font-black uppercase tracking-[0.2em]">Confidence {log.confidence} • Signature Verified</p>
+                                      <p className="text-[10px] text-black/90 font-black uppercase tracking-[0.2em]">Confidence {log.confidence} • Signature Verified</p>
                                    </div>
                                 </div>
                                 <div className="flex items-center gap-8">
                                    <div className="text-right">
                                       <span className="text-[11px] font-black uppercase text-[var(--foreground)] block mb-1">{log.status}</span>
-                                      <span className="text-[10px] text-zinc-400 font-bold">{log.time}</span>
+                                      <span className="text-[10px] text-black/90 font-bold">{log.time}</span>
                                    </div>
-                                   <button className="p-3 rounded-2xl bg-[var(--background)] text-zinc-400 hover:text-hig-blue transition-all border border-[var(--border)]"><MoreVertical className="w-5 h-5" /></button>
+                                   <button className="p-3 rounded-2xl bg-[var(--background)] text-black/90 hover:text-hig-blue transition-all border border-[var(--border)]"><MoreVertical className="w-5 h-5" /></button>
                                 </div>
                              </div>
                            ))}
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="space-y-10">
-                     <div className="hig-card p-10 space-y-10 bg-zinc-950 text-white border-zinc-800 shadow-2xl relative overflow-hidden group">
+                     <div className="hig-card p-10 space-y-10 bg-white dark:bg-white text-black dark:text-white border-black/5 dark:border-black/5 shadow-none border-b-2 relative overflow-hidden group">
                         <div className="relative z-10 space-y-10">
                            <div className="flex items-center gap-4">
                               <ShieldAlert className="w-8 h-8 text-rose-500" />
@@ -292,18 +292,18 @@ export default function AdminDashboard() {
                                 { t: "Shadowban Bots", v: "Active" },
                                 { t: "NSFW Shield", v: "Max Level" }
                               ].map((p, i) => (
-                                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 group/item transition-all hover:bg-white/10">
-                                   <span className="text-xs font-black uppercase tracking-widest text-white/70 group-hover/item:text-white transition-colors">{p.t}</span>
+                                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 group/item transition-all hover:bg-white">
+                                   <span className="text-xs font-black uppercase tracking-widest text-black/70 dark:text-white/70 group-hover/item:text-black dark:group-hover/item:text-white transition-colors">{p.t}</span>
                                    <div className="flex items-center gap-3">
-                                      <span className="text-[10px] font-bold text-emerald-500">{p.v}</span>
-                                      <div className="w-8 h-4 bg-emerald-500 rounded-full flex items-center px-0.5">
-                                         <div className="w-3 h-3 bg-white rounded-full ml-auto" />
+                                      <span className="text-[10px] font-black text-emerald-600">{p.v}</span>
+                                      <div className="w-8 h-4 bg-emerald-500 rounded-full flex items-center px-0.5 shadow-inner">
+                                         <div className="w-3 h-3 bg-white rounded-full ml-auto shadow-sm" />
                                       </div>
                                    </div>
                                 </div>
                               ))}
                            </div>
-                           <button className="w-full hig-button-primary bg-white text-black py-4 text-[10px] hover:scale-105 transition-transform">Update Global Protocol</button>
+                           <button className="w-full hig-button-primary bg-black text-white dark:bg-white dark:text-black py-4 text-[10px] hover:scale-105 transition-transform">Update Global Protocol</button>
                         </div>
                         <ShieldCheck className="absolute -left-10 -bottom-10 w-40 h-40 text-white/5 -rotate-12 group-hover:scale-125 transition-transform duration-1000" />
                      </div>
@@ -325,7 +325,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex gap-4">
                      <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/90" />
                         <input
                            value={searchQuery}
                            onChange={(e) => setSearchQuery(e.target.value)}
@@ -343,7 +343,7 @@ export default function AdminDashboard() {
                <div className="hig-card overflow-hidden border-[var(--border)] shadow-xl">
                   <table className="w-full text-left border-collapse">
                      <thead>
-                        <tr className="bg-[var(--muted)]/50 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+                        <tr className="bg-[var(--muted)]/50 text-[10px] font-black uppercase tracking-[0.3em] text-black/90">
                            <th className="px-10 py-8 border-b border-[var(--border)]">Entity Profile</th>
                            <th className="px-10 py-8 border-b border-[var(--border)]">Authorization</th>
                            <th className="px-10 py-8 border-b border-[var(--border)]">Connection</th>
@@ -356,12 +356,12 @@ export default function AdminDashboard() {
                           <tr key={i} className="group hover:bg-[var(--muted)] transition-all">
                              <td className="px-10 py-8">
                                 <div className="flex items-center gap-5">
-                                   <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-white dark:border-zinc-800 shadow-lg group-hover:scale-110 transition-transform">
+                                   <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-white dark:border-black/5 shadow-lg group-hover:scale-110 transition-transform">
                                       <Image src={`${user.img}?auto=format&fit=crop&q=80&w=100`} alt={user.name} fill className="object-cover" />
                                    </div>
                                    <div>
                                       <p className="font-black text-sm text-zinc-900 dark:text-zinc-100">{user.name}</p>
-                                      <p className="text-xs text-zinc-400 font-medium">{user.email}</p>
+                                      <p className="text-xs text-black/90 font-medium">{user.email}</p>
                                    </div>
                                 </div>
                              </td>
@@ -371,7 +371,7 @@ export default function AdminDashboard() {
                                    className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border transition-all active:scale-95 ${
                                      user.role === 'pro'
                                      ? "bg-amber-400 text-white border-amber-500 shadow-lg shadow-amber-400/20"
-                                     : "bg-[var(--muted)] border-[var(--border)] text-zinc-400 hover:border-amber-400 hover:text-amber-500"
+                                     : "bg-[var(--muted)] border-[var(--border)] text-black/90 hover:border-amber-400 hover:text-amber-500"
                                    }`}
                                 >
                                    {user.role} Authorization
@@ -379,22 +379,22 @@ export default function AdminDashboard() {
                              </td>
                              <td className="px-10 py-8">
                                 <div className="flex items-center gap-3">
-                                   <span className={`w-2 h-2 rounded-full ${user.active === 'Now' ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-300'}`} />
-                                   <span className="text-[11px] font-bold text-zinc-500">{user.active}</span>
+                                   <span className={`w-2 h-2 rounded-full ${user.active === 'Now' ? 'bg-emerald-500 animate-pulse' : 'bg-white'}`} />
+                                   <span className="text-[11px] font-bold text-black/90">{user.active}</span>
                                 </div>
                              </td>
                              <td className="px-10 py-8">
                                 <div className="flex items-center gap-4">
-                                   <div className="flex-1 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden min-w-[120px]">
+                                   <div className="flex-1 h-1.5 bg-white dark:bg-white rounded-full overflow-hidden min-w-[120px]">
                                       <div style={{ width: `${user.score}%` }} className={`h-full rounded-full transition-all duration-1000 ${user.score > 80 ? 'bg-emerald-500' : 'bg-hig-blue'}`} />
                                    </div>
-                                   <span className="text-[11px] font-black text-zinc-400">{user.score}</span>
+                                   <span className="text-[11px] font-black text-black/90">{user.score}</span>
                                 </div>
                              </td>
                              <td className="px-10 py-8 text-right">
                                 <div className="flex items-center justify-end gap-3">
-                                   <button className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue hover:shadow-lg transition-all"><Settings2 className="w-5 h-5" /></button>
-                                   <button className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-rose-500 hover:shadow-lg transition-all"><Flag className="w-5 h-5" /></button>
+                                   <button className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue hover:shadow-lg transition-all"><Settings2 className="w-5 h-5" /></button>
+                                   <button className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-rose-500 hover:shadow-lg transition-all"><Flag className="w-5 h-5" /></button>
                                 </div>
                              </td>
                           </tr>
@@ -433,11 +433,11 @@ export default function AdminDashboard() {
                               <div className="flex items-center justify-between">
                                  <div>
                                     <h4 className="font-black text-sm text-[var(--foreground)]">{item.label}</h4>
-                                    <p className="text-xs text-zinc-400 font-medium">{item.desc}</p>
+                                    <p className="text-xs text-black/90 font-medium">{item.desc}</p>
                                  </div>
                                  <span className="text-lg font-black text-hig-blue">{item.value}{item.unit || ""}</span>
                               </div>
-                              <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                              <div className="h-1.5 w-full bg-white dark:bg-white rounded-full overflow-hidden">
                                  <div
                                     style={{ width: `${(item.value / (item.unit === '%' ? 100 : item.value * 1.2)) * 100}%` }}
                                     className="h-full bg-hig-blue rounded-full transition-all group-hover:brightness-110"
@@ -468,7 +468,7 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="hig-card p-10 border-[var(--border)] space-y-6">
-                         <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Recent Audit Logs</h4>
+                         <h4 className="text-[10px] font-black uppercase tracking-widest text-black/90">Recent Audit Logs</h4>
                          <div className="space-y-4">
                             {[
                               { event: "Global SEO Re-index", time: "2m ago" },
@@ -477,11 +477,11 @@ export default function AdminDashboard() {
                             ].map((log, i) => (
                               <div key={i} className="flex items-center justify-between border-b border-[var(--border)] pb-3 last:border-0">
                                  <span className="text-xs font-bold text-[var(--foreground)]">{log.event}</span>
-                                 <span className="text-[10px] text-zinc-400 font-bold">{log.time}</span>
+                                 <span className="text-[10px] text-black/90 font-bold">{log.time}</span>
                               </div>
                             ))}
                          </div>
-                         <button className="w-full py-3 bg-[var(--muted)] text-zinc-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-hig-blue transition-colors">View All Logs</button>
+                         <button className="w-full py-3 bg-[var(--muted)] text-black/90 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-hig-blue transition-colors">View All Logs</button>
                       </div>
                    </div>
                 </div>

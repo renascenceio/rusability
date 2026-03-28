@@ -18,7 +18,7 @@ export default function NewsPage() {
         <h1 className="text-4xl md:text-7xl font-black tracking-tight leading-tight">
           Industry News & Real-time Insights.
         </h1>
-        <p className="text-xl text-zinc-500 font-medium leading-relaxed">
+        <p className="text-xl text-black/90 font-medium leading-relaxed">
           Stay ahead of the curve with AI-generated industry briefings and professional analysis.
         </p>
       </header>
@@ -27,13 +27,13 @@ export default function NewsPage() {
         {/* News Feed */}
         <div className="space-y-16">
           <section className="space-y-10">
-            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-black/5 pb-6">
                <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
                   <Flame className="w-6 h-6 text-orange-500" />
                   Breaking Now
                </h2>
                <div className="flex items-center gap-4">
-                  <button className="text-xs font-bold text-zinc-400 flex items-center gap-2 hover:text-hig-blue transition-colors">
+                  <button className="text-xs font-bold text-black/90 flex items-center gap-2 hover:text-hig-blue transition-colors">
                      <Filter className="w-4 h-4" /> Filter By Topic
                   </button>
                </div>
@@ -41,14 +41,14 @@ export default function NewsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                {mainNews.map((news) => (
-                  <div key={news.id} className="hig-card p-10 bg-zinc-50 dark:bg-zinc-900/40 border-zinc-100 dark:border-zinc-800 group cursor-pointer relative overflow-hidden">
+                  <div key={news.id} className="hig-card p-10 bg-white dark:bg-white/40 border-black/5 dark:border-black/5 group cursor-pointer relative overflow-hidden">
                      <div className="relative z-10 space-y-6">
                         <div className="flex items-center justify-between">
                            <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{news.category}</span>
-                           <span className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m ago</span>
+                           <span className="flex items-center gap-2 text-black/90 text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m ago</span>
                         </div>
                         <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-zinc-900 dark:text-white">{news.title}</h3>
-                        <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                        <p className="text-black/90 text-sm leading-relaxed font-medium">
                            Recent developments in {news.category} are signaling a major shift for enterprise marketers. Analysts suggest immediate action.
                         </p>
                         <div className="pt-4 flex items-center gap-3">
@@ -63,22 +63,22 @@ export default function NewsPage() {
           </section>
 
           <section className="space-y-10">
-            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-black/5 pb-6">
                <h2 className="text-2xl font-black tracking-tight">Recent Briefings</h2>
             </div>
 
             <div className="space-y-8">
                {regularNews.map(news => (
-                  <div key={news.id} className="flex flex-col md:flex-row gap-8 group cursor-pointer pb-8 border-b border-zinc-50 dark:border-zinc-900 last:border-0">
+                  <div key={news.id} className="flex flex-col md:flex-row gap-8 group cursor-pointer pb-8 border-b border-black/5 dark:border-black/5 last:border-0">
                      <div className="flex-1 space-y-4 pt-1">
                         <div className="flex items-center gap-3">
                            <span className="text-[10px] font-black uppercase text-hig-blue tracking-widest">{news.category}</span>
-                           <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h ago</span>
+                           <span className="text-[10px] text-black/90 font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h ago</span>
                         </div>
                         <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug text-zinc-900 dark:text-white">{news.title}</h3>
-                        <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
+                        <p className="text-black/90 text-sm leading-relaxed line-clamp-2">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
                      </div>
-                     <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative shrink-0">
+                     <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-white dark:bg-white relative shrink-0">
                         <div className="absolute inset-0 flex items-center justify-center opacity-20"><Zap className="w-12 h-12" /></div>
                      </div>
                   </div>
@@ -89,8 +89,8 @@ export default function NewsPage() {
 
         {/* Sidebar: Articles in News */}
         <aside className="space-y-16">
-          <div className="hig-card p-8 sticky top-24 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl border-white/20">
-            <div className="flex items-center gap-2 mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
+          <div className="hig-card p-8 sticky top-24 bg-white/40 dark:bg-white/40 backdrop-blur-3xl border-white/20">
+            <div className="flex items-center gap-2 mb-8 border-b border-black/5 dark:border-black/5 pb-4">
               <TrendingUp className="w-5 h-5 text-hig-blue" />
               <h3 className="font-black text-xs uppercase tracking-[0.1em] text-zinc-900 dark:text-white">Deep Dives</h3>
             </div>
@@ -112,14 +112,14 @@ export default function NewsPage() {
                ))}
             </div>
 
-            <div className="mt-10 pt-8 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="mt-10 pt-8 border-t border-black/5 dark:border-black/5">
                <Link href="/" className="hig-button-primary w-full text-center block text-sm">
                   Full Magazine Feed
                </Link>
             </div>
           </div>
 
-          <div className="hig-card p-8 bg-zinc-900 dark:bg-zinc-950 text-white space-y-6">
+          <div className="hig-card p-8 bg-white dark:bg-white text-white space-y-6">
              <div className="flex items-center gap-2 text-hig-blue font-black text-[10px] uppercase tracking-widest">
                <Sparkles className="w-4 h-4" />
                <span>AI COPILOT</span>
