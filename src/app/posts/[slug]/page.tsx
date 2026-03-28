@@ -74,7 +74,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
       <header className="mb-16 text-left max-w-5xl mx-auto lg:mx-0">
         <div className="flex items-center gap-4 mb-10 text-hig-blue font-bold text-xs uppercase tracking-widest">
           <span className="bg-hig-blue/10 px-3 py-1.5 rounded-full">{displayData.category}</span>
-          <span className="text-black/90">•</span>
+          <span className="text-[var(--foreground)]">•</span>
           <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> {displayData.time}</span>
         </div>
 
@@ -84,28 +84,28 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
 
         <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-white dark:bg-white flex items-center justify-center border-2 border-white dark:border-black/5 shadow-xl">
-                 <User className="w-7 h-7 text-black/90" />
+              <div className="w-14 h-14 rounded-full bg-white dark:bg-white flex items-center justify-center border-2 border-white dark:border-[var(--border)] shadow-xl">
+                 <User className="w-7 h-7 text-[var(--foreground)]" />
               </div>
               <div className="space-y-0.5">
-                 <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-none">{displayData.author}</p>
-                 <p className="text-sm text-black/90 font-medium tracking-tight">Chief Content Strategist</p>
+                 <p className="text-lg font-bold text-[var(--foreground)] dark:text-[var(--foreground)] leading-none">{displayData.author}</p>
+                 <p className="text-sm text-[var(--foreground)] font-medium tracking-tight">Chief Content Strategist</p>
               </div>
            </div>
 
-           <div className="hidden md:block h-10 w-px bg-white dark:border-black/5" />
+           <div className="hidden md:block h-10 w-px bg-white dark:border-[var(--border)]" />
 
            <div className="flex items-center gap-4">
               <button className="hig-button-primary py-2 px-6 text-sm flex items-center gap-2">Follow</button>
               <div className="flex gap-2">
-                 <button className="p-3 text-black/90 hover:text-hig-blue transition-colors rounded-full hover:bg-white dark:hover:bg-white"><Share2 className="w-5 h-5" /></button>
-                 <button className="p-3 text-black/90 hover:text-hig-blue transition-colors rounded-full hover:bg-white dark:hover:bg-white"><Bookmark className="w-5 h-5" /></button>
+                 <button className="p-3 text-[var(--foreground)] hover:text-hig-blue transition-colors rounded-full hover:bg-white dark:hover:bg-white"><Share2 className="w-5 h-5" /></button>
+                 <button className="p-3 text-[var(--foreground)] hover:text-hig-blue transition-colors rounded-full hover:bg-white dark:hover:bg-white"><Bookmark className="w-5 h-5" /></button>
               </div>
            </div>
         </div>
       </header>
 
-      <div className="relative mb-20 rounded-[40px] overflow-hidden shadow-2xl h-[400px] md:h-[600px] border border-black/5 dark:border-black/5">
+      <div className="relative mb-20 rounded-[40px] overflow-hidden shadow-2xl h-[400px] md:h-[600px] border border-[var(--border)] dark:border-[var(--border)]">
          <Image
            src={displayData.image}
            alt={displayData.title}
@@ -120,28 +120,28 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
          <aside className="hidden lg:block sticky top-32 h-fit space-y-8">
             <div className="flex flex-col items-start gap-8">
                <div className="flex flex-col items-center gap-2">
-                  <button className="p-4 text-black/90 hover:text-rose-500 transition-colors rounded-full bg-white dark:bg-white shadow-hig border border-black/5 dark:border-black/5 group">
+                  <button className="p-4 text-[var(--foreground)] hover:text-rose-500 transition-colors rounded-full bg-white dark:bg-white shadow-hig border border-[var(--border)] dark:border-[var(--border)] group">
                     <Heart className="w-6 h-6 group-hover:fill-rose-500" />
                   </button>
-                  <span className="text-[10px] font-black text-black/90 uppercase tracking-widest">1.2K</span>
+                  <span className="text-[10px] font-black text-[var(--foreground)] uppercase tracking-widest">1.2K</span>
                </div>
 
                <div className="flex flex-col items-center gap-2">
-                  <button className="p-4 text-black/90 hover:text-hig-blue transition-colors rounded-full bg-white dark:bg-white shadow-hig border border-black/5 dark:border-black/5 group">
+                  <button className="p-4 text-[var(--foreground)] hover:text-hig-blue transition-colors rounded-full bg-white dark:bg-white shadow-hig border border-[var(--border)] dark:border-[var(--border)] group">
                     <MessageCircle className="w-6 h-6" />
                   </button>
-                  <span className="text-[10px] font-black text-black/90 uppercase tracking-widest">48</span>
+                  <span className="text-[10px] font-black text-[var(--foreground)] uppercase tracking-widest">48</span>
                </div>
             </div>
          </aside>
 
          {/* Middle: Content */}
          <article className="flex-1 space-y-10 max-w-2xl mx-auto lg:mx-0">
-            <p className="text-xl md:text-2xl font-medium leading-relaxed text-zinc-900 dark:text-zinc-100 italic border-l-4 border-hig-blue pl-8 py-2">
+            <p className="text-xl md:text-2xl font-medium leading-relaxed text-[var(--foreground)] dark:text-[var(--foreground)] italic border-l-4 border-hig-blue pl-8 py-2">
               The era of mass marketing is ending. AI is not just another tool; it&apos;s the bridge between raw data and hyper-personalized customer experiences.
             </p>
 
-            <p className="text-zinc-900 dark:text-zinc-100">
+            <p className="text-[var(--foreground)] dark:text-[var(--foreground)]">
               In the rapidly evolving landscape of digital marketing, the integration of artificial intelligence (AI) has shifted from a futuristic concept to a present-day necessity. The ability of machine learning algorithms to process vast datasets in real-time is enabling brands to deliver content that resonates on a deeply individual level.
             </p>
 
@@ -158,13 +158,13 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
               }}
             />
 
-            <h2 className="text-3xl font-bold tracking-tight pt-10 text-zinc-900 dark:text-zinc-100">The Algorithmic Approach to Empathy</h2>
+            <h2 className="text-3xl font-bold tracking-tight pt-10 text-[var(--foreground)] dark:text-[var(--foreground)]">The Algorithmic Approach to Empathy</h2>
 
-            <p className="text-zinc-900 dark:text-zinc-100">
+            <p className="text-[var(--foreground)] dark:text-[var(--foreground)]">
               One of the most profound impacts of AI in marketing is its role in sentiment analysis and emotional intelligence. By monitoring social signals and engagement patterns, AI engines can now predict the emotional state of a user and adjust the tone of the messaging accordingly. This &quot;algorithmic empathy&quot; is what separates modern personalization from the basic &quot;First Name&quot; tags of the past decade.
             </p>
 
-            <div className="bg-white dark:bg-white p-12 rounded-[32px] border border-black/5 dark:border-black/5 space-y-6">
+            <div className="bg-white dark:bg-white p-12 rounded-[32px] border border-[var(--border)] dark:border-[var(--border)] space-y-6">
                <h3 className="text-xl font-black uppercase tracking-widest text-hig-blue">Key Insights for 2024</h3>
                <ul className="space-y-4">
                   {[
@@ -174,7 +174,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
                   ].map((item, i) => (
                     <li key={i} className="flex gap-4 items-start">
                        <span className="w-6 h-6 rounded-full bg-hig-blue text-white flex items-center justify-center shrink-0 font-bold text-[10px]">{i+1}</span>
-                       <span className="text-lg font-medium text-zinc-700 dark:text-black/80 leading-tight">{item}</span>
+                       <span className="text-lg font-medium text-[var(--foreground)] dark:text-[var(--foreground)] leading-tight">{item}</span>
                     </li>
                   ))}
                </ul>
@@ -182,7 +182,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
 
             {/* Another Injected Content: Multi-article suggest */}
             <div className="space-y-6 pt-12">
-               <h4 className="text-xs font-black uppercase tracking-widest text-black/90">Related Briefings</h4>
+               <h4 className="text-xs font-black uppercase tracking-widest text-[var(--foreground)]">Related Briefings</h4>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {ARTICLES.slice(1, 3).map(a => (
                      <ArticlePlugin
@@ -205,7 +205,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
               As we move further into 2024, the challenge for marketers will be balancing the efficiency of AI with the authenticity that human oversight provides. The brands that succeed will be those that use AI to enhance human creativity, not replace it.
             </p>
 
-            <div className="pt-20 border-t border-black/5 dark:border-black/5 space-y-12">
+            <div className="pt-20 border-t border-[var(--border)] dark:border-[var(--border)] space-y-12">
                <h3 className="text-2xl font-bold tracking-tight">More from {displayData.author}</h3>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {(authorArticles.length > 0 ? authorArticles : ARTICLES.slice(3, 5)).map(a => (
@@ -213,11 +213,11 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
                         <div className="space-y-4">
                            <div className="flex items-center gap-3 text-xs text-hig-blue font-black uppercase tracking-widest">
                               <span>{a.category}</span>
-                              <span className="text-black/90">•</span>
+                              <span className="text-[var(--foreground)]">•</span>
                               <span>{a.time}</span>
                            </div>
                            <h4 className="text-xl font-bold group-hover:text-hig-blue transition-colors leading-tight">{a.title}</h4>
-                           <p className="text-sm text-black/90 leading-relaxed line-clamp-2">{a.excerpt}</p>
+                           <p className="text-sm text-[var(--foreground)] leading-relaxed line-clamp-2">{a.excerpt}</p>
                            <div className="inline-flex items-center gap-2 text-sm font-bold text-hig-blue pt-4">Read Now <ArrowUpRight className="w-4 h-4" /></div>
                         </div>
                      </Link>
@@ -228,8 +228,8 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
 
          {/* Right Side: Pulse / Contextual news */}
          <aside className="space-y-12 sticky top-32 h-fit">
-            <div className="hig-card p-8 bg-white dark:bg-white/40">
-               <h4 className="text-[10px] font-black uppercase tracking-widest text-black/90 mb-8 pb-4 border-b border-black/5 dark:border-black/5 flex items-center gap-2">
+            <div className="hig-card p-8 bg-white dark:bg-transparent">
+               <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)] mb-8 pb-4 border-b border-[var(--border)] dark:border-[var(--border)] flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   Live Industry Pulse
                </h4>
@@ -239,7 +239,7 @@ export default async function PostPage(props: { params: Promise<{ slug: string }
                         <span className="text-[9px] font-black uppercase text-hig-blue tracking-tighter mb-1 block">{news.category}</span>
                         <h5 className="text-sm font-bold leading-tight group-hover:text-hig-blue transition-colors line-clamp-2">{news.title}</h5>
                         <div className="mt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                           <span className="text-[10px] text-black/90 font-bold uppercase">Briefing</span>
+                           <span className="text-[10px] text-[var(--foreground)] font-bold uppercase">Briefing</span>
                            <ChevronRight className="w-4 h-4 text-hig-blue" />
                         </div>
                      </div>

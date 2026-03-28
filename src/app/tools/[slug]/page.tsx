@@ -37,7 +37,7 @@ export default async function ToolDetailPage(props: { params: Promise<{ slug: st
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black tracking-tight">{tool.name}</h1>
-          <p className="text-xl md:text-2xl text-zinc-500 leading-relaxed font-medium max-w-3xl">
+          <p className="text-xl md:text-2xl text-[var(--foreground)] leading-relaxed font-medium max-w-3xl">
             {tool.description}
           </p>
 
@@ -67,7 +67,7 @@ export default async function ToolDetailPage(props: { params: Promise<{ slug: st
                        {i+1}
                     </div>
                     <h4 className="font-black text-xl italic">{feat.t}</h4>
-                    <p className="text-zinc-500 font-medium leading-relaxed">{feat.d}</p>
+                    <p className="text-[var(--foreground)] font-medium leading-relaxed">{feat.d}</p>
                  </div>
                ))}
             </div>
@@ -75,11 +75,11 @@ export default async function ToolDetailPage(props: { params: Promise<{ slug: st
 
          <aside className="space-y-10">
             <div className="hig-card p-10 bg-[var(--muted)]/50 border-[var(--border)]">
-               <h3 className="font-black text-xs uppercase tracking-[0.2em] text-zinc-400 mb-8 pb-4 border-b border-[var(--border)]">Pricing Context</h3>
+               <h3 className="font-black text-xs uppercase tracking-[0.2em] text-[var(--foreground)] mb-8 pb-4 border-b border-[var(--border)]">Pricing Context</h3>
                <div className="space-y-6">
                   <div className="flex items-center justify-between">
                      <span className="font-bold text-[var(--foreground)]">Basic Tier</span>
-                     <span className="text-sm font-black text-zinc-400">Free</span>
+                     <span className="text-sm font-black text-[var(--foreground)]">Free</span>
                   </div>
                   <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--background)] border border-hig-blue/20 shadow-lg shadow-hig-blue/10">
                      <span className="font-bold text-hig-blue">Pro Edition</span>
@@ -87,7 +87,7 @@ export default async function ToolDetailPage(props: { params: Promise<{ slug: st
                   </div>
                   <div className="flex items-center justify-between">
                      <span className="font-bold text-[var(--foreground)]">Enterprise</span>
-                     <span className="text-sm font-black text-zinc-400">Contact Sales</span>
+                     <span className="text-sm font-black text-[var(--foreground)]">Contact Sales</span>
                   </div>
                </div>
             </div>

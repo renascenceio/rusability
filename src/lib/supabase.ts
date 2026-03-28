@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 // This is a placeholder for future Supabase integration as requested by the user.
 // Replace with actual Supabase client initialization when moving to production.
 
@@ -42,14 +40,14 @@ export interface Tool {
 
 // Mock Supabase Client
 export const supabase = {
-  from: (table: string) => ({
-    select: (query: string = "*") => ({
-      eq: (column: string, value: string | number) => ({
+  from: (_table: string) => ({
+    select: (_query: string = "*") => ({
+      eq: (_column: string, _value: string | number) => ({
         single: async () => ({ data: null, error: null }),
-        limit: async (n: number) => ({ data: [], error: null }),
+        limit: async (_n: number) => ({ data: [], error: null }),
       }),
-      order: (column: string, { ascending }: { ascending: boolean }) => ({
-        limit: async (n: number) => ({ data: [], error: null }),
+      order: (_column: string, { ascending: _ascending }: { ascending: boolean }) => ({
+        limit: async (_n: number) => ({ data: [], error: null }),
       }),
     }),
     insert: async (data: Record<string, unknown>) => ({ data, error: null }),

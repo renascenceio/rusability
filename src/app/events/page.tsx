@@ -8,13 +8,13 @@ export default function EventsPage() {
       <header className="mb-16 flex flex-col md:flex-row items-end justify-between gap-8 md:gap-12">
         <div className="space-y-6 max-w-2xl">
           <h1 className="text-4xl md:text-5xl font-black">Industry Events</h1>
-          <p className="text-xl text-zinc-500 leading-relaxed">
+          <p className="text-xl text-[var(--foreground)] leading-relaxed">
             The most significant marketing, PR, and advertising events worldwide, gathered in one place.
           </p>
           <div className="relative group max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground)]" />
             <input
-              className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-4 pl-12 pr-6 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-hig-blue/20"
+              className="w-full bg-[var(--background)] dark:bg-[var(--background)] border-none rounded-2xl py-4 pl-12 pr-6 text-[var(--foreground)] dark:text-[var(--foreground)] focus:ring-2 focus:ring-hig-blue/20"
               placeholder="Search for events, cities or topics..."
             />
           </div>
@@ -83,7 +83,7 @@ export default function EventsPage() {
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute top-4 left-4">
-                  <span className="bg-white/90 dark:bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+                  <span className="bg-white/90 dark:bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-[var(--foreground)] dark:text-[var(--foreground)]">
                     {event.type}
                   </span>
                 </div>
@@ -91,20 +91,20 @@ export default function EventsPage() {
 
              <div className="p-8 flex-1 flex flex-col space-y-6">
                 <div className="space-y-4 flex-1">
-                   <h3 className="text-xl font-bold leading-tight text-zinc-900 dark:text-white group-hover:text-hig-blue transition-colors">
+                   <h3 className="text-xl font-bold leading-tight text-[var(--foreground)] dark:text-white group-hover:text-hig-blue transition-colors">
                      {event.title}
                    </h3>
-                   <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed line-clamp-3">
+                   <p className="text-[var(--foreground)] dark:text-[var(--foreground)] text-sm leading-relaxed line-clamp-3">
                      {event.description}
                    </p>
                 </div>
 
-                <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
-                   <div className="flex items-center gap-2.5 text-xs font-bold text-zinc-500">
+                <div className="pt-6 border-t border-[var(--border)] dark:border-[var(--border)] space-y-3">
+                   <div className="flex items-center gap-2.5 text-xs font-bold text-[var(--foreground)]">
                       <Clock className="w-4 h-4 text-hig-blue" />
                       {event.date}
                    </div>
-                   <div className="flex items-center gap-2.5 text-xs font-bold text-zinc-500">
+                   <div className="flex items-center gap-2.5 text-xs font-bold text-[var(--foreground)]">
                       <MapPin className="w-4 h-4 text-hig-blue" />
                       {event.location}
                    </div>
@@ -119,12 +119,12 @@ export default function EventsPage() {
 
         {/* Placeholder for more */}
         <div className="hig-card border-dashed p-8 flex flex-col items-center justify-center text-center space-y-6 group cursor-pointer hover:border-hig-blue/40">
-           <div className="w-16 h-16 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 transition-colors group-hover:bg-hig-blue/5">
-              <Calendar className="w-6 h-6 text-zinc-400 group-hover:text-hig-blue" />
+           <div className="w-16 h-16 rounded-full bg-[var(--background)] dark:bg-[var(--background)] flex items-center justify-center border-2 border-dashed border-[var(--border)] dark:border-[var(--border)] transition-colors group-hover:bg-hig-blue/5">
+              <Calendar className="w-6 h-6 text-[var(--foreground)] group-hover:text-hig-blue" />
            </div>
            <div className="space-y-2">
               <h4 className="font-bold text-lg">Suggest an Event</h4>
-              <p className="text-sm text-zinc-500 leading-relaxed">Know about an upcoming conference or webinar? Let us know.</p>
+              <p className="text-sm text-[var(--foreground)] leading-relaxed">Know about an upcoming conference or webinar? Let us know.</p>
            </div>
            <button className="text-sm font-bold text-hig-blue">Submit Form</button>
         </div>
