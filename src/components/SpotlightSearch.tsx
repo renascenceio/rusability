@@ -55,18 +55,18 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden"
+        className="relative w-full max-w-2xl bg-[var(--background)] rounded-3xl shadow-2xl border border-[var(--border)] overflow-hidden"
       >
-        <div className="flex items-center p-6 gap-4 border-b border-zinc-50 dark:border-zinc-800">
-          <Search className="w-6 h-6 text-zinc-300 dark:text-zinc-500" />
+        <div className="flex items-center p-6 gap-4 border-b border-[var(--border)]">
+          <Search className="w-6 h-6 text-zinc-400" />
           <input
             autoFocus
-            className="flex-1 bg-transparent border-none outline-none text-2xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-200 dark:placeholder:text-zinc-800 font-medium"
+            className="flex-1 bg-transparent border-none outline-none text-2xl text-[var(--foreground)] placeholder:text-zinc-300 font-medium"
             placeholder="Search anything..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-50 dark:bg-zinc-800 rounded-md">
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--muted)] rounded-md border border-[var(--border)]">
             <Command className="w-3 h-3 text-zinc-400" />
             <span className="text-xs font-medium text-zinc-400">K</span>
           </div>
@@ -90,12 +90,12 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
                     { title: "Draft News Briefing", desc: "Based on current trends", icon: PenTool },
                     { title: "Analyze Competitors", desc: "AI-infused pattern detection", icon: Target }
                   ].map((item) => (
-                    <button key={item.title} className="flex items-center gap-4 p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-2xl transition-all group border border-transparent hover:border-zinc-100 dark:hover:border-zinc-700">
+                    <button key={item.title} className="flex items-center gap-4 p-4 text-left hover:bg-[var(--muted)] rounded-2xl transition-all group border border-transparent hover:border-[var(--border)]">
                       <div className="w-10 h-10 rounded-xl bg-hig-blue/5 flex items-center justify-center text-hig-blue group-hover:scale-110 transition-transform">
                         <item.icon className="w-5 h-5" />
                       </div>
                       <div>
-                        <span className="text-sm font-black text-zinc-900 dark:text-zinc-100 block">{item.title}</span>
+                        <span className="text-sm font-black text-[var(--foreground)] block">{item.title}</span>
                         <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{item.desc}</span>
                       </div>
                     </button>
@@ -110,9 +110,9 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {["Marketing Trends 2024", "Social Media ROI", "AI Copywriting Tools", "PR Strategy"].map((item) => (
-                    <button key={item} className="flex items-center gap-3 p-3 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+                    <button key={item} className="flex items-center gap-3 p-3 text-left hover:bg-[var(--muted)] rounded-xl transition-colors">
                       <Search className="w-4 h-4 text-zinc-400" />
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{item}</span>
+                      <span className="text-sm font-medium text-[var(--foreground)]">{item}</span>
                     </button>
                   ))}
                 </div>
@@ -121,12 +121,12 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
           ) : (
             <div className="space-y-2">
               {suggestions.map((suggestion) => (
-                <button key={suggestion} className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl group transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
+                <button key={suggestion} className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--muted)] rounded-2xl group transition-all border border-transparent hover:border-[var(--border)]">
                   <div className="flex items-center gap-4">
                     <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center text-amber-500">
                        <Sparkles className="w-4 h-4" />
                     </div>
-                    <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{suggestion}</span>
+                    <span className="text-sm font-bold text-[var(--foreground)]">{suggestion}</span>
                   </div>
                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                      <span className="text-[10px] font-black uppercase tracking-widest text-hig-blue">Ask AI</span>
@@ -138,7 +138,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
           )}
         </div>
 
-        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
+        <div className="bg-[var(--muted)]/50 p-4 border-t border-[var(--border)] flex justify-between items-center">
           <p className="text-[10px] text-zinc-400">Press Esc to close</p>
           <div className="flex gap-4">
              <div className="flex items-center gap-1">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Image as ImageIcon, Send, Sparkles, X, ChevronDown, Check, Type, Plus, Wand2, Eye } from "lucide-react";
+import { Image as ImageIcon, Send, Sparkles, X, ChevronDown, Check, Type, Plus, Wand2, Eye, Bold, Italic, Link as LinkIcon, List, Quote } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -57,41 +57,45 @@ export default function EditorPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 md:py-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header className="flex items-center justify-between mb-16 border-b border-zinc-100 dark:border-zinc-800 pb-8 sticky top-0 z-30 bg-white/80 dark:bg-black/80 backdrop-blur-xl -mx-6 px-6 pt-12">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors text-zinc-400 hover:text-hig-blue">
-            <X className="w-6 h-6" />
-          </Link>
-          <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Editing Perspective</span>
-            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Draft saved at 12:42 PM</span>
+      <header className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4">
+        <div className="bg-[var(--card-bg)] backdrop-blur-3xl border border-[var(--border)] rounded-[32px] p-3 shadow-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="p-3 rounded-2xl hover:bg-rose-500/10 text-zinc-400 hover:text-rose-500 transition-all active:scale-90">
+              <X className="w-6 h-6" />
+            </Link>
+            <div className="h-8 w-px bg-[var(--border)] mx-1" />
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-hig-blue">Editing Perspective</span>
+              <span className="text-[11px] font-bold text-zinc-400">Draft saved at 12:42 PM</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 px-6 py-3 text-sm font-black uppercase tracking-widest text-zinc-500 hover:text-hig-blue transition-all active:scale-95">
+              <Eye className="w-5 h-5" /> Preview
+            </button>
+            <button
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className={`hig-button-primary px-8 py-3 text-sm flex items-center gap-3 transition-all shadow-xl shadow-hig-blue/20 ${isPublishing ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+            >
+              {isPublishing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Publishing...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Publish</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          <button className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-            <Eye className="w-4 h-4" /> Preview
-          </button>
-          <button
-            onClick={handlePublish}
-            disabled={isPublishing}
-            className={`hig-button-primary px-8 py-2.5 text-sm flex items-center gap-3 transition-all ${isPublishing ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
-          >
-            {isPublishing ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Publishing...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span>Publish Briefing</span>
-              </>
-            )}
-          </button>
-        </div>
       </header>
+
+      <div className="h-20" /> {/* Spacer for fixed header */}
 
       <div className="space-y-16">
         {/* Functional Image Uploader */}
@@ -184,21 +188,43 @@ export default function EditorPage() {
 
           {/* Real Textarea for Content */}
           <div className="relative min-h-[600px] pt-10 group/content">
-            <div className="absolute top-0 left-0 -translate-x-20 translate-y-10 opacity-0 group-hover/content:opacity-100 transition-all duration-500">
-               <div className="flex flex-col gap-4">
+            <div className="fixed left-8 top-1/2 -translate-y-1/2 z-40 hidden xl:block">
+               <div className="flex flex-col gap-3 bg-[var(--card-bg)] backdrop-blur-3xl p-2 rounded-full border border-[var(--border)] shadow-2xl">
                   <button
                     onClick={() => setContent(prev => prev + "\n\n")}
-                    className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-xl transition-all hover:scale-110 active:scale-90"
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-lg transition-all hover:scale-110 active:scale-90"
                     title="Add block"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-6 h-6" />
                   </button>
+
+                  <div className="h-px w-8 bg-[var(--border)] mx-auto my-1" />
+
                   <button
-                    onClick={() => setContent(prev => prev + "\nAI Suggestion: Improving this paragraph for better engagement...")}
-                    className="p-3 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-xl transition-all hover:scale-110 active:scale-90"
+                    onClick={() => setContent(prev => prev + "\nAI: Refining for clarity...")}
+                    className="p-4 rounded-full bg-hig-blue text-white shadow-xl shadow-hig-blue/30 transition-all hover:scale-110 active:scale-90"
                     title="AI Enhance"
                   >
-                    <Wand2 className="w-5 h-5" />
+                    <Wand2 className="w-6 h-6" />
+                  </button>
+
+                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="AI Rewrite">
+                    <Sparkles className="w-6 h-6" />
+                  </button>
+
+                  <div className="h-px w-8 bg-[var(--border)] mx-auto my-1" />
+
+                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Bold">
+                    <Bold className="w-6 h-6" />
+                  </button>
+                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Italic">
+                    <Italic className="w-6 h-6" />
+                  </button>
+                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Quote">
+                    <Quote className="w-6 h-6" />
+                  </button>
+                  <button className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Link">
+                    <LinkIcon className="w-6 h-6" />
                   </button>
                </div>
             </div>
@@ -212,19 +238,21 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {/* Improved AI Floating Toolbar - Moved to Bottom-Left */}
-      <div className="fixed bottom-6 left-6 right-6 md:right-auto md:bottom-12 md:left-12 flex items-center gap-4 z-40">
-         <div className="w-full md:w-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-3xl px-4 md:px-8 py-3 md:py-5 rounded-[24px] md:rounded-[32px] shadow-2xl border border-zinc-100 dark:border-zinc-800 flex items-center justify-between md:justify-start gap-4 md:gap-10">
-            <div className="flex items-center gap-4 md:gap-8 md:border-r border-zinc-100 dark:border-zinc-800 md:pr-10">
-               <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors"><Type className="w-5 h-5" /></button>
-               <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors font-black">B</button>
-               <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors font-black italic">I</button>
+      {/* Floating Info / Stats Toolbar */}
+      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 z-40 w-full max-w-md px-4">
+         <div className="w-full bg-[var(--card-bg)] backdrop-blur-3xl px-8 py-4 rounded-full shadow-2xl border border-[var(--border)] flex items-center justify-between">
+            <div className="flex flex-col">
+               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Word Count</span>
+               <span className="text-xs font-bold text-[var(--foreground)]">{content.split(/\s+/).filter(Boolean).length} words</span>
             </div>
-
-            <button className="flex items-center gap-3 text-hig-blue font-black text-[10px] md:text-xs uppercase tracking-widest group bg-hig-blue/5 px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl hover:bg-hig-blue/10 transition-all border border-hig-blue/10">
-               <Sparkles className="w-4 h-4 animate-pulse group-hover:scale-110 transition-transform" />
-               <span className="hidden xs:inline">AI Refine & Optimize</span>
-               <span className="xs:hidden">AI Refine</span>
+            <div className="h-8 w-px bg-[var(--border)]" />
+            <div className="flex flex-col">
+               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Read Time</span>
+               <span className="text-xs font-bold text-[var(--foreground)]">{Math.ceil(content.split(/\s+/).filter(Boolean).length / 200)} min</span>
+            </div>
+            <div className="h-8 w-px bg-[var(--border)]" />
+            <button className="p-2 rounded-full bg-hig-blue/10 text-hig-blue hover:bg-hig-blue hover:text-white transition-all">
+               <Sparkles className="w-5 h-5" />
             </button>
          </div>
       </div>
