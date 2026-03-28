@@ -1,45 +1,105 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Search, Sparkles, Command, X, ArrowRight, Zap, ShieldCheck, PenTool, Target } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import {
+  Search, Sparkles, Command, X, ArrowRight, Zap,
+  ShieldCheck, PenTool, Target, FileText, Calendar,
+  TrendingUp, Newspaper, BrainCircuit
+} from "lucide-react";
 import { motion } from "framer-motion";
+import { ARTICLES, INDUSTRY_TOOLS, EVENTS, INDUSTRY_NEWS, TRENDING } from "@/lib/data";
+import Link from "next/link";
+
+interface SearchResult {
+  id: string | number;
+  title: string;
+  category: string;
+  type: 'article' | 'tool' | 'event' | 'news' | 'ai-suggestion';
+  link: string;
+}
 
 export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        onClose();
-      }
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  const results = useMemo(() => {
+    if (!query) return [];
 
-  useEffect(() => {
-    if (query.length > 2) {
-      // Mock AI suggestions
-      const timer = setTimeout(() => {
-        setSuggestions([
-          `AI in ${query} marketing`,
-          `Trends for ${query} in 2024`,
-          `Best ${query} tools for PR`
-        ]);
-      }, 100);
-      return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => {
-        setSuggestions([]);
-      }, 0);
-      return () => clearTimeout(timer);
+    const searchResults: SearchResult[] = [];
+    const q = query.toLowerCase();
+
+    // Search Articles
+    ARTICLES.filter(a =>
+      a.title.toLowerCase().includes(q) ||
+      a.category.toLowerCase().includes(q) ||
+      a.excerpt.toLowerCase().includes(q)
+    ).slice(0, 3).forEach(a => {
+      searchResults.push({ id: `a-${a.id}`, title: a.title, category: a.category, type: 'article', link: `/posts/${a.id}` });
+    });
+
+    // Search Tools
+    INDUSTRY_TOOLS.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      t.category.toLowerCase().includes(q) ||
+      t.description.toLowerCase().includes(q)
+    ).slice(0, 2).forEach(t => {
+      searchResults.push({ id: `t-${t.id}`, title: t.name, category: t.category, type: 'tool', link: t.link });
+    });
+
+    // Search News
+    INDUSTRY_NEWS.filter(n =>
+      n.title.toLowerCase().includes(q) ||
+      n.category.toLowerCase().includes(q)
+    ).slice(0, 2).forEach(n => {
+      searchResults.push({ id: `n-${n.id}`, title: n.title, category: n.category, type: 'news', link: '/news' });
+    });
+
+    // Search Events
+    EVENTS.filter(e =>
+      e.title.toLowerCase().includes(q) ||
+      e.description.toLowerCase().includes(q) ||
+      e.location.toLowerCase().includes(q)
+    ).slice(0, 2).forEach(e => {
+      searchResults.push({ id: `e-${e.id}`, title: e.title, category: e.type, type: 'event', link: '/events' });
+    });
+
+    // AI Predictions / Smart Suggestions
+    if (q.includes('ai') || q.includes('marketing') || q.includes('strategy')) {
+      searchResults.push({
+        id: 'ai-1',
+        title: `How to implement ${query} in your workflow`,
+        category: 'AI Strategy',
+        type: 'ai-suggestion',
+        link: '#'
+      });
+      searchResults.push({
+        id: 'ai-2',
+        title: `Predictive ROI for ${query} campaigns`,
+        category: 'Analytics',
+        type: 'ai-suggestion',
+        link: '#'
+      });
     }
+
+    return searchResults;
   }, [query]);
 
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query, results.length]);
+
   if (!isOpen) return null;
+
+  const getIcon = (type: SearchResult['type']) => {
+    switch (type) {
+      case 'article': return <FileText className="w-4 h-4" />;
+      case 'tool': return <PenTool className="w-4 h-4" />;
+      case 'event': return <Calendar className="w-4 h-4" />;
+      case 'news': return <Newspaper className="w-4 h-4" />;
+      case 'ai-suggestion': return <BrainCircuit className="w-4 h-4" />;
+      default: return <Search className="w-4 h-4" />;
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
@@ -75,7 +135,7 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
           </button>
         </div>
 
-        <div className="p-4">
+        <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
           {query.length === 0 ? (
             <div className="space-y-6">
               <div className="space-y-4">
@@ -105,35 +165,62 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
 
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-[var(--foreground)] text-[10px] font-black uppercase tracking-[0.2em]">
-                  <Command className="w-3.5 h-3.5" />
-                  <span>Recent Knowledge</span>
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Trending Vibe</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {["Marketing Trends 2024", "Social Media ROI", "AI Copywriting Tools", "PR Strategy"].map((item) => (
-                    <button key={item} className="flex items-center gap-3 p-3 text-left hover:bg-[var(--muted)] rounded-xl transition-colors">
-                      <Search className="w-4 h-4 text-[var(--foreground)]" />
-                      <span className="text-sm font-medium text-[var(--foreground)]">{item}</span>
+                <div className="flex flex-wrap gap-2">
+                  {TRENDING.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setQuery(tag)}
+                      className="px-4 py-2 bg-[var(--muted)] hover:bg-hig-blue/10 hover:text-hig-blue rounded-full text-sm font-bold transition-all border border-transparent hover:border-hig-blue/20"
+                    >
+                      {tag}
                     </button>
                   ))}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              {suggestions.map((suggestion) => (
-                <button key={suggestion} className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--muted)] rounded-2xl group transition-all border border-transparent hover:border-[var(--border)]">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center text-amber-500">
-                       <Sparkles className="w-4 h-4" />
+            <div className="space-y-1">
+              {results.length > 0 ? (
+                results.map((result, index) => (
+                  <Link
+                    key={result.id}
+                    href={result.link}
+                    onClick={onClose}
+                    className={`w-full flex items-center justify-between p-4 text-left rounded-2xl group transition-all border border-transparent ${
+                      selectedIndex === index ? "bg-[var(--muted)] border-[var(--border)] shadow-sm" : "hover:bg-[var(--muted)]/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        result.type === 'ai-suggestion' ? "bg-amber-400/10 text-amber-500" : "bg-hig-blue/5 text-hig-blue"
+                      }`}>
+                         {getIcon(result.type)}
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-[var(--foreground)] block">{result.title}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]/40">{result.category} • {result.type}</span>
+                      </div>
                     </div>
-                    <span className="text-sm font-bold text-[var(--foreground)]">{suggestion}</span>
-                  </div>
-                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-hig-blue">Ask AI</span>
-                     <ArrowRight className="w-4 h-4 text-hig-blue" />
-                  </div>
-                </button>
-              ))}
+                    <div className={`flex items-center gap-3 transition-all ${selectedIndex === index ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}>
+                       <span className="text-[10px] font-black uppercase tracking-widest text-hig-blue">Open</span>
+                       <ArrowRight className="w-4 h-4 text-hig-blue" />
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="p-12 text-center space-y-4">
+                   <div className="w-16 h-16 bg-[var(--muted)] rounded-full flex items-center justify-center mx-auto">
+                      <Search className="w-8 h-8 text-[var(--foreground)]/20" />
+                   </div>
+                   <div className="space-y-1">
+                      <p className="font-black text-[var(--foreground)]">No results for &quot;{query}&quot;</p>
+                      <p className="text-sm text-[var(--foreground)]/60">Try searching for &quot;AI&quot;, &quot;SEO&quot;, or &quot;PR&quot;.</p>
+                   </div>
+                </div>
+              )}
             </div>
           )}
         </div>

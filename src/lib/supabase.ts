@@ -38,11 +38,13 @@ export interface Tool {
   link: string;
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Mock Supabase Client
 export const supabase = {
   from: (_table: string) => ({
     select: (_query: string = "*") => ({
-      eq: (_column: string, _value: string | number) => ({
+      eq: (_column: string, _value: any) => ({
         single: async () => ({ data: null, error: null }),
         limit: async (_n: number) => ({ data: [], error: null }),
       }),
@@ -50,7 +52,7 @@ export const supabase = {
         limit: async (_n: number) => ({ data: [], error: null }),
       }),
     }),
-    insert: async (data: Record<string, unknown>) => ({ data, error: null }),
-    update: async (data: Record<string, unknown>) => ({ data, error: null }),
+    insert: async (data: any) => ({ data, error: null }),
+    update: async (data: any) => ({ data, error: null }),
   }),
 };
