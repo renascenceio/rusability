@@ -44,24 +44,24 @@ export default function ProfilePage() {
     <div className="max-w-7xl mx-auto px-6 py-12 animate-in fade-in duration-700">
       <header className="mb-16 flex flex-col md:flex-row items-center gap-12">
          <div className="relative group">
-            <div className="w-32 h-32 rounded-full bg-hig-gray-100 dark:bg-zinc-800 flex items-center justify-center border-4 border-white dark:border-black shadow-xl ring-2 ring-hig-blue/10 overflow-hidden">
-               <User className="w-16 h-16 text-zinc-400 group-hover:scale-110 transition-transform" />
+            <div className="w-32 h-32 rounded-full bg-white dark:bg-white flex items-center justify-center border-4 border-white dark:border-black shadow-none ring-1 ring-black/5 overflow-hidden">
+               <User className="w-16 h-16 text-black/70 group-hover:scale-110 transition-transform" />
             </div>
-            <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-zinc-900 rounded-full shadow-lg border border-zinc-100 dark:border-zinc-800 text-hig-blue hover:scale-110 transition-transform">
+            <button className="absolute bottom-0 right-0 p-2 bg-white dark:bg-white rounded-full shadow-lg border border-black/5 dark:border-black/5 text-hig-blue hover:scale-110 transition-transform">
                <Edit3 className="w-4 h-4" />
             </button>
          </div>
          <div className="flex-1 space-y-6 text-center md:text-left">
             <div className="space-y-2">
                 <div className="flex flex-col md:flex-row items-center gap-4">
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight">{user.name}</h1>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-black dark:text-white">{user.name}</h1>
                 {isPro && (
                     <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
                     Pro Member
                     </div>
                 )}
                 </div>
-                <p className="text-xl text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed max-w-2xl">
+                <p className="text-xl text-black/90 dark:text-black/90 font-black leading-relaxed max-w-2xl">
                 {user.role}. {user.bio}
                 </p>
             </div>
@@ -71,7 +71,7 @@ export default function ProfilePage() {
                  <Settings className="w-4 h-4" />
                  Account
                </button>
-               <button className="p-3 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-hig-blue transition-colors">
+               <button className="p-3 rounded-full border border-black/5 dark:border-black/5 text-black/90 hover:text-hig-blue transition-colors">
                   <Bell className="w-5 h-5" />
                </button>
             </div>
@@ -81,16 +81,16 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,360px] gap-16">
          <section className="space-y-12">
             <div>
-               <div className="flex items-center justify-between mb-8 border-b border-zinc-100 dark:border-zinc-800">
+               <div className="flex items-center justify-between mb-8 border-b border-black/5 dark:border-black/5">
                   <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
                      {tabs.map((tab) => (
                        <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`font-bold text-sm pb-4 whitespace-nowrap transition-all border-b-2 ${
+                        className={`font-black uppercase tracking-widest text-xs pb-4 whitespace-nowrap transition-all border-b-2 ${
                             activeTab === tab.id
                             ? "text-hig-blue border-hig-blue"
-                            : "text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100"
+                            : "text-black/80 border-transparent hover:text-black dark:hover:text-zinc-100"
                         }`}
                        >
                          {tab.label}
@@ -104,20 +104,20 @@ export default function ProfilePage() {
 
                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   {activeTab === "saved" && contentMap.saved.map((article) => (
-                    <div key={article.title} className="hig-card p-6 flex items-center justify-between group bg-white dark:bg-zinc-900/50">
+                    <div key={article.title} className="hig-card p-6 flex items-center justify-between group bg-white dark:bg-white/50 border-black/5 dark:border-black/5 shadow-none hover:border-black/5">
                        <div className="space-y-2">
-                          <h3 className="font-bold text-lg group-hover:text-hig-blue transition-colors">{article.title}</h3>
-                          <div className="flex items-center gap-4 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                          <h3 className="font-black text-lg group-hover:text-hig-blue transition-colors text-black dark:text-white">{article.title}</h3>
+                          <div className="flex items-center gap-4 text-[10px] text-black/80 font-black uppercase tracking-widest">
                              <span className="text-hig-blue">{article.cat}</span>
                              <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {article.time}</span>
-                             <span className="text-zinc-300 dark:text-zinc-700">{article.date}</span>
+                             <span className="text-black/70 dark:text-zinc-700">{article.date}</span>
                           </div>
                        </div>
                        <div className="flex items-center gap-2">
                           <button className="p-3 text-rose-500 bg-rose-50 dark:bg-rose-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
                              <Trash2 className="w-4 h-4" />
                           </button>
-                          <button className="p-3 text-zinc-400 hover:text-hig-blue bg-zinc-50 dark:bg-zinc-800 rounded-xl transition-all">
+                          <button className="p-3 text-black/90 hover:text-hig-blue bg-white dark:bg-white rounded-xl transition-all">
                              <ChevronRight className="w-5 h-5" />
                           </button>
                        </div>
@@ -125,15 +125,15 @@ export default function ProfilePage() {
                   ))}
 
                   {activeTab === "drafts" && contentMap.drafts.map((article) => (
-                    <Link href="/editor" key={article.title} className="hig-card p-6 flex items-center justify-between group bg-white dark:bg-zinc-900/50">
+                    <Link href="/editor" key={article.title} className="hig-card p-6 flex items-center justify-between group bg-white dark:bg-white/50 border-black/5 dark:border-black/5 shadow-none hover:border-black/5">
                        <div className="space-y-2">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-bold text-lg group-hover:text-hig-blue transition-colors">{article.title}</h3>
+                            <h3 className="font-black text-lg group-hover:text-hig-blue transition-colors text-black dark:text-white">{article.title}</h3>
                             <span className="text-[8px] font-black uppercase bg-amber-400/10 text-amber-600 px-2 py-0.5 rounded border border-amber-400/20">{article.status}</span>
                           </div>
-                          <div className="flex items-center gap-4 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                          <div className="flex items-center gap-4 text-[10px] text-black/80 font-black uppercase tracking-widest">
                              <span className="text-hig-blue">{article.cat}</span>
-                             <span className="text-zinc-300 dark:text-zinc-700">Updated today</span>
+                             <span className="text-black/70 dark:text-zinc-700">Updated today</span>
                           </div>
                        </div>
                        <div className="p-3 text-hig-blue bg-hig-blue/5 rounded-xl transition-all group-hover:scale-110">
@@ -143,31 +143,31 @@ export default function ProfilePage() {
                   ))}
 
                   {activeTab === "published" && contentMap.published.map((article) => (
-                    <div key={article.title} className="hig-card p-6 flex items-center justify-between group bg-white dark:bg-zinc-900/50">
+                    <div key={article.title} className="hig-card p-6 flex items-center justify-between group bg-white dark:bg-white/50 border-black/5 dark:border-black/5 shadow-none hover:border-black/5">
                        <div className="space-y-2">
-                          <h3 className="font-bold text-lg group-hover:text-hig-blue transition-colors">{article.title}</h3>
-                          <div className="flex items-center gap-4 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                          <h3 className="font-black text-lg group-hover:text-hig-blue transition-colors text-black dark:text-white">{article.title}</h3>
+                          <div className="flex items-center gap-4 text-[10px] text-black/80 font-black uppercase tracking-widest">
                              <span className="text-hig-blue">{article.cat}</span>
                              <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> {article.views} views</span>
-                             <span className="text-zinc-300 dark:text-zinc-700">{article.date}</span>
+                             <span className="text-black/70 dark:text-zinc-700">{article.date}</span>
                           </div>
                        </div>
-                       <button className="p-3 text-zinc-400 hover:text-hig-blue bg-zinc-50 dark:bg-zinc-800 rounded-xl transition-all">
+                       <button className="p-3 text-black/90 hover:text-hig-blue bg-white dark:bg-white rounded-xl transition-all">
                           <ArrowRight className="w-5 h-5" />
                        </button>
                     </div>
                   ))}
 
                   {activeTab === "activity" && contentMap.activity.map((item, i) => (
-                    <div key={i} className="flex items-center gap-6 p-4 border-l-2 border-zinc-100 dark:border-zinc-800 hover:border-hig-blue transition-colors">
-                       <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center shrink-0">
+                    <div key={i} className="flex items-center gap-6 p-4 border-l-2 border-black/5 dark:border-black/5 hover:border-hig-blue transition-colors">
+                       <div className="w-10 h-10 rounded-full bg-white dark:bg-white flex items-center justify-center shrink-0">
                           {item.action.includes("Comment") ? <MessageCircle className="w-4 h-4 text-hig-blue" /> : <Sparkles className="w-4 h-4 text-amber-500" />}
                        </div>
                        <div className="flex-1">
-                          <p className="text-sm font-medium">
-                            <span className="text-zinc-400">{item.action}</span> <span className="font-bold text-zinc-900 dark:text-white underline underline-offset-4 decoration-zinc-200 dark:decoration-zinc-800">{item.target}</span>
+                          <p className="text-sm font-black">
+                            <span className="text-black/80 dark:text-black/90">{item.action}</span> <span className="text-black dark:text-white underline underline-offset-4 decoration-black/10 dark:decoration-zinc-800">{item.target}</span>
                           </p>
-                          <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-1 block">{item.date}</span>
+                          <span className="text-[10px] text-black/70 dark:text-black/90 font-black uppercase tracking-widest mt-1 block">{item.date}</span>
                        </div>
                     </div>
                   ))}
@@ -187,33 +187,33 @@ export default function ProfilePage() {
                     </div>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="hig-card p-8 space-y-4 bg-white dark:bg-zinc-900/50 relative overflow-hidden group">
-                       <div className="flex items-center gap-2 text-zinc-400 group-hover:text-hig-blue transition-colors">
+                    <div className="hig-card p-8 space-y-4 bg-white dark:bg-white/50 relative overflow-hidden group border-black/5 dark:border-black/5 shadow-none border-b-2">
+                       <div className="flex items-center gap-2 text-black/70 dark:text-black/90 group-hover:text-hig-blue transition-colors">
                           <TrendingUp className="w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-widest">Total Readership</span>
                        </div>
-                       <p className="text-4xl font-black">42.8K</p>
+                       <p className="text-4xl font-black text-black dark:text-white">42.8K</p>
                        <div className="flex items-center gap-1.5 text-emerald-500 font-black text-[10px] uppercase">
                           <TrendingUp className="w-3 h-3" /> +12% week
                        </div>
                     </div>
-                    <div className="hig-card p-8 space-y-4 bg-white dark:bg-zinc-900/50">
-                       <div className="flex items-center gap-2 text-zinc-400 group-hover:text-hig-blue transition-colors">
+                    <div className="hig-card p-8 space-y-4 bg-white dark:bg-white/50 border-black/5 dark:border-black/5 shadow-none border-b-2">
+                       <div className="flex items-center gap-2 text-black/70 dark:text-black/90 group-hover:text-hig-blue transition-colors">
                           <Target className="w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-widest">Conversion Rate</span>
                        </div>
-                       <p className="text-4xl font-black">8.2%</p>
+                       <p className="text-4xl font-black text-black dark:text-white">8.2%</p>
                        <div className="flex items-center gap-1.5 text-emerald-500 font-black text-[10px] uppercase">
                           Peak Performance
                        </div>
                     </div>
-                    <div className="hig-card p-8 space-y-4 bg-white dark:bg-zinc-900/50">
-                       <div className="flex items-center gap-2 text-zinc-400 group-hover:text-hig-blue transition-colors">
+                    <div className="hig-card p-8 space-y-4 bg-white dark:bg-white/50 border-black/5 dark:border-black/5 shadow-none border-b-2">
+                       <div className="flex items-center gap-2 text-black/70 dark:text-black/90 group-hover:text-hig-blue transition-colors">
                           <Users className="w-4 h-4" />
                           <span className="text-[10px] font-black uppercase tracking-widest">Total Followers</span>
                        </div>
-                       <p className="text-4xl font-black">12.1K</p>
-                       <div className="flex items-center gap-1.5 text-zinc-400 font-black text-[10px] uppercase">
+                       <p className="text-4xl font-black text-black dark:text-white">12.1K</p>
+                       <div className="flex items-center gap-1.5 text-black/80 dark:text-black/90 font-black text-[10px] uppercase">
                           Growing Network
                        </div>
                     </div>
@@ -223,17 +223,17 @@ export default function ProfilePage() {
          </section>
 
          <aside className="space-y-12">
-            <div className="hig-card p-8 bg-white dark:bg-zinc-900/50">
+            <div className="hig-card p-8 bg-white dark:bg-white/50 border-black/5 dark:border-black/5 shadow-none border-b-2">
                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black uppercase tracking-widest text-zinc-400">Interests</h3>
-                  <button className="p-2 text-zinc-400 hover:text-hig-blue transition-colors">
+                  <h3 className="text-lg font-black uppercase tracking-widest text-black/70 dark:text-black/90">Interests</h3>
+                  <button className="p-2 text-black/70 hover:text-hig-blue transition-colors">
                      <Sliders className="w-4 h-4" />
                   </button>
                </div>
 
                <div className="flex flex-wrap gap-2">
                   {INTERESTS.map((tag) => (
-                    <span key={tag} className="bg-zinc-50 dark:bg-zinc-800 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-700 hover:border-hig-blue hover:text-hig-blue transition-all cursor-pointer">
+                    <span key={tag} className="bg-white dark:bg-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-black/90 dark:text-black/80 border border-black/5 dark:border-black/5 hover:border-hig-blue hover:text-hig-blue transition-all cursor-pointer">
                       {tag}
                     </span>
                   ))}
@@ -242,13 +242,13 @@ export default function ProfilePage() {
                <button className="w-full mt-10 hig-button-secondary py-3 text-xs uppercase tracking-[0.2em] font-black">Add Topic</button>
             </div>
 
-            <div className="p-8 hig-card bg-zinc-900 dark:bg-zinc-950 text-white relative overflow-hidden group">
+            <div className="p-8 hig-card bg-white dark:bg-white text-white relative overflow-hidden group">
                <div className="relative z-10">
                    <div className="flex items-center gap-3 mb-8">
                         <div className="w-10 h-10 rounded-xl bg-hig-blue flex items-center justify-center shadow-lg shadow-hig-blue/20">
                             <Shield className="w-5 h-5 text-white" />
                         </div>
-                        <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-zinc-400">Professional Identity</h3>
+                        <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-black/90">Professional Identity</h3>
                    </div>
                    <div className="space-y-6">
                       <div className="space-y-2">

@@ -80,18 +80,18 @@ export default function EditorPage() {
       <header className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-4xl px-4">
         <div className="bg-[var(--card-bg)] backdrop-blur-3xl border border-[var(--border)] rounded-[32px] p-3 shadow-2xl flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="p-3 rounded-2xl hover:bg-rose-500/10 text-zinc-400 hover:text-rose-500 transition-all active:scale-90">
+            <Link href="/" className="p-3 rounded-2xl hover:bg-rose-500/10 text-black/90 hover:text-rose-500 transition-all active:scale-90">
               <X className="w-6 h-6" />
             </Link>
             <div className="h-8 w-px bg-[var(--border)] mx-1" />
             <div className="flex flex-col">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-hig-blue">Editing Perspective</span>
-              <span className="text-[11px] font-bold text-zinc-400">Draft saved at 12:42 PM</span>
+              <span className="text-[11px] font-bold text-black/90">Draft saved at 12:42 PM</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-6 py-3 text-sm font-black uppercase tracking-widest text-zinc-500 hover:text-hig-blue transition-all active:scale-95">
+            <button className="flex items-center gap-2 px-6 py-3 text-sm font-black uppercase tracking-widest text-black/90 hover:text-hig-blue transition-all active:scale-95">
               <Eye className="w-5 h-5" /> Preview
             </button>
             <button
@@ -124,7 +124,7 @@ export default function EditorPage() {
           className={`relative group aspect-[21/9] w-full rounded-[48px] overflow-hidden border-2 border-dashed transition-all duration-500 flex flex-col items-center justify-center gap-6 cursor-pointer ${
             coverImage
             ? 'border-transparent'
-            : 'bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 hover:border-hig-blue hover:bg-hig-blue/[0.02]'
+            : 'bg-white dark:bg-white/50 border-black/5 dark:border-black/5 hover:border-hig-blue hover:bg-hig-blue/[0.02]'
           }`}
         >
           {coverImage ? (
@@ -138,12 +138,12 @@ export default function EditorPage() {
             </>
           ) : (
             <>
-              <div className="p-8 rounded-full bg-white dark:bg-zinc-900 shadow-xl group-hover:scale-110 transition-transform ring-4 ring-zinc-50 dark:ring-zinc-900/50 group-hover:ring-hig-blue/10">
+              <div className="p-8 rounded-full bg-white dark:bg-white shadow-xl group-hover:scale-110 transition-transform ring-4 ring-zinc-50 dark:ring-zinc-900/50 group-hover:ring-hig-blue/10">
                 <ImageIcon className="w-10 h-10 text-hig-blue" />
               </div>
               <div className="text-center space-y-2">
-                <p className="text-xl font-black text-zinc-900 dark:text-zinc-100">Add an evocative cover image</p>
-                <p className="text-sm text-zinc-500 font-medium">1600 x 900px recommended. Max 10MB.</p>
+                <p className="text-xl font-black text-zinc-900 dark:text-black">Add an evocative cover image</p>
+                <p className="text-sm text-black/90 font-medium">1600 x 900px recommended. Max 10MB.</p>
               </div>
             </>
           )}
@@ -168,8 +168,8 @@ export default function EditorPage() {
             </button>
 
             {showCategoryMenu && (
-              <div className="absolute top-full left-0 mt-3 w-72 hig-card p-2 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300 shadow-2xl ring-1 ring-black/5">
-                <div className="p-3 text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 mb-2">Select Category</div>
+              <div className="absolute top-full left-0 mt-3 w-72 hig-card p-2 z-50 bg-white/95 dark:bg-white/95 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300 shadow-2xl ring-1 ring-black/5">
+                <div className="p-3 text-[10px] font-black uppercase tracking-widest text-black/90 border-b border-black/5 dark:border-black/5 mb-2">Select Category</div>
                 {categories.map((cat) => (
                   <button
                     key={cat}
@@ -177,7 +177,7 @@ export default function EditorPage() {
                       setSelectedCategory(cat);
                       setShowCategoryMenu(false);
                     }}
-                    className="w-full text-left px-5 py-3.5 rounded-2xl text-[11px] font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-hig-blue flex items-center justify-between group transition-colors"
+                    className="w-full text-left px-5 py-3.5 rounded-2xl text-[11px] font-bold text-zinc-600 dark:text-black/90 hover:bg-white dark:hover:bg-white hover:text-hig-blue flex items-center justify-between group transition-colors"
                   >
                     {cat}
                     {selectedCategory === cat && <Check className="w-4 h-4 text-hig-blue" />}
@@ -193,7 +193,7 @@ export default function EditorPage() {
             placeholder="Type your compelling headliner"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-3xl md:text-6xl font-black bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-800 resize-none leading-[1.1] tracking-tight py-2 overflow-hidden"
+            className="w-full text-3xl md:text-6xl font-black bg-transparent border-none outline-none placeholder:text-black/50 dark:placeholder:text-black/50 resize-none leading-[1.1] tracking-tight py-2 overflow-hidden text-black dark:text-white"
             rows={1}
           />
 
@@ -202,7 +202,7 @@ export default function EditorPage() {
             placeholder="Sum it up for the home page feed..."
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
-            className="w-full text-xl md:text-3xl font-medium text-zinc-500 bg-transparent border-none outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-800 resize-none leading-relaxed border-l-4 border-zinc-100 dark:border-zinc-800 pl-10 whitespace-pre-wrap"
+            className="w-full text-xl md:text-3xl font-black text-black dark:text-black/80 bg-transparent border-none outline-none placeholder:text-black/50 dark:placeholder:text-black/50 resize-none leading-relaxed border-l-4 border-black/5 dark:border-black/5 pl-10 whitespace-pre-wrap"
             rows={1}
           />
 
@@ -212,7 +212,7 @@ export default function EditorPage() {
                <div className="flex flex-col gap-3 bg-[var(--card-bg)] backdrop-blur-3xl p-2 rounded-full border border-[var(--border)] shadow-2xl">
                   <button
                     onClick={() => setContent(prev => prev + "\n\n")}
-                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue hover:border-hig-blue shadow-lg transition-all hover:scale-110 active:scale-90"
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue hover:border-hig-blue shadow-lg transition-all hover:scale-110 active:scale-90"
                     title="Add block"
                   >
                     <Plus className="w-6 h-6" />
@@ -237,7 +237,7 @@ export default function EditorPage() {
                       setContent("AI is rewriting your story for maximum impact and clarity...");
                       setTimeout(() => setContent(content + "\n\n(AI Rewrite complete: Optimized for executive readability)"), 1000);
                     }}
-                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="AI Rewrite">
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="AI Rewrite">
                     <Sparkles className="w-6 h-6" />
                   </button>
 
@@ -245,22 +245,22 @@ export default function EditorPage() {
 
                   <button
                     onClick={() => applyFormat("**", "**")}
-                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Bold">
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Bold">
                     <Bold className="w-6 h-6" />
                   </button>
                   <button
                     onClick={() => applyFormat("_", "_")}
-                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Italic">
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Italic">
                     <Italic className="w-6 h-6" />
                   </button>
                   <button
                     onClick={() => applyFormat("> ", "")}
-                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Quote">
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Quote">
                     <Quote className="w-6 h-6" />
                   </button>
                   <button
                     onClick={() => applyFormat("[", "](https://)")}
-                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-zinc-400 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Link">
+                    className="p-4 rounded-full bg-[var(--background)] border border-[var(--border)] text-black/90 hover:text-hig-blue transition-all hover:scale-110 active:scale-90" title="Link">
                     <LinkIcon className="w-6 h-6" />
                   </button>
                </div>
@@ -270,7 +270,7 @@ export default function EditorPage() {
               placeholder="Tell the story. This is where insights are born. AI is ready to assist..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full text-xl md:text-2xl font-medium text-zinc-800 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-zinc-900 resize-none h-full min-h-[600px] leading-relaxed selection:bg-hig-blue/10 whitespace-pre-wrap"
+              className="w-full text-xl md:text-2xl font-black text-black dark:text-black bg-transparent border-none outline-none placeholder:text-black/50 dark:placeholder:text-black/50 resize-none h-full min-h-[600px] leading-relaxed selection:bg-hig-blue/10 whitespace-pre-wrap"
             />
           </div>
         </div>
@@ -280,12 +280,12 @@ export default function EditorPage() {
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 z-40 w-full max-w-md px-4">
          <div className="w-full bg-[var(--card-bg)] backdrop-blur-3xl px-8 py-4 rounded-full shadow-2xl border border-[var(--border)] flex items-center justify-between">
             <div className="flex flex-col">
-               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Word Count</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-black/90">Word Count</span>
                <span className="text-xs font-bold text-[var(--foreground)]">{content.split(/\s+/).filter(Boolean).length} words</span>
             </div>
             <div className="h-8 w-px bg-[var(--border)]" />
             <div className="flex flex-col">
-               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Read Time</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-black/90">Read Time</span>
                <span className="text-xs font-bold text-[var(--foreground)]">{Math.ceil(content.split(/\s+/).filter(Boolean).length / 200)} min</span>
             </div>
             <div className="h-8 w-px bg-[var(--border)]" />
