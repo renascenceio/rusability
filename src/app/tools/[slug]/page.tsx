@@ -2,7 +2,6 @@ import { INDUSTRY_TOOLS } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { ExternalLink, Sparkles, ShieldCheck, PieChart, MessageSquare } from "lucide-react";
-import Link from "next/link";
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   Sparkles: <Sparkles className="w-8 h-8 text-hig-blue" />,

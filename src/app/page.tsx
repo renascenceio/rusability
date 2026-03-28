@@ -1,11 +1,15 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, User, Bookmark, TrendingUp, Sparkles, ExternalLink, Flame, Users } from "lucide-react";
-import { ARTICLES, TRENDING, INDUSTRY_TOOLS, POPULAR_AUTHORS, INDUSTRY_NEWS } from "@/lib/data";
+import { ArrowUpRight, User, Bookmark, TrendingUp, Sparkles, ExternalLink, Flame, Users, BrainCircuit } from "lucide-react";
+import { ARTICLES, TRENDING, INDUSTRY_TOOLS, POPULAR_AUTHORS, CURRENT_USER } from "@/lib/data";
+import { getPersonalizedFeed, getPersonalizedNews } from "@/lib/personalization";
 
 export default function Home() {
   const featuredArticle = ARTICLES.find(a => a.featured) || ARTICLES[0];
   const otherArticles = ARTICLES.filter(a => a.id !== featuredArticle.id);
+
+  const personalizedFeed = getPersonalizedFeed(CURRENT_USER, 4);
+  const personalizedNews = getPersonalizedNews(CURRENT_USER, 5);
 
   // Helper to get random content for injection
   const getRandomTool = () => INDUSTRY_TOOLS[Math.floor(Math.random() * INDUSTRY_TOOLS.length)];
@@ -132,20 +136,20 @@ export default function Home() {
 
              {/* Secondary Grid - Continuous Content */}
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-               {/* Injection Tool Card */}
+               {/* Injection Tool Card - Refined White Version */}
                {(() => {
                  const tool = getRandomTool();
                  return (
-                  <div className="bg-hig-blue rounded-[32px] p-8 text-white flex flex-col justify-between group cursor-pointer relative overflow-hidden h-full min-h-[340px]">
+                  <div className="bg-white dark:bg-zinc-900 rounded-[32px] p-8 text-[var(--foreground)] flex flex-col justify-between group cursor-pointer relative overflow-hidden h-full min-h-[340px] border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow">
                     <div className="relative z-10 space-y-6">
-                      <div className="bg-white/20 w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Tool</div>
-                      <h4 className="text-2xl font-black leading-tight group-hover:underline">{tool.name}</h4>
-                      <p className="text-white/80 text-sm font-medium leading-relaxed">{tool.description}</p>
-                      <Link href={tool.link} className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-white text-hig-blue px-6 py-3 rounded-full">
+                      <div className="bg-hig-blue/10 text-hig-blue w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Featured Tool</div>
+                      <h4 className="text-2xl font-bold leading-tight group-hover:text-hig-blue transition-colors">{tool.name}</h4>
+                      <p className="text-[var(--foreground)]/70 text-sm font-medium leading-relaxed">{tool.description}</p>
+                      <Link href={tool.link} className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-hig-blue text-white px-6 py-3 rounded-full hover:bg-hig-blue/90 transition-colors">
                         Try Now <ExternalLink className="w-4 h-4" />
                       </Link>
                     </div>
-                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-hig-blue/5 rounded-full blur-3xl" />
                   </div>
                  );
                })()}
@@ -203,6 +207,41 @@ export default function Home() {
           </section>
         </div>
 
+        {/* Personalized AI Section */}
+        <section className="space-y-10">
+          <div className="flex items-center justify-between border-b border-[var(--border)] pb-6">
+            <div className="flex items-center gap-3">
+              <BrainCircuit className="w-6 h-6 text-hig-blue" />
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Recommended For You</h2>
+                <p className="text-[10px] text-hig-blue font-black uppercase tracking-widest">Personalized AI Intelligence</p>
+              </div>
+            </div>
+            <Link href="/profile" className="text-xs font-bold text-hig-blue uppercase tracking-wider hover:underline">Adjust Interests</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {personalizedFeed.map((article) => (
+              <Link key={article.id} href={`/posts/${article.id}`} className="group flex flex-col space-y-4">
+                <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-[var(--border)]">
+                  <Image src={article.image} alt={article.title} fill className="object-cover transition-transform group-hover:scale-105" />
+                  <div className="absolute top-2 right-2">
+                    <div className="bg-white/90 dark:bg-black/90 backdrop-blur px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                      <Sparkles className="w-2 h-2 text-amber-500" />
+                      94% Match
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-sm font-bold leading-tight group-hover:text-hig-blue transition-colors line-clamp-2 uppercase tracking-tight">{article.title}</h3>
+                  <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-[var(--foreground)]/40">
+                    <span>{article.category}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* Industry Pulse & Trending - Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Industry Pulse News */}
@@ -212,10 +251,15 @@ export default function Home() {
                 <h3 className="font-black text-xl text-[var(--foreground)] uppercase tracking-tight">Pulse News</h3>
              </div>
              <div className="space-y-6">
-                {INDUSTRY_NEWS.map((item) => (
+                {personalizedNews.map((item) => (
                   <div key={item.id} className="group cursor-pointer space-y-2 border-b border-[var(--border)] pb-4 last:border-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-hig-blue">{item.category}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-hig-blue">{item.category}</span>
+                        {CURRENT_USER.interests.some(i => item.category.toLowerCase().includes(i.toLowerCase())) && (
+                          <span className="text-[8px] font-black uppercase text-amber-500 flex items-center gap-0.5"><Sparkles className="w-2 h-2" /> Top Interest</span>
+                        )}
+                      </div>
                       {item.isHot && <span className="bg-rose-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-1"><Flame className="w-2 h-2" /> HOT</span>}
                     </div>
                     <h4 className="text-sm font-black leading-snug text-[var(--foreground)] group-hover:text-hig-blue transition-colors">{item.title}</h4>
@@ -249,21 +293,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Full Width Personalization */}
-        <div className="hig-card p-12 bg-hig-blue text-white overflow-hidden relative">
+        {/* Full Width Personalization - Refined White Version */}
+        <div className="rounded-[48px] p-12 bg-white dark:bg-zinc-900 border border-[var(--border)] text-[var(--foreground)] overflow-hidden relative shadow-sm">
            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-4">
-                 <h3 className="font-black text-xs uppercase tracking-[0.2em] opacity-80">Tailored For You</h3>
-                 <h2 className="text-3xl md:text-5xl font-black leading-tight">Your Personalization Engine.</h2>
-                 <p className="text-lg font-medium opacity-90 max-w-xl">
-                   Get content and tools tailored to your PR & Search Strategy goals. We use AI to analyze your reading patterns.
+              <div className="space-y-6">
+                 <div className="flex items-center gap-2 text-hig-blue font-black text-[10px] uppercase tracking-[0.2em]">
+                    <BrainCircuit className="w-5 h-5" />
+                    <span>Tailored For You</span>
+                 </div>
+                 <h2 className="text-3xl md:text-6xl font-black leading-none tracking-tighter">Your Intelligence Engine.</h2>
+                 <p className="text-xl font-medium text-[var(--foreground)]/70 max-w-xl leading-relaxed">
+                   Get content and tools tailored to your <strong>PR & Search Strategy</strong> goals. We use AI to analyze your reading patterns.
                  </p>
               </div>
-              <Link href="/profile" className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest bg-white text-hig-blue px-10 py-5 rounded-full hover:bg-white transition-colors shadow-2xl shrink-0">
+              <Link href="/profile" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest bg-hig-blue text-white px-10 py-5 rounded-full hover:bg-hig-blue/90 transition-all shadow-xl hover:shadow-hig-blue/20 shrink-0">
                 Customize My Feed <ArrowUpRight className="w-5 h-5" />
               </Link>
            </div>
-           <div className="absolute top-0 right-0 w-1/3 h-full bg-white/10 blur-[100px] -z-0 rounded-full" />
+           <div className="absolute top-0 right-0 w-1/3 h-full bg-hig-blue/5 blur-[120px] -z-0 rounded-full" />
         </div>
       </div>
     </div>

@@ -4,11 +4,10 @@ import Image from "next/image";
 import { ARTICLES, INDUSTRY_TOOLS, type Article, INDUSTRY_NEWS } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { ArticlePlugin } from "@/components/ArticlePlugin";
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 
 export async function generateMetadata(
-  props: { params: Promise<{ slug: string }> },
-  parent: ResolvingMetadata
+  props: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const article = ARTICLES.find(a => a.id.toString() === slug);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Image as ImageIcon, Send, Sparkles, X, ChevronDown, Check, Type, Plus, Wand2, Eye, Bold, Italic, Link as LinkIcon, List, Quote } from "lucide-react";
+import { Image as ImageIcon, Send, Sparkles, X, ChevronDown, Check, Wand2, Eye, Bold, Italic, Link as LinkIcon, Quote } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 

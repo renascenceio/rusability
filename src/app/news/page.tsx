@@ -1,12 +1,14 @@
-import { Clock, TrendingUp, Sparkles, Filter, Newspaper, Flame, Zap } from "lucide-react";
+import { Clock, TrendingUp, Sparkles, Filter, Newspaper, Flame, Zap, BrainCircuit } from "lucide-react";
 import Link from "next/link";
-import { ARTICLES, INDUSTRY_NEWS } from "@/lib/data";
+import { CURRENT_USER } from "@/lib/data";
 import { ArticlePlugin } from "@/components/ArticlePlugin";
+import { getPersonalizedNews, getPersonalizedFeed } from "@/lib/personalization";
 
 export default function NewsPage() {
-  const mainNews = INDUSTRY_NEWS.filter(n => n.isHot);
-  const regularNews = INDUSTRY_NEWS.filter(n => !n.isHot);
-  const recentArticles = ARTICLES.slice(0, 2);
+  const personalizedNews = getPersonalizedNews(CURRENT_USER, 10);
+  const mainNews = personalizedNews.filter(n => n.isHot).slice(0, 2);
+  const regularNews = personalizedNews.filter(n => !n.isHot || !mainNews.find(m => m.id === n.id));
+  const recommendedArticles = getPersonalizedFeed(CURRENT_USER, 2);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
@@ -96,7 +98,7 @@ export default function NewsPage() {
             </div>
 
             <div className="space-y-10">
-               {recentArticles.map(a => (
+               {recommendedArticles.map(a => (
                   <ArticlePlugin
                      key={a.id}
                      type="article"
@@ -119,15 +121,18 @@ export default function NewsPage() {
             </div>
           </div>
 
-          <div className="hig-card p-8 bg-white dark:bg-white text-white space-y-6">
-             <div className="flex items-center gap-2 text-hig-blue font-black text-[10px] uppercase tracking-widest">
-               <Sparkles className="w-4 h-4" />
-               <span>AI COPILOT</span>
+          <div className="hig-card p-8 bg-hig-blue text-white space-y-6 relative overflow-hidden">
+             <div className="relative z-10 space-y-4">
+               <div className="flex items-center gap-2 text-white font-black text-[10px] uppercase tracking-widest">
+                 <BrainCircuit className="w-4 h-4" />
+                 <span>AI COPILOT</span>
+               </div>
+               <p className="text-sm font-bold leading-relaxed">
+                 I noticed 3 major news events that directly impact your interest in <strong>{CURRENT_USER.interests[0]}</strong>. Shall I prepare a summary?
+               </p>
+               <button className="hig-button-primary w-full text-[10px] bg-white text-hig-blue py-3 border-none shadow-none hover:bg-white hover:text-hig-blue">Prepare Summary</button>
              </div>
-             <p className="text-sm font-bold leading-relaxed">
-               I noticed 3 major news events that directly impact your interest in <strong>Search Strategy</strong>. Shall I prepare a summary?
-             </p>
-             <button className="hig-button-primary w-full text-[10px] bg-white text-black py-3">Prepare Summary</button>
+             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
           </div>
         </aside>
       </div>

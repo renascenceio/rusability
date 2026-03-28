@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, ExternalLink, Sparkles, Sliders, Layout, MessageSquare, PieChart, ShieldCheck, Grid, List as ListIcon, Star, ArrowRight } from "lucide-react";
+import { Search, ExternalLink, Sparkles, Sliders, MessageSquare, PieChart, ShieldCheck, Grid, List as ListIcon, Star, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { INDUSTRY_TOOLS } from "@/lib/data";

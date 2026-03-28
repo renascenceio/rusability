@@ -1,7 +1,6 @@
 "use client";
 
-import { User, Settings, Sparkles, Heart, Clock, Layout, Sliders, ChevronRight, TrendingUp, Users, Target, Edit3, BookOpen, MessageCircle, FileText, Trash2, Shield, Bell, ArrowRight } from "lucide-react";
-import Image from "next/image";
+import { User, Settings, Sparkles, Heart, Clock, Sliders, ChevronRight, TrendingUp, Users, Target, Edit3, BookOpen, MessageCircle, FileText, Trash2, Shield, Bell, ArrowRight } from "lucide-react";
 import { CURRENT_USER } from "@/lib/data";
 import Link from "next/link";
 import { useState } from "react";
