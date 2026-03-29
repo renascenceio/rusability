@@ -9,6 +9,7 @@ import {
 import { motion} from"framer-motion";
 import { ARTICLES, INDUSTRY_TOOLS, EVENTS, INDUSTRY_NEWS, TRENDING} from"@/lib/data";
 import Link from"next/link";
+import { useTranslation} from "@/lib/i18n/context";
 
 interface SearchResult {
  id: string | number;
@@ -19,6 +20,7 @@ interface SearchResult {
 }
 
 export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: () => void}) => {
+ const { t } = useTranslation();
  const [query, setQuery] = useState("");
  const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -125,7 +127,7 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  <input
  autoFocus
  className="flex-1 bg-transparent outline-none text-2xl text-[var(--foreground)] placeholder:text-secondary font-bold"
- placeholder="Search anything..."
+ placeholder={t("search.placeholder")}
  value={query}
  onChange={(e) => setQuery(e.target.value)}
  />
@@ -144,14 +146,14 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  <div className="space-y-4">
  <div className="flex items-center gap-2 text-[var(--foreground)] text-[10px] font-black uppercase tracking-[0.2em]">
  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
- <span>AI Recommended Actions</span>
+ <span>{t("search.aiActions")}</span>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  {[
- { title:"Generate Q4 Strategy", desc:"Using live market data", icon: Zap},
- { title:"Review SEO Health", desc:"Instant site-wide audit", icon: ShieldCheck},
- { title:"Draft News Briefing", desc:"Based on current trends", icon: PenTool},
- { title:"Analyze Competitors", desc:"AI-infused pattern detection", icon: Target}
+ { title: t("search.generateStrategy"), desc: t("search.marketData"), icon: Zap},
+ { title: t("search.reviewSeo"), desc: t("search.siteAudit"), icon: ShieldCheck},
+ { title: t("search.draftNews"), desc: t("search.currentTrends"), icon: PenTool},
+ { title: t("search.analyzeCompetitors"), desc: t("search.patternDetection"), icon: Target}
  ].map((item) => (
  <button key={item.title} className="flex items-center gap-4 p-4 text-left hover:bg-[var(--muted)] rounded-2xl transition-all group hover:">
  <div className="w-10 h-10 rounded-xl bg-hig-blue/10 flex items-center justify-center text-hig-blue group-hover:scale-110 transition-transform">
@@ -169,7 +171,7 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  <div className="space-y-4">
  <div className="flex items-center gap-2 text-[var(--foreground)] text-[10px] font-black uppercase tracking-[0.2em]">
  <TrendingUp className="w-3.5 h-3.5" />
- <span>Trending Vibe</span>
+ <span>{t("search.trendingVibe")}</span>
  </div>
  <div className="flex flex-wrap gap-2">
  {TRENDING.map((tag) => (
@@ -212,7 +214,7 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  </div>
  </div>
  <div className={`flex items-center gap-3 transition-all ${selectedIndex === index ?"opacity-100 translate-x-0" :"opacity-0 -translate-x-2"}`}>
- <span className="text-[10px] font-black uppercase tracking-widest text-hig-blue">Open</span>
+ <span className="text-[10px] font-black uppercase tracking-widest text-hig-blue">{t("search.open")}</span>
  <ArrowRight className="w-4 h-4 text-hig-blue" />
  </div>
  </Link>
@@ -223,8 +225,8 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  <Search className="w-8 h-8 text-[var(--foreground)] /20" />
  </div>
  <div className="space-y-1">
- <p className="font-black text-[var(--foreground)]">No results for &quot;{query}&quot;</p>
- <p className="text-sm text-[var(--foreground)] /60">Try searching for &quot;AI&quot;, &quot;SEO&quot;, or &quot;PR&quot;.</p>
+ <p className="font-black text-[var(--foreground)]">{t("search.noResultsFor")} &quot;{query}&quot;</p>
+ <p className="text-sm text-[var(--foreground)] /60">{t("search.trySearching")}</p>
  </div>
  </div>
  )}
@@ -233,10 +235,10 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  </div>
 
  <div className="bg-[var(--muted)] /50 p-4 flex justify-between items-center">
- <p className="text-[10px] text-[var(--foreground)]">Press Esc to close</p>
+ <p className="text-[10px] text-[var(--foreground)]">{t("search.pressEsc")}</p>
  <div className="flex gap-4">
  <div className="flex items-center gap-1">
- <span className="text-[10px] text-[var(--foreground)]">Powered by Rusability AI</span>
+ <span className="text-[10px] text-[var(--foreground)]">{t("search.poweredBy")}</span>
  </div>
  </div>
  </div>

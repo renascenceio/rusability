@@ -1,8 +1,12 @@
+"use client";
+
 import { Calendar, MapPin, Search, Filter, ArrowUpRight, Clock, Star} from"lucide-react";
 import Image from"next/image";
 import { EVENTS} from"@/lib/data";
+import { useTranslation } from "@/lib/i18n/context";
 
 export default function EventsPage() {
+ const { t } = useTranslation();
  return (
  <div className="max-w-7xl mx-auto px-6 py-12">
  <script
@@ -31,15 +35,15 @@ export default function EventsPage() {
  />
  <header className="mb-16 flex flex-col md:flex-row items-end justify-between gap-8 md:gap-12">
  <div className="space-y-6 max-w-2xl">
- <h1 className="text-4xl md:text-5xl font-bold text-[var(--foreground)] tracking-tight">Industry Events</h1>
+ <h1 className="text-4xl md:text-5xl font-bold text-[var(--foreground)] tracking-tight">{t("events.title")}</h1>
  <p className="text-xl text-secondary leading-relaxed font-medium">
- The most significant marketing, PR, and advertising events worldwide, gathered in one place.
+ {t("events.subtitle")}
  </p>
  <div className="relative group max-w-md">
  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-tertiary" />
  <input
  className="w-full bg-[var(--muted)] rounded-2xl py-4 pl-12 pr-6 text-[var(--foreground)] placeholder:text-secondary focus:ring-2 focus:ring-hig-blue/20 transition-all font-medium"
- placeholder="Search for events, cities or topics..."
+ placeholder={t("events.searchPlaceholder")}
  />
  </div>
  </div>
@@ -47,9 +51,9 @@ export default function EventsPage() {
  <div className="flex gap-4">
  <button className="flex items-center gap-2 hig-button-secondary py-4 px-6">
  <Filter className="w-4 h-4" />
- Filters
+ {t("events.filters")}
  </button>
- <button className="hig-button-primary py-4 px-8">Add Event</button>
+ <button className="hig-button-primary py-4 px-8">{t("events.addEvent")}</button>
  </div>
  </header>
 
@@ -68,7 +72,7 @@ export default function EventsPage() {
  <div className="flex items-center gap-3">
  <span className="bg-hig-blue text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2">
  <Star className="w-3.5 h-3.5 fill-white" />
- Featured
+ {t("events.featured")}
  </span>
  <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
  {EVENTS[0].type}
@@ -89,7 +93,7 @@ export default function EventsPage() {
  </div>
 
  <button className="hig-button-primary text-lg px-10 py-4 flex items-center gap-3">
- Register Interest <ArrowUpRight className="w-5 h-5" />
+ {t("events.register")} <ArrowUpRight className="w-5 h-5" />
  </button>
  </div>
  </div>
@@ -135,7 +139,7 @@ export default function EventsPage() {
  </div>
 
  <button className="w-full text-sm font-bold text-hig-blue py-2 rounded-xl hover:bg-hig-blue hover:text-white transition-all">
- Event Details
+ {t("events.details")}
  </button>
  </div>
  </div>
@@ -147,10 +151,10 @@ export default function EventsPage() {
  <Calendar className="w-6 h-6 text-tertiary group-hover:text-hig-blue" />
  </div>
  <div className="space-y-2">
- <h4 className="font-bold text-lg text-[var(--foreground)]">Suggest an Event</h4>
- <p className="text-sm text-secondary leading-relaxed font-medium">Know about an upcoming conference or webinar? Let us know.</p>
+ <h4 className="font-bold text-lg text-[var(--foreground)]">{t("events.suggest")}</h4>
+ <p className="text-sm text-secondary leading-relaxed font-medium">{t("events.suggestDesc")}</p>
  </div>
- <button className="text-sm font-bold text-hig-blue">Submit Form</button>
+ <button className="text-sm font-bold text-hig-blue">{t("events.submit")}</button>
  </div>
  </div>
  </div>

@@ -8,8 +8,10 @@ import { SpotlightSearch} from"./SpotlightSearch";
 import { ThemeToggle} from"./ThemeToggle";
 import { useTheme} from"next-themes";
 import { CURRENT_USER} from"@/lib/data";
+import { useTranslation} from "@/lib/i18n/context";
 
 export const Header = () => {
+ const { t } = useTranslation();
  const [isScrolled, setIsScrolled] = useState(false);
  const [isSearchOpen, setIsSearchOpen] = useState(false);
  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -57,16 +59,16 @@ export const Header = () => {
 
  <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-secondary uppercase tracking-widest">
  <Link href="/" className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
- Home
+ {t("nav.home")}
  </Link>
  <Link href="/news" className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
- News
+ {t("nav.news")}
  </Link>
  <Link href="/events" className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
- Events
+ {t("nav.events")}
  </Link>
  <Link href="/tools" className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
- Tools
+ {t("nav.tools")}
  </Link>
  </nav>
 
@@ -76,7 +78,7 @@ export const Header = () => {
  onClick={() => setIsSearchOpen(true)}
  readOnly
  className="w-full bg-[var(--muted)] rounded-xl py-2 pl-10 pr-12 text-sm text-[var(--foreground)] placeholder:text-secondary cursor-pointer focus:ring-2 focus:ring-hig-blue/10 transition-all shadow-sm font-medium"
- placeholder="Search anything..."
+ placeholder={t("search.placeholder")}
  />
  <div className="absolute right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--background)]">
  <Command className="w-2.5 h-2.5 text-tertiary" />
@@ -95,7 +97,7 @@ export const Header = () => {
 
  <Link href="/editor" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-hig-blue text-white text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-sm group">
  <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
- Write
+ {t("nav.write")}
  </Link>
 
  <button className="p-2 text-[var(--foreground)] /40 hover:text-foreground transition-colors hidden sm:block">
@@ -113,14 +115,14 @@ export const Header = () => {
  {/* Mobile Menu */}
  {isMobileMenuOpen && (
  <div className="md:hidden bg-white dark:bg-black dark: p-6 flex flex-col gap-6 animate-in slide-in-from-top-4 duration-300">
- <Link href="/" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
- <Link href="/news" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>News</Link>
- <Link href="/events" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Events</Link>
- <Link href="/tools" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>Tools</Link>
- {isAdmin && <Link href="/admin" className="text-lg font-semibold text-amber-500" onClick={() => setIsMobileMenuOpen(false)}>Admin Dashboard</Link>}
+ <Link href="/" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>{t("nav.home")}</Link>
+ <Link href="/news" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>{t("nav.news")}</Link>
+ <Link href="/events" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>{t("nav.events")}</Link>
+ <Link href="/tools" className="text-lg font-semibold" onClick={() => setIsMobileMenuOpen(false)}>{t("nav.tools")}</Link>
+ {isAdmin && <Link href="/admin" className="text-lg font-semibold text-amber-500" onClick={() => setIsMobileMenuOpen(false)}>{t("nav.admin")}</Link>}
  <div className="h-px bg-white dark:bg-white w-full" />
  <Link href="/editor" className="text-lg font-semibold flex items-center gap-2 text-hig-blue" onClick={() => setIsMobileMenuOpen(false)}>
- <Edit3 className="w-5 h-5" /> Write Article
+ <Edit3 className="w-5 h-5" /> {t("nav.write")}
  </Link>
  </div>
  )}
