@@ -1,0 +1,22 @@
+
+> rusability@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3005
+   - Network:      http://192.168.0.2:3005
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 13.4s (1588 modules)
+ GET / 200 in 20908ms
+ GET / 200 in 738ms
+ HEAD / 200 in 372ms
+ GET / 200 in 1079ms
+ GET / 200 in 5423ms
+ ○ Compiling /news ...
+ ✓ Compiled /news in 5.8s (1572 modules)
+ GET /news 200 in 9870ms
+ GET / 200 in 5132ms
+[?25h

@@ -1,141 +1,141 @@
-import { Clock, TrendingUp, Sparkles, Filter, Newspaper, Flame, Zap, BrainCircuit } from "lucide-react";
-import Link from "next/link";
-import { CURRENT_USER } from "@/lib/data";
-import { ArticlePlugin } from "@/components/ArticlePlugin";
-import { getPersonalizedNews, getPersonalizedFeed } from "@/lib/personalization";
+import { Clock, TrendingUp, Sparkles, Filter, Newspaper, Flame, Zap, BrainCircuit} from"lucide-react";
+import Link from"next/link";
+import { CURRENT_USER} from"@/lib/data";
+import { ArticlePlugin} from"@/components/ArticlePlugin";
+import { getPersonalizedNews, getPersonalizedFeed} from"@/lib/personalization";
 
 export default function NewsPage() {
-  const personalizedNews = getPersonalizedNews(CURRENT_USER, 10);
-  const mainNews = personalizedNews.filter(n => n.isHot).slice(0, 2);
-  const regularNews = personalizedNews.filter(n => !n.isHot || !mainNews.find(m => m.id === n.id));
-  const recommendedArticles = getPersonalizedFeed(CURRENT_USER, 2);
+ const personalizedNews = getPersonalizedNews(CURRENT_USER, 10);
+ const mainNews = personalizedNews.filter(n => n.isHot).slice(0, 2);
+ const regularNews = personalizedNews.filter(n => !n.isHot || !mainNews.find(m => m.id === n.id));
+ const recommendedArticles = getPersonalizedFeed(CURRENT_USER, 2);
 
-  return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
-      <header className="space-y-6 max-w-3xl">
-        <div className="flex items-center gap-3 text-hig-blue font-black uppercase tracking-[0.2em] text-xs">
-          <Newspaper className="w-5 h-5" />
-          <span>The Pulse of Marketing</span>
-        </div>
-        <h1 className="text-4xl md:text-7xl font-black tracking-tight leading-tight">
-          Industry News & Real-time Insights.
-        </h1>
-        <p className="text-xl text-[var(--foreground)] font-medium leading-relaxed">
-          Stay ahead of the curve with AI-generated industry briefings and professional analysis.
-        </p>
-      </header>
+ return (
+ <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+ <header className="space-y-6 max-w-3xl">
+ <div className="flex items-center gap-3 text-hig-blue font-bold uppercase tracking-[0.2em] text-xs">
+ <Newspaper className="w-5 h-5" />
+ <span>The Pulse of Marketing</span>
+ </div>
+ <h1 className="text-4xl md:text-7xl font-bold tracking-tight leading-tight text-[var(--foreground)]">
+ Industry News & Real-time Insights.
+ </h1>
+ <p className="text-xl text-secondary font-medium leading-relaxed">
+ Stay ahead of the curve with AI-generated industry briefings and professional analysis.
+ </p>
+ </header>
 
-      <div className="flex flex-col lg:grid lg:grid-cols-[1fr,360px] gap-16 md:gap-24">
-        {/* News Feed */}
-        <div className="space-y-16">
-          <section className="space-y-10">
-            <div className="flex items-center justify-between border-b border-[var(--border)] dark:border-[var(--border)] pb-6">
-               <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                  <Flame className="w-6 h-6 text-orange-500" />
-                  Breaking Now
-               </h2>
-               <div className="flex items-center gap-4">
-                  <button className="text-xs font-bold text-[var(--foreground)] flex items-center gap-2 hover:text-hig-blue transition-colors">
-                     <Filter className="w-4 h-4" /> Filter By Topic
-                  </button>
-               </div>
-            </div>
+ <div className="flex flex-col lg:grid lg:grid-cols-[1fr,360px] gap-16 md:gap-24">
+ {/* News Feed */}
+ <div className="space-y-16">
+ <section className="space-y-10">
+ <div className="flex items-center justify-between pb-6">
+ <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3 text-[var(--foreground)]">
+ <Flame className="w-6 h-6 text-orange-500" />
+ Breaking Now
+ </h2>
+ <div className="flex items-center gap-4">
+ <button className="text-xs font-bold text-secondary flex items-center gap-2 hover:text-hig-blue transition-colors">
+ <Filter className="w-4 h-4" /> Filter By Topic
+ </button>
+ </div>
+ </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               {mainNews.map((news) => (
-                  <div key={news.id} className="hig-card p-10 bg-[var(--background)] border-[var(--border)] group cursor-pointer relative overflow-hidden">
-                     <div className="relative z-10 space-y-6">
-                        <div className="flex items-center justify-between">
-                           <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{news.category}</span>
-                           <span className="flex items-center gap-2 text-[var(--foreground)] text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m ago</span>
-                        </div>
-                        <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-[var(--foreground)] dark:text-white">{news.title}</h3>
-                        <p className="text-[var(--foreground)] text-sm leading-relaxed font-medium">
-                           Recent developments in {news.category} are signaling a major shift for enterprise marketers. Analysts suggest immediate action.
-                        </p>
-                        <div className="pt-4 flex items-center gap-3">
-                           <button className="hig-button-primary text-[10px] px-6 py-2.5">Full Briefing</button>
-                           <button className="hig-button-secondary p-2.5 rounded-full"><Sparkles className="w-4 h-4" /></button>
-                        </div>
-                     </div>
-                     <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl" />
-                  </div>
-               ))}
-            </div>
-          </section>
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+ {mainNews.map((news) => (
+ <div key={news.id} className="hig-card p-10 group cursor-pointer relative overflow-hidden">
+ <div className="relative z-10 space-y-6">
+ <div className="flex items-center justify-between">
+ <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">{news.category}</span>
+ <span className="flex items-center gap-2 text-tertiary text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m ago</span>
+ </div>
+ <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-[var(--foreground)]">{news.title}</h3>
+ <p className="text-secondary text-sm leading-relaxed font-medium">
+ Recent developments in {news.category} are signaling a major shift for enterprise marketers. Analysts suggest immediate action.
+ </p>
+ <div className="pt-4 flex items-center gap-3">
+ <button className="hig-button-primary text-[10px] px-6 py-2.5">Full Briefing</button>
+ <button className="hig-button-secondary p-2.5 rounded-full"><Sparkles className="w-4 h-4" /></button>
+ </div>
+ </div>
+ <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl" />
+ </div>
+ ))}
+ </div>
+ </section>
 
-          <section className="space-y-10">
-            <div className="flex items-center justify-between border-b border-[var(--border)] dark:border-[var(--border)] pb-6">
-               <h2 className="text-2xl font-black tracking-tight">Recent Briefings</h2>
-            </div>
+ <section className="space-y-10">
+ <div className="flex items-center justify-between pb-6">
+ <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Recent Briefings</h2>
+ </div>
 
-            <div className="space-y-8">
-               {regularNews.map(news => (
-                  <div key={news.id} className="flex flex-col md:flex-row gap-8 group cursor-pointer pb-8 border-b border-[var(--border)] dark:border-[var(--border)] last:border-0">
-                     <div className="flex-1 space-y-4 pt-1">
-                        <div className="flex items-center gap-3">
-                           <span className="text-[10px] font-black uppercase text-hig-blue tracking-widest">{news.category}</span>
-                           <span className="text-[10px] text-[var(--foreground)] font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h ago</span>
-                        </div>
-                        <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug text-[var(--foreground)] dark:text-white">{news.title}</h3>
-                        <p className="text-[var(--foreground)] text-sm leading-relaxed line-clamp-2">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
-                     </div>
-                     <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--background)] border border-[var(--border)] relative shrink-0">
-                        <div className="absolute inset-0 flex items-center justify-center opacity-20"><Zap className="w-12 h-12" /></div>
-                     </div>
-                  </div>
-               ))}
-            </div>
-          </section>
-        </div>
+ <div className="space-y-8">
+ {regularNews.map(news => (
+ <div key={news.id} className="flex flex-col md:flex-row gap-8 group cursor-pointer pb-8 last:">
+ <div className="flex-1 space-y-4 pt-1">
+ <div className="flex items-center gap-3">
+ <span className="text-[10px] font-bold uppercase text-hig-blue tracking-widest">{news.category}</span>
+ <span className="text-[10px] text-tertiary font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h ago</span>
+ </div>
+ <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug text-[var(--foreground)]">{news.title}</h3>
+ <p className="text-secondary text-sm leading-relaxed line-clamp-2 font-medium">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
+ </div>
+ <div className="w-full md:w-[240px] aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--muted)] relative shrink-0">
+ <div className="absolute inset-0 flex items-center justify-center text-tertiary/20"><Zap className="w-12 h-12" /></div>
+ </div>
+ </div>
+ ))}
+ </div>
+ </section>
+ </div>
 
-        {/* Sidebar: Articles in News */}
-        <aside className="space-y-16">
-          <div className="hig-card p-8 sticky top-24 bg-[var(--background)] border-[var(--border)]">
-            <div className="flex items-center gap-2 mb-8 border-b border-[var(--border)] pb-4">
-              <TrendingUp className="w-5 h-5 text-hig-blue" />
-              <h3 className="font-black text-xs uppercase tracking-[0.1em] text-[var(--foreground)] dark:text-white">Deep Dives</h3>
-            </div>
+ {/* Sidebar: Articles in News */}
+ <aside className="space-y-16">
+ <div className="hig-card p-8 sticky top-24">
+ <div className="flex items-center gap-2 mb-8 pb-4">
+ <TrendingUp className="w-5 h-5 text-hig-blue" />
+ <h3 className="font-bold text-xs uppercase tracking-[0.1em] text-secondary">Deep Dives</h3>
+ </div>
 
-            <div className="space-y-10">
-               {recommendedArticles.map(a => (
-                  <ArticlePlugin
-                     key={a.id}
-                     type="article"
-                     layout="vertical"
-                     data={{
-                        id: a.id,
-                        title: a.title,
-                        description: a.excerpt,
-                        image: a.image,
-                        category: a.category
-                     }}
-                  />
-               ))}
-            </div>
+ <div className="space-y-10">
+ {recommendedArticles.map(a => (
+ <ArticlePlugin
+ key={a.id}
+ type="article"
+ layout="vertical"
+ data={{
+ id: a.id,
+ title: a.title,
+ description: a.excerpt,
+ image: a.image,
+ category: a.category
+}}
+ />
+ ))}
+ </div>
 
-            <div className="mt-10 pt-8 border-t border-[var(--border)] dark:border-[var(--border)]">
-               <Link href="/" className="hig-button-primary w-full text-center block text-sm">
-                  Full Magazine Feed
-               </Link>
-            </div>
-          </div>
+ <div className="mt-10 pt-8">
+ <Link href="/" className="hig-button-primary w-full text-center block text-sm">
+ Full Magazine Feed
+ </Link>
+ </div>
+ </div>
 
-          <div className="hig-card p-8 bg-hig-blue text-white space-y-6 relative overflow-hidden">
-             <div className="relative z-10 space-y-4">
-               <div className="flex items-center gap-2 text-white font-black text-[10px] uppercase tracking-widest">
-                 <BrainCircuit className="w-4 h-4" />
-                 <span>AI COPILOT</span>
-               </div>
-               <p className="text-sm font-bold leading-relaxed">
-                 I noticed 3 major news events that directly impact your interest in <strong>{CURRENT_USER.interests[0]}</strong>. Shall I prepare a summary?
-               </p>
-               <button className="hig-button-primary w-full text-[10px] bg-white text-hig-blue py-3 border-none shadow-none hover:bg-white hover:text-hig-blue">Prepare Summary</button>
-             </div>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--background)]/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
-          </div>
-        </aside>
-      </div>
-    </div>
-  );
+ <div className="hig-card p-8 bg-hig-blue text-white space-y-6 relative overflow-hidden shadow-lg shadow-hig-blue/20">
+ <div className="relative z-10 space-y-4">
+ <div className="flex items-center gap-2 text-white font-bold text-[10px] uppercase tracking-widest">
+ <BrainCircuit className="w-4 h-4" />
+ <span>AI COPILOT</span>
+ </div>
+ <p className="text-sm font-bold leading-relaxed">
+ I noticed 3 major news events that directly impact your interest in <strong>{CURRENT_USER.interests[0]}</strong>. Shall I prepare a summary?
+ </p>
+ <button className="w-full text-[10px] font-bold uppercase tracking-widest bg-white text-hig-blue py-3 rounded-full hover:brightness-110 transition-all">Prepare Summary</button>
+ </div>
+ <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
+ </div>
+ </aside>
+ </div>
+ </div>
+ );
 }
