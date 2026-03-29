@@ -5,6 +5,7 @@ import { Search, ExternalLink, Sparkles, Sliders, MessageSquare, PieChart, Shiel
 import Image from"next/image";
 import Link from"next/link";
 import { INDUSTRY_TOOLS} from"@/lib/data";
+import { useTranslation } from "@/lib/i18n/context";
 
 const ICON_MAP: Record<string, React.ReactNode> = {
  Sparkles: <Sparkles className="w-6 h-6 text-hig-blue" />,
@@ -16,6 +17,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
 const CATEGORIES = ["All","AI Marketing","Public Relations","Analytics","Brand Protection","Social Media","SEO"];
 
 export default function ToolsPage() {
+ const { t } = useTranslation();
  const [activeCategory, setActiveCategory] = useState("All");
  const [searchQuery, setSearchQuery] = useState("");
  const [viewMode, setViewMode] = useState<"grid" |"list">("grid");
@@ -30,9 +32,9 @@ export default function ToolsPage() {
  return (
  <div className="max-w-7xl mx-auto px-6 py-12">
  <header className="mb-16">
- <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[var(--foreground)]">Marketing Tools</h1>
+ <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[var(--foreground)]">{t("tools.title")}</h1>
  <p className="text-xl text-secondary max-w-2xl leading-relaxed font-medium">
- The essential toolkit for digital marketing and PR professionals. Hand-curated, AI-vetted, and community-reviewed.
+ {t("tools.subtitle")}
  </p>
  </header>
 
@@ -40,7 +42,7 @@ export default function ToolsPage() {
  {/* Filters Sidebar */}
  <aside className="w-full lg:w-[240px] space-y-10">
  <div className="space-y-6">
- <h3 className="text-sm font-bold uppercase tracking-wider text-secondary">Categories</h3>
+ <h3 className="text-sm font-bold uppercase tracking-wider text-secondary">{t("tools.categories")}</h3>
  <div className="flex flex-col gap-4">
  {CATEGORIES.map((cat) => (
  <button
@@ -54,11 +56,11 @@ export default function ToolsPage() {
  </div>
 
  <div className="hig-card p-6 bg-hig-blue/5 shadow-sm shadow-hig-blue/5">
- <h4 className="text-sm font-bold text-hig-blue mb-3">Rusability Suggests</h4>
+ <h4 className="text-sm font-bold text-hig-blue mb-3">{t("tools.suggests")}</h4>
  <p className="text-xs text-secondary leading-relaxed mb-4 font-medium">
- Based on your interest in &quot;AI Copywriting&quot;, we recommend checking out Persona AI.
+ {t("tools.suggestedForYou")}
  </p>
- <button className="text-[10px] font-bold uppercase tracking-wider text-hig-blue underline decoration-2 underline-offset-4">View Suggestion</button>
+ <button className="text-[10px] font-bold uppercase tracking-wider text-hig-blue underline decoration-2 underline-offset-4">{t("tools.viewSuggestion")}</button>
  </div>
  </aside>
 
@@ -71,7 +73,7 @@ export default function ToolsPage() {
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
  className="w-full bg-[var(--muted)] rounded-2xl py-3 pl-12 pr-6 text-[var(--foreground)] placeholder:text-secondary focus:ring-2 focus:ring-hig-blue/20 shadow-none transition-all font-medium"
- placeholder="Search tools..."
+ placeholder={t("tools.searchPlaceholder")}
  />
  </div>
  <div className="flex items-center gap-3">
@@ -91,7 +93,7 @@ export default function ToolsPage() {
  </div>
  <button className="hig-button-secondary text-sm flex items-center gap-2 py-3">
  <Sliders className="w-4 h-4" />
- Sort
+ {t("tools.sort")}
  </button>
  </div>
  </div>
@@ -135,7 +137,7 @@ export default function ToolsPage() {
 
  <div className="flex items-center gap-3 pt-6">
  <button className="flex-1 bg-hig-blue text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-sm">
- Connect <ArrowRight className="w-4 h-4" />
+ {t("tools.connect")} <ArrowRight className="w-4 h-4" />
  </button>
  <button className="px-5 py-3 rounded-xl text-tertiary hover:text-hig-blue hover: transition-all">
  <ExternalLink className="w-4 h-4" />
@@ -161,8 +163,8 @@ export default function ToolsPage() {
  </div>
  <div className="flex items-center gap-4 shrink-0">
  <div className="text-right hidden sm:block">
- <div className="text-sm font-bold text-[var(--foreground)] dark:text-white">Free Trial</div>
- <div className="text-[10px] text-[var(--foreground)] font-bold">Starts at $29/mo</div>
+ <div className="text-sm font-bold text-[var(--foreground)] dark:text-white">{t("tools.freeTrial")}</div>
+ <div className="text-[10px] text-[var(--foreground)] font-bold">{t("tools.startsAt")} $29/mo</div>
  </div>
  <div className="p-3 rounded-full bg-hig-blue/10 text-hig-blue group-hover:bg-hig-blue group-hover:text-white transition-all">
  <ArrowRight className="w-5 h-5" />

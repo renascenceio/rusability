@@ -1,11 +1,15 @@
 "use client";
 
+"use client";
+
 import { User, Settings, Sparkles, Heart, Clock, Sliders, ChevronRight, TrendingUp, Users, Target, Edit3, BookOpen, MessageCircle, FileText, Trash2, Shield, Bell, ArrowRight} from"lucide-react";
 import { CURRENT_USER} from"@/lib/data";
 import Link from"next/link";
 import { useState} from"react";
+import { useTranslation } from "@/lib/i18n/context";
 
 export default function ProfilePage() {
+ const { t } = useTranslation();
  const user = CURRENT_USER;
  type TabId ="saved" |"drafts" |"published" |"activity";
  const [activeTab, setActiveTab] = useState<TabId>("saved");
@@ -13,10 +17,10 @@ export default function ProfilePage() {
  const INTERESTS = user.interests;
 
  const tabs: { id: TabId; label: string; icon: React.ElementType}[] = [
- { id:"saved", label:"Saved Articles", icon: Heart},
- { id:"drafts", label:"My Drafts", icon: FileText},
- { id:"published", label:"Published", icon: BookOpen},
- { id:"activity", label:"Activity", icon: TrendingUp},
+ { id:"saved", label: t("profile.savedArticles"), icon: Heart},
+ { id:"drafts", label: t("profile.myDrafts"), icon: FileText},
+ { id:"published", label: t("profile.published"), icon: BookOpen},
+ { id:"activity", label: t("profile.activity"), icon: TrendingUp},
  ];
 
  const contentMap = {
@@ -56,7 +60,7 @@ export default function ProfilePage() {
  <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--foreground)]">{user.name}</h1>
  {isPro && (
  <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-amber-500/20">
- Pro Member
+ {t("profile.proMember")}
  </div>
  )}
  </div>
@@ -65,10 +69,10 @@ export default function ProfilePage() {
  </p>
  </div>
  <div className="flex items-center justify-center md:justify-start gap-4">
- <button className="hig-button-primary px-8">Follow</button>
+ <button className="hig-button-primary px-8">{t("profile.follow")}</button>
  <button className="hig-button-secondary flex items-center gap-2">
  <Settings className="w-4 h-4" />
- Account
+ {t("profile.account")}
  </button>
  <button className="p-3 rounded-full text-secondary hover:text-hig-blue transition-colors">
  <Bell className="w-5 h-5" />
@@ -93,7 +97,7 @@ export default function ProfilePage() {
  ))}
  </div>
  <Link href="/editor" className="hidden md:flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-hig-blue hover:underline mb-4">
- <Edit3 className="w-4 h-4" /> New Article
+ <Edit3 className="w-4 h-4" /> {t("profile.newArticle")}
  </Link>
  </div>
 
@@ -128,7 +132,7 @@ export default function ProfilePage() {
  </div>
  <div className="flex items-center gap-4 text-[10px] text-[var(--foreground)] font-black uppercase tracking-widest">
  <span className="text-hig-blue">{article.cat}</span>
- <span className="text-[var(--foreground)] dark:text-[var(--foreground)]">Updated today</span>
+ <span className="text-[var(--foreground)] dark:text-[var(--foreground)]">{t("profile.updatedToday")}</span>
  </div>
  </div>
  <div className="p-3 text-hig-blue bg-hig-blue/5 rounded-xl transition-all group-hover:scale-110">
@@ -143,7 +147,7 @@ export default function ProfilePage() {
  <h3 className="font-black text-lg group-hover:text-hig-blue transition-colors text-[var(--foreground)]">{article.title}</h3>
  <div className="flex items-center gap-4 text-[10px] text-[var(--foreground)] font-black uppercase tracking-widest">
  <span className="text-hig-blue">{article.cat}</span>
- <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> {article.views} views</span>
+ <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> {article.views} {t("profile.views")}</span>
  <span className="text-[var(--foreground)] dark:text-[var(--foreground)]">{article.date}</span>
  </div>
  </div>
@@ -174,18 +178,18 @@ export default function ProfilePage() {
  <div className="flex items-center justify-between">
  <h3 className="text-2xl font-bold tracking-tight flex items-center gap-3 text-[var(--foreground)]">
  <BookOpen className="w-6 h-6 text-hig-blue" />
- Performance Pulse
+ {t("profile.performancePulse")}
  </h3>
  <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full">
  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Live Optimization</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">{t("profile.liveOptimization")}</span>
  </div>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
  <div className="hig-card p-8 space-y-4 relative overflow-hidden group">
  <div className="flex items-center gap-2 text-secondary group-hover:text-hig-blue transition-colors">
  <TrendingUp className="w-4 h-4" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Total Readership</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">{t("profile.totalReadership")}</span>
  </div>
  <p className="text-4xl font-bold text-[var(--foreground)]">42.8K</p>
  <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-[10px] uppercase">
@@ -195,21 +199,21 @@ export default function ProfilePage() {
  <div className="hig-card p-8 space-y-4 group">
  <div className="flex items-center gap-2 text-secondary group-hover:text-hig-blue transition-colors">
  <Target className="w-4 h-4" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Conversion Rate</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">{t("profile.conversionRate")}</span>
  </div>
  <p className="text-4xl font-bold text-[var(--foreground)]">8.2%</p>
  <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-[10px] uppercase">
- Peak Performance
+ {t("profile.peakPerformance")}
  </div>
  </div>
  <div className="hig-card p-8 space-y-4 group">
  <div className="flex items-center gap-2 text-secondary group-hover:text-hig-blue transition-colors">
  <Users className="w-4 h-4" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Total Followers</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">{t("profile.totalFollowers")}</span>
  </div>
  <p className="text-4xl font-bold text-[var(--foreground)]">12.1K</p>
  <div className="flex items-center gap-1.5 text-secondary font-bold text-[10px] uppercase">
- Growing Network
+ {t("profile.growingNetwork")}
  </div>
  </div>
  </div>
@@ -220,7 +224,7 @@ export default function ProfilePage() {
  <aside className="space-y-12">
  <div className="hig-card p-8">
  <div className="flex items-center justify-between mb-8">
- <h3 className="text-lg font-bold uppercase tracking-widest text-secondary">Interests</h3>
+ <h3 className="text-lg font-bold uppercase tracking-widest text-secondary">{t("profile.interests")}</h3>
  <button className="p-2 text-secondary hover:text-hig-blue transition-colors">
  <Sliders className="w-4 h-4" />
  </button>
@@ -234,7 +238,7 @@ export default function ProfilePage() {
  ))}
  </div>
 
- <button className="w-full mt-10 hig-button-secondary py-3 text-xs uppercase tracking-[0.2em] font-bold">Add Topic</button>
+ <button className="w-full mt-10 hig-button-secondary py-3 text-xs uppercase tracking-[0.2em] font-bold">{t("profile.addTopic")}</button>
  </div>
 
  <div className="p-8 hig-card bg-[var(--foreground)] text-[var(--background)] relative overflow-hidden group">
@@ -243,11 +247,11 @@ export default function ProfilePage() {
  <div className="w-10 h-10 rounded-xl bg-hig-blue flex items-center justify-center shadow-lg shadow-hig-blue/20">
  <Shield className="w-5 h-5 text-white" />
  </div>
- <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-[var(--background)]">Professional Identity</h3>
+ <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-[var(--background)]">{t("profile.professionalIdentity")}</h3>
  </div>
  <div className="space-y-6">
  <div className="space-y-2">
- <span className="text-[9px] font-black uppercase tracking-widest text-hig-blue">Primary Toolkit</span>
+ <span className="text-[9px] font-black uppercase tracking-widest text-hig-blue">{t("profile.primaryToolkit")}</span>
  <div className="flex items-center gap-4">
  <span className="text-sm font-bold">Persona AI</span>
  <div className="h-1 flex-1 bg-[var(--background)] /10 rounded-full overflow-hidden">
@@ -265,7 +269,7 @@ export default function ProfilePage() {
  </div>
  </div>
  <button className="w-full mt-10 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--background)] hover:text-hig-blue transition-colors pb-4 text-left flex items-center justify-between group">
- Certifications <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+ {t("profile.certifications")} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
  </button>
  </div>
  <div className="absolute top-0 right-0 w-32 h-32 bg-hig-blue/20 blur-[80px] -z-0" />

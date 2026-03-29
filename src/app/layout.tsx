@@ -4,6 +4,8 @@ import"./globals.css";
 import { Header} from"@/components/Header";
 import { Footer} from"@/components/Footer";
 import { ThemeProvider} from"@/components/providers/ThemeProvider";
+import { LanguageProvider } from "@/lib/i18n/context";
+import { getSiteSettings } from "@/lib/settings";
 
 const geistSans = Geist({
  variable:"--font-geist-sans",
@@ -20,41 +22,48 @@ const playfair = Playfair_Display({
  subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
- title:"rusability | Marketing Intelligence",
- description:"Magazine for marketing, PR, and industry professionals. AI-powered insights and tools.",
- metadataBase: new URL('https://rusability.vercel.app'),
- openGraph: {
- title:'rusability | Marketing Intelligence',
- description:'Magazine for marketing, PR, and industry professionals. AI-powered insights and tools.',
- url:'https://rusability.vercel.app',
- siteName:'rusability',
- images: [
- {
- url:'/og-image.jpg',
- width: 1200,
- height: 630,
- alt:'rusability magazine',
-},
- ],
- locale:'en_US',
- type:'website',
-},
- twitter: {
- card:'summary_large_image',
- title:'rusability | Marketing Intelligence',
- description:'Magazine for marketing, PR, and industry professionals. AI-powered insights and tools.',
- images: ['/og-image.jpg'],
-},
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const isRu = settings.default_language === "ru";
 
-export default function RootLayout({
+  return {
+    title: isRu ? settings.site_title_ru : settings.site_title_en,
+    description: isRu ? settings.site_description_ru : settings.site_description_en,
+    metadataBase: new URL('https://rusability.vercel.app'),
+    openGraph: {
+      title: isRu ? settings.site_title_ru : settings.site_title_en,
+      description: isRu ? settings.site_description_ru : settings.site_description_en,
+      url: 'https://rusability.vercel.app',
+      siteName: 'rusability',
+      images: [
+        {
+          url: settings.og_image,
+          width: 1200,
+          height: 630,
+          alt: 'rusability magazine',
+        },
+      ],
+      locale: 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: isRu ? settings.site_title_ru : settings.site_title_en,
+      description: isRu ? settings.site_description_ru : settings.site_description_en,
+      images: [settings.og_image],
+    },
+  };
+}
+
+export default async function RootLayout({
  children,
 }: Readonly<{
  children: React.ReactNode;
 }>) {
+  const settings = await getSiteSettings();
+
  return (
- <html lang="en" suppressHydrationWarning>
+ <html lang={settings.default_language} suppressHydrationWarning>
  <head>
  <script
  type="application/ld+json"
@@ -75,6 +84,7 @@ export default function RootLayout({
  />
  </head>
  <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased selection:bg-hig-blue selection:text-white`}>
+ <LanguageProvider initialLocale={settings.default_language}>
  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
  <Header />
  <main className="min-h-screen pt-16">
@@ -82,6 +92,7 @@ export default function RootLayout({
  </main>
  <Footer />
  </ThemeProvider>
+ </LanguageProvider>
  </body>
  </html>
  );

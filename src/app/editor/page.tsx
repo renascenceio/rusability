@@ -4,8 +4,10 @@ import { useState, useRef, useEffect} from"react";
 import { Image as ImageIcon, Send, Sparkles, X, ChevronDown, Check, Wand2, Eye, Bold, Italic, Link as LinkIcon, Quote} from"lucide-react";
 import Link from"next/link";
 import Image from"next/image";
+import { useTranslation } from "@/lib/i18n/context";
 
 export default function EditorPage() {
+ const { t } = useTranslation();
  const [isPublishing, setIsPublishing] = useState(false);
  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
  const [selectedCategory, setSelectedCategory] = useState("Search Strategy");
@@ -88,7 +90,7 @@ export default function EditorPage() {
  <Image src={coverImage} alt="Cover Preview" fill className="object-cover" />
  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
  <div className="p-4 rounded-full bg-[var(--card-bg-solid)] text-hig-blue font-bold text-xs uppercase tracking-widest flex items-center gap-2 shadow-2xl scale-90 group-hover:scale-100 transition-transform">
- <ImageIcon className="w-5 h-5" /> Change Cover Photo
+ <ImageIcon className="w-5 h-5" /> {t("editor.changeCover")}
  </div>
  </div>
  </>
@@ -98,8 +100,8 @@ export default function EditorPage() {
  <ImageIcon className="w-10 h-10 text-hig-blue" />
  </div>
  <div className="text-center space-y-2">
- <p className="text-xl font-bold text-[var(--foreground)] tracking-tight">Add an evocative cover image</p>
- <p className="text-sm text-secondary font-bold uppercase tracking-widest">1600 x 900px recommended. Max 10MB.</p>
+ <p className="text-xl font-bold text-[var(--foreground)] tracking-tight">{t("editor.addCover")}</p>
+ <p className="text-sm text-secondary font-bold uppercase tracking-widest">{t("editor.coverDesc")}</p>
  </div>
  </>
  )}
@@ -125,7 +127,7 @@ export default function EditorPage() {
 
  {showCategoryMenu && (
  <div className="absolute top-full left-0 mt-3 w-72 hig-card p-2 z-50 bg-[var(--card-bg)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-300 shadow-2xl ring-1 ring-black/5">
- <div className="p-3 text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">Select Category</div>
+ <div className="p-3 text-[10px] font-bold uppercase tracking-widest text-secondary mb-2">{t("editor.selectCategory")}</div>
  {categories.map((cat) => (
  <button
  key={cat}
@@ -146,7 +148,7 @@ export default function EditorPage() {
  {/* Functional Inputs */}
  <textarea
  ref={titleRef}
- placeholder="Type your compelling headliner"
+ placeholder={t("editor.titlePlaceholder")}
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  className="w-full text-3xl md:text-6xl font-bold bg-transparent outline-none placeholder:text-secondary/30 resize-none leading-[1.1] tracking-tight py-2 overflow-hidden text-[var(--foreground)]"
@@ -155,7 +157,7 @@ export default function EditorPage() {
 
  <textarea
  ref={excerptRef}
- placeholder="Sum it up for the home page feed..."
+ placeholder={t("editor.excerptPlaceholder")}
  value={excerpt}
  onChange={(e) => setExcerpt(e.target.value)}
  className="w-full text-xl md:text-3xl font-bold text-[var(--foreground)] bg-transparent outline-none placeholder:text-secondary/30 resize-none leading-relaxed pl-10 whitespace-pre-wrap"
@@ -166,7 +168,7 @@ export default function EditorPage() {
  <div className="relative min-h-[600px] pt-10 group/content">
  <textarea
  ref={contentRef}
- placeholder="Tell the story. This is where insights are born. AI is ready to assist..."
+ placeholder={t("editor.contentPlaceholder")}
  value={content}
  onChange={(e) => setContent(e.target.value)}
  className="w-full text-xl md:text-2xl font-bold text-[var(--foreground)] bg-transparent outline-none placeholder:text-secondary/30 resize-none h-full min-h-[600px] leading-relaxed selection:bg-hig-blue/10 whitespace-pre-wrap body-serif"
@@ -213,7 +215,7 @@ export default function EditorPage() {
  setContent(prev => prev +"\n\nAI Analysis: This section could benefit from more data-driven examples.");
 }}
  className="p-3 rounded-full hover:bg-hig-blue hover:text-white text-hig-blue transition-all"
- title="AI Enhance"
+ title={t("editor.aiEnhance")}
  >
  <Wand2 className="w-4 h-4" />
  </button>
@@ -223,7 +225,7 @@ export default function EditorPage() {
  setContent("AI is rewriting...");
  setTimeout(() => setContent(content +"\n\n(AI Rewrite complete)"), 1000);
 }}
- className="p-3 rounded-full hover:bg-hig-blue hover:text-white text-hig-blue transition-all" title="AI Rewrite">
+ className="p-3 rounded-full hover:bg-hig-blue hover:text-white text-hig-blue transition-all" title={t("editor.aiRewrite")}>
  <Sparkles className="w-4 h-4" />
  </button>
  </div>
@@ -231,15 +233,15 @@ export default function EditorPage() {
 
  <div className="flex items-center gap-10 flex-1 justify-center px-10">
  <div className="flex flex-col items-center">
- <span className="text-[10px] font-bold uppercase tracking-tighter text-hig-blue">Editing</span>
- <span className="text-[10px] font-bold text-tertiary">Saved 12:42</span>
+ <span className="text-[10px] font-bold uppercase tracking-tighter text-hig-blue">{t("editor.editing")}</span>
+ <span className="text-[10px] font-bold text-tertiary">{t("editor.lastSaved")} 12:42</span>
  </div>
  <div className="flex flex-col items-center pl-10">
- <span className="text-[10px] font-bold uppercase text-secondary leading-none">Words</span>
+ <span className="text-[10px] font-bold uppercase text-secondary leading-none">{t("editor.words")}</span>
  <span className="text-sm font-bold text-[var(--foreground)] mt-1">{content.split(/\s+/).filter(Boolean).length}</span>
  </div>
  <div className="flex flex-col items-center pl-10">
- <span className="text-[10px] font-bold uppercase text-secondary leading-none">Read</span>
+ <span className="text-[10px] font-bold uppercase text-secondary leading-none">{t("editor.read")}</span>
  <span className="text-sm font-bold text-[var(--foreground)] mt-1">{Math.ceil(content.split(/\s+/).filter(Boolean).length / 200)}m</span>
  </div>
  </div>
@@ -253,7 +255,7 @@ export default function EditorPage() {
  disabled={isPublishing}
  className="hig-button-primary px-8 flex items-center gap-3"
  >
- {isPublishing ?"..." :"Publish Now"} <Send className="w-4 h-4" />
+ {isPublishing ?"..." : t("editor.publishNow")} <Send className="w-4 h-4" />
  </button>
  </div>
  </div>

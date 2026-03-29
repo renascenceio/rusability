@@ -38,14 +38,39 @@ export interface Tool {
  link: string;
 }
 
+export interface SiteSettings {
+ id: string;
+ default_language: 'en' | 'ru';
+ site_title_en: string;
+ site_title_ru: string;
+ site_description_en: string;
+ site_description_ru: string;
+ og_image: string;
+ analytics_id?: string;
+}
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// Mock Site Settings Initial State
+const MOCK_SITE_SETTINGS: SiteSettings = {
+ id: 'global-settings',
+ default_language: 'en',
+ site_title_en: 'rusability | Marketing Intelligence',
+ site_title_ru: 'rusability | Маркетинговая разведка',
+ site_description_en: 'Magazine for marketing, PR, and industry professionals. AI-powered insights and tools.',
+ site_description_ru: 'Журнал для профессионалов в сфере маркетинга, PR и индустрии. Идеи и инструменты на базе ИИ.',
+ og_image: '/og-image.jpg',
+};
+
 // Mock Supabase Client
 export const supabase = {
- from: (_table: string) => ({
+ from: (table: string) => ({
  select: (_query: string ="*") => ({
  eq: (_column: string, _value: any) => ({
- single: async () => ({ data: null, error: null}),
+ single: async () => {
+ if (table === 'site_settings') return { data: MOCK_SITE_SETTINGS, error: null };
+ return { data: null, error: null };
+},
  limit: async (_n: number) => ({ data: [], error: null}),
 }),
  order: (_column: string, { ascending: _ascending}: { ascending: boolean}) => ({
@@ -53,6 +78,12 @@ export const supabase = {
 }),
 }),
  insert: async (data: any) => ({ data, error: null}),
- update: async (data: any) => ({ data, error: null}),
+ update: async (data: any) => {
+ if (table === 'site_settings') {
+ Object.assign(MOCK_SITE_SETTINGS, data);
+ return { data: MOCK_SITE_SETTINGS, error: null };
+}
+ return { data, error: null };
+},
 }),
 };

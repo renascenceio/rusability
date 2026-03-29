@@ -23,11 +23,16 @@ import {
  SearchCode,
  LineChart,
  Target,
- ArrowUpRight
+ ArrowUpRight,
+ Languages
 } from"lucide-react";
 import Image from"next/image";
+import { useTranslation } from "@/lib/i18n/context";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
+ const router = useRouter();
+ const { t } = useTranslation();
  const [activeTab, setActiveTab] = useState("analytics");
  const [activeAnalyticsSubTab, setActiveAnalyticsSubTab] = useState("overview");
  const [searchQuery, setSearchQuery] = useState("");
@@ -46,14 +51,16 @@ export default function AdminDashboard() {
 };
 
  const tabs = [
- { id:"analytics", label:"Analytics", icon: BarChart3},
- { id:"ai-moderation", label:"AI Auto-Editor", icon: ShieldAlert},
- { id:"seo", label:"SEO Product", icon: Globe},
- { id:"news-auto", label:"Auto-News", icon: Zap},
- { id:"content", label:"Articles", icon: FileText},
- { id:"users", label:"Users", icon: Users},
- { id:"support", label:"Support", icon: LifeBuoy},
- { id:"brand", label:"Brand", icon: Palette},
+ { id:"analytics", label: t("admin.tab.analytics"), icon: BarChart3},
+ { id:"ai-moderation", label: t("admin.tab.aiEditor"), icon: ShieldAlert},
+ { id:"seo", label: t("admin.tab.seo"), icon: Globe},
+ { id:"news-auto", label: t("admin.tab.news"), icon: Zap},
+ { id:"content", label: t("admin.tab.articles"), icon: FileText},
+ { id:"users", label: t("admin.tab.users"), icon: Users},
+ { id:"support", label: t("admin.tab.support"), icon: LifeBuoy},
+ { id:"brand", label: t("admin.tab.brand"), icon: Palette},
+ { id:"settings", label: t("admin.settings"), icon: Settings2, link:"/admin/settings"},
+ { id:"translations", label: t("admin.translations"), icon: Languages, link:"/admin/translations"},
  ];
 
  return (
@@ -65,8 +72,8 @@ export default function AdminDashboard() {
  <div className="space-y-1">
  <div className="px-5 py-8 mb-10 bg-amber-400/5 rounded-[32px] relative overflow-hidden group/admin">
  <div className="relative z-10">
- <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-600 mb-2">Super Admin Access</h2>
- <p className="text-lg font-bold text-[var(--foreground)] italic leading-tight">Global Controller</p>
+ <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-600 mb-2">{t("admin.superAccess")}</h2>
+ <p className="text-lg font-bold text-[var(--foreground)] italic leading-tight">{t("admin.globalController")}</p>
  </div>
  <ShieldCheck className="absolute -right-4 -bottom-4 w-20 h-20 text-amber-500/10 rotate-12 group-hover/admin:scale-110 transition-transform duration-700" />
  </div>
@@ -74,7 +81,10 @@ export default function AdminDashboard() {
  {tabs.map((tab) => (
  <button
  key={tab.id}
- onClick={() => setActiveTab(tab.id)}
+ onClick={() => {
+ if ('link' in tab) router.push((tab as { link: string }).link);
+ else setActiveTab(tab.id);
+}}
  className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-bold transition-all group relative overflow-hidden ${ activeTab === tab.id ?"bg-hig-blue text-white shadow-lg shadow-hig-blue/20" :"text-secondary hover:text-hig-blue hover:bg-hig-blue/5"}`}
  >
  <tab.icon className={`w-5 h-5 relative z-10 ${activeTab === tab.id ?"text-white scale-110" :"text-tertiary group-hover:text-hig-blue group-hover:scale-110"} transition-all`} />
@@ -86,7 +96,7 @@ export default function AdminDashboard() {
 
  <div className="pt-8">
  <button className="flex items-center gap-3 text-secondary hover:text-rose-500 text-[10px] font-bold uppercase tracking-widest px-5 py-4 transition-all hover:translate-x-1">
- <Trash2 className="w-4 h-4" /> Reset Environment
+ <Trash2 className="w-4 h-4" /> {t("admin.resetEnv")}
  </button>
  </div>
  </aside>
@@ -101,9 +111,9 @@ export default function AdminDashboard() {
  <header className="space-y-2">
  <div className="flex items-center gap-3 text-hig-blue text-[10px] font-bold uppercase tracking-[0.3em]">
  <LineChart className="w-4 h-4" />
- Analytics Intelligence
+ {t("admin.analyticsIntel")}
  </div>
- <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)] hover:text-hig-blue cursor-default transition-colors">System Velocity.</h1>
+ <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)] hover:text-hig-blue cursor-default transition-colors">{t("admin.systemVelocity")}.</h1>
  </header>
  <div className="flex bg-[var(--muted)] p-1.5 rounded-2xl shadow-sm">
  {["overview","users","authors","content"].map((sub) => (
@@ -144,11 +154,11 @@ export default function AdminDashboard() {
  <div className="lg:col-span-2 hig-card p-10 h-[500px] flex flex-col justify-between">
  <div className="flex items-center justify-between mb-10">
  <h3 className="text-2xl font-bold tracking-tight flex items-center gap-3 italic text-[var(--foreground)]">
- Traffic Flow
+ {t("admin.trafficFlow")}
  </h3>
  <div className="flex items-center gap-2">
  <span className="w-2 h-2 rounded-full bg-hig-blue animate-pulse" />
- <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">Live Stream</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">{t("admin.liveStream")}</span>
  </div>
  </div>
  <div className="flex-1 flex items-end gap-4 pb-8">
@@ -168,7 +178,7 @@ export default function AdminDashboard() {
  <div className="hig-card p-10 h-[500px] flex flex-col">
  <div className="flex items-center justify-between mb-10 pb-6">
  <h3 className="text-2xl font-bold tracking-tight flex items-center gap-3 italic text-[var(--foreground)]">
- Top Performers
+ {t("admin.topPerformers")}
  </h3>
  <Sparkles className="w-5 h-5 text-amber-500" />
  </div>
@@ -204,9 +214,9 @@ export default function AdminDashboard() {
  <div className="space-y-2">
  <div className="flex items-center gap-3 text-rose-500 text-[10px] font-bold uppercase tracking-[0.3em]">
  <ShieldAlert className="w-4 h-4" />
- Safety Protocol V4
+ {t("admin.safetyProtocol")}
  </div>
- <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)]">Autonomous Guard.</h1>
+ <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)]">{t("admin.autonomousGuard")}.</h1>
  </div>
  <div className="flex gap-4">
  <div className="flex items-center gap-4 bg-[var(--muted)] px-6 py-3 rounded-2xl">
@@ -217,7 +227,7 @@ export default function AdminDashboard() {
  </div>
  <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">3 AI Agents Active</span>
  </div>
- <button className="hig-button-primary">Sync Core</button>
+ <button className="hig-button-primary">{t("admin.syncCore")}</button>
  </div>
  </header>
 
@@ -227,11 +237,11 @@ export default function AdminDashboard() {
  <div className="bg-[var(--muted)] p-6 flex items-center justify-between">
  <div className="flex items-center gap-4 flex-1">
  <SearchCode className="w-5 h-5 text-secondary" />
- <input placeholder="Search audit logs by signature..." className="bg-transparent outline-none text-sm w-full font-medium text-[var(--foreground)]" />
+ <input placeholder={t("admin.searchLogs")} className="bg-transparent outline-none text-sm w-full font-medium text-[var(--foreground)]" />
  </div>
  <div className="flex items-center gap-2">
- <button className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase bg-[var(--card-bg-solid)] text-secondary">Clear Logs</button>
- <button className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase bg-hig-blue text-white shadow-sm">Export Report</button>
+ <button className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase bg-[var(--card-bg-solid)] text-secondary">{t("admin.clearLogs")}</button>
+ <button className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase bg-hig-blue text-white shadow-sm">{t("admin.exportReport")}</button>
  </div>
  </div>
                         <div className="space-y-4 p-4">
@@ -271,7 +281,7 @@ export default function AdminDashboard() {
  <div className="relative z-10 space-y-10">
  <div className="flex items-center gap-4">
  <ShieldAlert className="w-8 h-8 text-rose-500" />
- <h3 className="font-bold text-xl italic text-[var(--foreground)]">Core Rules</h3>
+ <h3 className="font-bold text-xl italic text-[var(--foreground)]">{t("admin.coreRules")}</h3>
  </div>
  <div className="space-y-6">
  {[
@@ -291,7 +301,7 @@ export default function AdminDashboard() {
  </div>
  ))}
  </div>
- <button className="w-full hig-button-primary py-4 text-[10px] hover:scale-105 transition-transform">Update Global Protocol</button>
+ <button className="w-full hig-button-primary py-4 text-[10px] hover:scale-105 transition-transform">{t("admin.updateProtocol")}</button>
  </div>
  <ShieldCheck className="absolute -left-10 -bottom-10 w-40 h-40 text-tertiary opacity-5 -rotate-12 group-hover:scale-125 transition-transform duration-1000" />
  </div>
@@ -307,9 +317,9 @@ export default function AdminDashboard() {
  <div className="space-y-2">
  <div className="flex items-center gap-3 text-hig-blue text-[10px] font-bold uppercase tracking-[0.3em]">
  <Target className="w-4 h-4" />
- Network Intelligence
+ {t("admin.networkIntel")}
  </div>
- <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)]">Access Control.</h1>
+ <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)]">{t("admin.accessControl")}.</h1>
  </div>
  <div className="flex gap-4">
  <div className="relative">
@@ -317,13 +327,13 @@ export default function AdminDashboard() {
  <input
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
- placeholder="Search users..."
+ placeholder={t("admin.tab.users")}
  className="bg-[var(--muted)] rounded-2xl py-3 pl-12 pr-6 text-sm font-medium w-80 focus:ring-2 focus:ring-hig-blue/20 transition-all text-[var(--foreground)]"
  />
  </div>
  <button className="hig-button-primary flex items-center gap-3 px-8">
  <UserPlus className="w-5 h-5" />
- <span className="text-[10px] uppercase tracking-widest">New User</span>
+ <span className="text-[10px] uppercase tracking-widest">{t("admin.newUser")}</span>
  </button>
  </div>
  </header>
@@ -332,11 +342,11 @@ export default function AdminDashboard() {
  <table className="w-full text-left">
  <thead>
  <tr className="bg-[var(--muted)] /50 text-[10px] font-bold uppercase tracking-[0.3em] text-secondary">
- <th className="px-10 py-8">Entity Profile</th>
- <th className="px-10 py-8">Authorization</th>
- <th className="px-10 py-8">Connection</th>
- <th className="px-10 py-8">Activity Score</th>
- <th className="px-10 py-8 text-right">Admin Actions</th>
+ <th className="px-10 py-8">{t("admin.entityProfile")}</th>
+ <th className="px-10 py-8">{t("admin.authorization")}</th>
+ <th className="px-10 py-8">{t("admin.connection")}</th>
+ <th className="px-10 py-8">{t("admin.activityScore")}</th>
+ <th className="px-10 py-8 text-right">{t("admin.adminActions")}</th>
  </tr>
  </thead>
                      <tbody>
@@ -400,10 +410,10 @@ export default function AdminDashboard() {
  {/* Interactive Config Panel */}
  <div className="lg:col-span-2 hig-card p-10 space-y-8">
  <div className="flex items-center justify-between">
- <h3 className="text-2xl font-bold tracking-tight italic text-[var(--foreground)]">Engine Configuration</h3>
+ <h3 className="text-2xl font-bold tracking-tight italic text-[var(--foreground)]">{t("admin.engineConfig")}</h3>
  <div className="flex items-center gap-2">
  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
- <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">System Ready</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">{t("admin.systemReady")}</span>
  </div>
  </div>
 
@@ -432,8 +442,8 @@ export default function AdminDashboard() {
  </div>
 
  <div className="flex gap-4">
- <button className="hig-button-primary flex-1">Save Global Config</button>
- <button className="hig-button-secondary bg-[var(--muted)] flex-1 text-secondary hover:text-hig-blue transition-colors">Reset Defaults</button>
+ <button className="hig-button-primary flex-1">{t("admin.saveGlobal")}</button>
+ <button className="hig-button-secondary bg-[var(--muted)] flex-1 text-secondary hover:text-hig-blue transition-colors">{t("admin.resetDefaults")}</button>
  </div>
  </div>
 
@@ -444,7 +454,7 @@ export default function AdminDashboard() {
  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
  <Sparkles className="w-6 h-6 text-white" />
  </div>
- <h3 className="text-xl font-bold italic">Optimization Score</h3>
+ <h3 className="text-xl font-bold italic">{t("admin.optiScore")}</h3>
  <p className="text-4xl font-bold tracking-tighter">98.2</p>
  <p className="text-xs text-white/70 font-medium leading-relaxed">Your current {activeTab} strategy is performing in the top 1% of the industry.</p>
  </div>
@@ -452,7 +462,7 @@ export default function AdminDashboard() {
  </div>
 
  <div className="hig-card p-10 space-y-6">
- <h4 className="text-[10px] font-bold uppercase tracking-widest text-secondary">Recent Audit Logs</h4>
+ <h4 className="text-[10px] font-bold uppercase tracking-widest text-secondary">{t("admin.recentLogs")}</h4>
  <div className="space-y-4">
  {[
  { event:"Global SEO Re-index", time:"2m ago"},
@@ -465,7 +475,7 @@ export default function AdminDashboard() {
  </div>
  ))}
  </div>
- <button className="w-full py-3 bg-[var(--muted)] text-secondary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-hig-blue transition-colors">View All Logs</button>
+ <button className="w-full py-3 bg-[var(--muted)] text-secondary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-hig-blue transition-colors">{t("admin.viewAllLogs")}</button>
  </div>
  </div>
  </div>

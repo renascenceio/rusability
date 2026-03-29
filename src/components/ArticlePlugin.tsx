@@ -1,7 +1,10 @@
+"use client";
+
 import React from"react";
 import Image from"next/image";
 import Link from"next/link";
 import { ArrowUpRight, Sparkles, Flame, Zap} from"lucide-react";
+import { useTranslation} from "@/lib/i18n/context";
 
 interface ArticlePluginProps {
  type:"tool" |"article" |"news";
@@ -19,6 +22,7 @@ interface ArticlePluginProps {
 }
 
 export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout ="horizontal"}) => {
+ const { t } = useTranslation();
  const isTool = type ==="tool";
  const isNews = type ==="news";
  const title = isTool ? data.name : data.title;
@@ -49,14 +53,14 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
  <Image src={data.image} alt={title ||""} fill className="object-cover transition-transform duration-700 group-hover/vertical:scale-110" />
  <div className="absolute top-4 left-4 bg-hig-blue text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-2 shadow-lg">
  <Zap className="w-3 h-3 fill-white" />
- {isTool ?"TOOL" :"PERSPECTIVE"}
+ {isTool ? t("article.tool") : t("article.perspective")}
  </div>
  </div>
  <div className="p-8 space-y-4">
  <h4 className="text-xl font-bold leading-tight group-hover/vertical:text-hig-blue transition-colors text-[var(--foreground)]">{title}</h4>
  <p className="text-sm text-secondary leading-relaxed line-clamp-3 font-medium">{data.description}</p>
  <Link href={href} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-hig-blue pt-4">
- Explore Now <ArrowUpRight className="w-4 h-4" />
+ {t("article.exploreNow")} <ArrowUpRight className="w-4 h-4" />
  </Link>
  </div>
  </div>
@@ -77,7 +81,7 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
  <div className="flex-1 p-8 flex flex-col justify-center space-y-4">
  <div className="flex items-center gap-2 text-hig-blue font-bold text-[10px] uppercase tracking-widest">
  <Sparkles className="w-3 h-3" />
- <span>Featured {isTool ?"Resource" : (isNews ?"Briefing" :"Perspective")}</span>
+ <span>{isTool ? t("article.featuredResource") : (isNews ? t("article.featuredBriefing") : t("article.featuredPerspective"))}</span>
  </div>
  <h4 className="text-xl font-bold text-[var(--foreground)] group-hover/plugin:text-hig-blue transition-colors">
  {title}
@@ -89,7 +93,7 @@ export const ArticlePlugin: React.FC<ArticlePluginProps> = ({ type, data, layout
  href={href}
  className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-hig-blue pt-2 group/link"
  >
- Explore Now
+ {t("article.exploreNow")}
  <ArrowUpRight className="w-4 h-4 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
  </Link>
  </div>

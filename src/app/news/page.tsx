@@ -1,10 +1,14 @@
+"use client";
+
 import { Clock, TrendingUp, Sparkles, Filter, Newspaper, Flame, Zap, BrainCircuit} from"lucide-react";
 import Link from"next/link";
 import { CURRENT_USER} from"@/lib/data";
 import { ArticlePlugin} from"@/components/ArticlePlugin";
 import { getPersonalizedNews, getPersonalizedFeed} from"@/lib/personalization";
+import { useTranslation } from "@/lib/i18n/context";
 
 export default function NewsPage() {
+ const { t } = useTranslation();
  const personalizedNews = getPersonalizedNews(CURRENT_USER, 10);
  const mainNews = personalizedNews.filter(n => n.isHot).slice(0, 2);
  const regularNews = personalizedNews.filter(n => !n.isHot || !mainNews.find(m => m.id === n.id));
@@ -15,13 +19,13 @@ export default function NewsPage() {
  <header className="space-y-6 max-w-3xl">
  <div className="flex items-center gap-3 text-hig-blue font-bold uppercase tracking-[0.2em] text-xs">
  <Newspaper className="w-5 h-5" />
- <span>The Pulse of Marketing</span>
+ <span>{t("news.pulse")}</span>
  </div>
  <h1 className="text-4xl md:text-7xl font-bold tracking-tight leading-tight text-[var(--foreground)]">
- Industry News & Real-time Insights.
+ {t("news.title")}
  </h1>
  <p className="text-xl text-secondary font-medium leading-relaxed">
- Stay ahead of the curve with AI-generated industry briefings and professional analysis.
+ {t("news.subtitle")}
  </p>
  </header>
 
@@ -32,11 +36,11 @@ export default function NewsPage() {
  <div className="flex items-center justify-between pb-6">
  <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3 text-[var(--foreground)]">
  <Flame className="w-6 h-6 text-orange-500" />
- Breaking Now
+ {t("news.breaking")}
  </h2>
  <div className="flex items-center gap-4">
  <button className="text-xs font-bold text-secondary flex items-center gap-2 hover:text-hig-blue transition-colors">
- <Filter className="w-4 h-4" /> Filter By Topic
+ <Filter className="w-4 h-4" /> {t("news.filter")}
  </button>
  </div>
  </div>
@@ -47,14 +51,14 @@ export default function NewsPage() {
  <div className="relative z-10 space-y-6">
  <div className="flex items-center justify-between">
  <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">{news.category}</span>
- <span className="flex items-center gap-2 text-tertiary text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m ago</span>
+ <span className="flex items-center gap-2 text-tertiary text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m {t("news.timeAgo")}</span>
  </div>
  <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-[var(--foreground)]">{news.title}</h3>
  <p className="text-secondary text-sm leading-relaxed font-medium">
- Recent developments in {news.category} are signaling a major shift for enterprise marketers. Analysts suggest immediate action.
+ {t("news.recentDevelopments")}
  </p>
  <div className="pt-4 flex items-center gap-3">
- <button className="hig-button-primary text-[10px] px-6 py-2.5">Full Briefing</button>
+ <button className="hig-button-primary text-[10px] px-6 py-2.5">{t("news.briefing")}</button>
  <button className="hig-button-secondary p-2.5 rounded-full"><Sparkles className="w-4 h-4" /></button>
  </div>
  </div>
@@ -66,7 +70,7 @@ export default function NewsPage() {
 
  <section className="space-y-10">
  <div className="flex items-center justify-between pb-6">
- <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Recent Briefings</h2>
+ <h2 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">{t("news.recentBriefings")}</h2>
  </div>
 
  <div className="space-y-8">
@@ -75,7 +79,7 @@ export default function NewsPage() {
  <div className="flex-1 space-y-4 pt-1">
  <div className="flex items-center gap-3">
  <span className="text-[10px] font-bold uppercase text-hig-blue tracking-widest">{news.category}</span>
- <span className="text-[10px] text-tertiary font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h ago</span>
+ <span className="text-[10px] text-tertiary font-bold uppercase tracking-widest flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> 1h {t("news.timeAgo")}</span>
  </div>
  <h3 className="text-2xl font-bold group-hover:text-hig-blue transition-colors leading-snug text-[var(--foreground)]">{news.title}</h3>
  <p className="text-secondary text-sm leading-relaxed line-clamp-2 font-medium">The latest industry move from {news.category} leaders is expected to impact how digital agencies structure their Q4 outreach campaigns.</p>
@@ -94,7 +98,7 @@ export default function NewsPage() {
  <div className="hig-card p-8 sticky top-24">
  <div className="flex items-center gap-2 mb-8 pb-4">
  <TrendingUp className="w-5 h-5 text-hig-blue" />
- <h3 className="font-bold text-xs uppercase tracking-[0.1em] text-secondary">Deep Dives</h3>
+ <h3 className="font-bold text-xs uppercase tracking-[0.1em] text-secondary">{t("news.deepDives")}</h3>
  </div>
 
  <div className="space-y-10">
@@ -116,7 +120,7 @@ export default function NewsPage() {
 
  <div className="mt-10 pt-8">
  <Link href="/" className="hig-button-primary w-full text-center block text-sm">
- Full Magazine Feed
+ {t("news.fullFeed")}
  </Link>
  </div>
  </div>
@@ -125,12 +129,12 @@ export default function NewsPage() {
  <div className="relative z-10 space-y-4">
  <div className="flex items-center gap-2 text-white font-bold text-[10px] uppercase tracking-widest">
  <BrainCircuit className="w-4 h-4" />
- <span>AI COPILOT</span>
+ <span>{t("news.aiCopilot")}</span>
  </div>
  <p className="text-sm font-bold leading-relaxed">
- I noticed 3 major news events that directly impact your interest in <strong>{CURRENT_USER.interests[0]}</strong>. Shall I prepare a summary?
+ {t("news.aiMessage")}
  </p>
- <button className="w-full text-[10px] font-bold uppercase tracking-widest bg-white text-hig-blue py-3 rounded-full hover:brightness-110 transition-all">Prepare Summary</button>
+ <button className="w-full text-[10px] font-bold uppercase tracking-widest bg-white text-hig-blue py-3 rounded-full hover:brightness-110 transition-all">{t("news.prepareSummary")}</button>
  </div>
  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
  </div>
