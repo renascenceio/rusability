@@ -155,7 +155,7 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  { title: t("search.draftNews"), desc: t("search.currentTrends"), icon: PenTool},
  { title: t("search.analyzeCompetitors"), desc: t("search.patternDetection"), icon: Target}
  ].map((item) => (
- <button key={item.title} className="flex items-center gap-4 p-4 text-left hover:bg-[var(--muted)] rounded-2xl transition-all group hover:">
+ <button key={item.title} className="flex items-center gap-4 p-4 text-left hover:bg-[var(--muted)] rounded-2xl transition-all group">
  <div className="w-10 h-10 rounded-xl bg-hig-blue/10 flex items-center justify-center text-hig-blue group-hover:scale-110 transition-transform">
  <item.icon className="w-5 h-5" />
  </div>
@@ -178,7 +178,7 @@ export const SpotlightSearch = ({ isOpen, onClose}: { isOpen: boolean; onClose: 
  <button
  key={tag}
  onClick={() => setQuery(tag)}
- className="px-4 py-2 bg-[var(--muted)] hover:bg-hig-blue/10 hover:text-hig-blue rounded-full text-sm font-bold transition-all hover:"
+ className="px-4 py-2 bg-[var(--muted)] hover:bg-hig-blue/10 hover:text-hig-blue rounded-full text-sm font-bold transition-all"
  >
  {tag}
  </button>
