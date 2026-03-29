@@ -1,494 +1,478 @@
 "use client";
 
-import { useState } from "react";
+import { useState} from"react";
 import {
-  Users,
-  FileText,
-  BarChart3,
-  ShieldAlert,
-  Globe,
-  Settings2,
-  Palette,
-  Eye,
-  UserPlus,
-  Trash2,
-  Search,
-  Sparkles,
-  Zap,
-  MoreVertical,
-  Flag,
-  PenTool,
-  LifeBuoy,
-  ShieldCheck,
-  SearchCode,
-  LineChart,
-  Target,
-  ArrowUpRight
-} from "lucide-react";
-import Image from "next/image";
+ Users,
+ FileText,
+ BarChart3,
+ ShieldAlert,
+ Globe,
+ Settings2,
+ Palette,
+ Eye,
+ UserPlus,
+ Trash2,
+ Search,
+ Sparkles,
+ Zap,
+ MoreVertical,
+ Flag,
+ PenTool,
+ LifeBuoy,
+ ShieldCheck,
+ SearchCode,
+ LineChart,
+ Target,
+ ArrowUpRight
+} from"lucide-react";
+import Image from"next/image";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("analytics");
-  const [activeAnalyticsSubTab, setActiveAnalyticsSubTab] = useState("overview");
-  const [searchQuery, setSearchQuery] = useState("");
+ const [activeTab, setActiveTab] = useState("analytics");
+ const [activeAnalyticsSubTab, setActiveAnalyticsSubTab] = useState("overview");
+ const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock functional states
-  const [users, setUsers] = useState([
-    { id: 1, name: "John Smith", email: "john@cloudscale.io", role: "free", active: "10m ago", score: 84, img: "https://images.unsplash.com/photo-1599566150163-29194dcaad36" },
-    { id: 2, name: "Sarah Connor", email: "sarah@cyberdyne.net", role: "pro", active: "Now", score: 98, img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330" },
-    { id: 3, name: "David Miller", email: "david@marketing.pro", role: "pro", active: "2h ago", score: 92, img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e" },
-    { id: 4, name: "Emily Watson", email: "emily@gmail.com", role: "free", active: "1d ago", score: 45, img: "https://images.unsplash.com/photo-1580489944761-15a19d654956" },
-    { id: 5, name: "Michael Chang", email: "m.chang@techhub.com", role: "pro", active: "Now", score: 89, img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" },
-  ]);
+ // Mock functional states
+ const [users, setUsers] = useState([
+ { id: 1, name:"John Smith", email:"john@cloudscale.io", role:"free", active:"10m ago", score: 84, img:"https://images.unsplash.com/photo-1599566150163-29194dcaad36"},
+ { id: 2, name:"Sarah Connor", email:"sarah@cyberdyne.net", role:"pro", active:"Now", score: 98, img:"https://images.unsplash.com/photo-1494790108377-be9c29b29330"},
+ { id: 3, name:"David Miller", email:"david@marketing.pro", role:"pro", active:"2h ago", score: 92, img:"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"},
+ { id: 4, name:"Emily Watson", email:"emily@gmail.com", role:"free", active:"1d ago", score: 45, img:"https://images.unsplash.com/photo-1580489944761-15a19d654956"},
+ { id: 5, name:"Michael Chang", email:"m.chang@techhub.com", role:"pro", active:"Now", score: 89, img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"},
+ ]);
 
-  const togglePro = (userId: number) => {
-    setUsers(users.map(u => u.id === userId ? { ...u, role: u.role === 'pro' ? 'free' : 'pro' } : u));
-  };
+ const togglePro = (userId: number) => {
+ setUsers(users.map(u => u.id === userId ? { ...u, role: u.role ==='pro' ?'free' :'pro'} : u));
+};
 
-  const tabs = [
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
-    { id: "ai-moderation", label: "AI Auto-Editor", icon: ShieldAlert },
-    { id: "seo", label: "SEO Product", icon: Globe },
-    { id: "news-auto", label: "Auto-News", icon: Zap },
-    { id: "content", label: "Articles", icon: FileText },
-    { id: "users", label: "Users", icon: Users },
-    { id: "support", label: "Support", icon: LifeBuoy },
-    { id: "brand", label: "Brand", icon: Palette },
-  ];
+ const tabs = [
+ { id:"analytics", label:"Analytics", icon: BarChart3},
+ { id:"ai-moderation", label:"AI Auto-Editor", icon: ShieldAlert},
+ { id:"seo", label:"SEO Product", icon: Globe},
+ { id:"news-auto", label:"Auto-News", icon: Zap},
+ { id:"content", label:"Articles", icon: FileText},
+ { id:"users", label:"Users", icon: Users},
+ { id:"support", label:"Support", icon: LifeBuoy},
+ { id:"brand", label:"Brand", icon: Palette},
+ ];
 
-  return (
-    <div className="min-h-screen bg-[var(--background)] pt-20">
-      <div className="max-w-[1600px] mx-auto flex gap-0">
+ return (
+ <div className="min-h-screen bg-[var(--background)] pt-20">
+ <div className="max-w-[1600px] mx-auto flex gap-0">
 
-        {/* Sidebar Nav */}
-        <aside className="w-72 h-[calc(100vh-80px)] sticky top-20 border-r border-[var(--border)] p-6 flex flex-col justify-between overflow-y-auto bg-[var(--card-bg)] backdrop-blur-3xl">
-          <div className="space-y-1">
-            <div className="px-5 py-8 mb-10 bg-amber-400/5 rounded-[32px] border border-amber-400/20 relative overflow-hidden group/admin">
-               <div className="relative z-10">
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-600 mb-2">Super Admin Access</h2>
-                  <p className="text-lg font-black text-[var(--foreground)] italic leading-tight">Global Controller</p>
-               </div>
-               <ShieldCheck className="absolute -right-4 -bottom-4 w-20 h-20 text-amber-500/10 rotate-12 group-hover/admin:scale-110 transition-transform duration-700" />
-            </div>
+ {/* Sidebar Nav */}
+ <aside className="w-72 h-[calc(100vh-80px sticky top-20 p-6 flex flex-col justify-between overflow-y-auto bg-[var(--card-bg)] backdrop-blur-3xl">
+ <div className="space-y-1">
+ <div className="px-5 py-8 mb-10 bg-amber-400/5 rounded-[32px] relative overflow-hidden group/admin">
+ <div className="relative z-10">
+ <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-600 mb-2">Super Admin Access</h2>
+ <p className="text-lg font-bold text-[var(--foreground)] italic leading-tight">Global Controller</p>
+ </div>
+ <ShieldCheck className="absolute -right-4 -bottom-4 w-20 h-20 text-amber-500/10 rotate-12 group-hover/admin:scale-110 transition-transform duration-700" />
+ </div>
 
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-black transition-all group relative overflow-hidden ${
-                  activeTab === tab.id
-                    ? "bg-hig-blue text-white shadow-xl shadow-hig-blue/20"
-                    : "text-[var(--foreground)] hover:text-hig-blue hover:bg-[var(--foreground)]/5 border border-[var(--border)]/10"
-                }`}
-              >
-                <tab.icon className={`w-5 h-5 relative z-10 ${activeTab === tab.id ? "text-white scale-110" : "text-[var(--foreground)]/40 group-hover:text-hig-blue group-hover:scale-110"} transition-all`} />
-                <span className="relative z-10">{tab.label}</span>
-                {activeTab === tab.id && <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/10" />}
-              </button>
-            ))}
-          </div>
+ {tabs.map((tab) => (
+ <button
+ key={tab.id}
+ onClick={() => setActiveTab(tab.id)}
+ className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-[13px] font-bold transition-all group relative overflow-hidden ${ activeTab === tab.id ?"bg-hig-blue text-white shadow-lg shadow-hig-blue/20" :"text-secondary hover:text-hig-blue hover:bg-hig-blue/5"}`}
+ >
+ <tab.icon className={`w-5 h-5 relative z-10 ${activeTab === tab.id ?"text-white scale-110" :"text-tertiary group-hover:text-hig-blue group-hover:scale-110"} transition-all`} />
+ <span className="relative z-10">{tab.label}</span>
+ {activeTab === tab.id && <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/10" />}
+ </button>
+ ))}
+ </div>
 
-          <div className="pt-8 border-t border-[var(--border)] dark:border-[var(--border)]">
-             <button className="flex items-center gap-3 text-[var(--foreground)] hover:text-rose-500 text-[10px] font-black uppercase tracking-widest px-5 py-4 transition-all hover:translate-x-1">
-                <Trash2 className="w-4 h-4" /> Reset Environment
-             </button>
-          </div>
-        </aside>
+ <div className="pt-8">
+ <button className="flex items-center gap-3 text-secondary hover:text-rose-500 text-[10px] font-bold uppercase tracking-widest px-5 py-4 transition-all hover:translate-x-1">
+ <Trash2 className="w-4 h-4" /> Reset Environment
+ </button>
+ </div>
+ </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 p-10 min-h-[calc(100vh-80px)] bg-[var(--background)]">
+ {/* Main Content Area */}
+ <main className="flex-1 p-10 min-h-[calc(100vh-80px bg-[var(--background)]">
 
-          {/* Analytics Engine */}
-          {activeTab === "analytics" && (
-            <div className="space-y-12 animate-in fade-in duration-700">
-               <div className="flex items-end justify-between border-b border-[var(--border)] pb-10">
-                  <header className="space-y-2">
-                    <div className="flex items-center gap-3 text-hig-blue text-[10px] font-black uppercase tracking-[0.3em]">
-                       <LineChart className="w-4 h-4" />
-                       Analytics Intelligence
-                    </div>
-                    <h1 className="text-5xl font-black tracking-tighter leading-none text-[var(--foreground)] hover:text-hig-blue cursor-default transition-colors">System Velocity.</h1>
-                  </header>
-                  <div className="flex bg-[var(--muted)] p-1.5 rounded-2xl border border-[var(--border)] shadow-sm">
-                    {["overview", "users", "authors", "content"].map((sub) => (
-                      <button
-                        key={sub}
-                        onClick={() => setActiveAnalyticsSubTab(sub)}
-                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                          activeAnalyticsSubTab === sub
-                          ? "bg-[var(--card-bg-solid)] text-hig-blue shadow-lg"
-                          : "text-[var(--foreground)] hover:text-[var(--foreground)]"
-                        }`}
-                      >
-                        {sub}
-                      </button>
-                    ))}
-                  </div>
-               </div>
+ {/* Analytics Engine */}
+ {activeTab ==="analytics" && (
+ <div className="space-y-12 animate-in fade-in duration-700">
+ <div className="flex items-end justify-between pb-10">
+ <header className="space-y-2">
+ <div className="flex items-center gap-3 text-hig-blue text-[10px] font-bold uppercase tracking-[0.3em]">
+ <LineChart className="w-4 h-4" />
+ Analytics Intelligence
+ </div>
+ <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)] hover:text-hig-blue cursor-default transition-colors">System Velocity.</h1>
+ </header>
+ <div className="flex bg-[var(--muted)] p-1.5 rounded-2xl shadow-sm">
+ {["overview","users","authors","content"].map((sub) => (
+ <button
+ key={sub}
+ onClick={() => setActiveAnalyticsSubTab(sub)}
+ className={`px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${ activeAnalyticsSubTab === sub ?"bg-[var(--card-bg-solid)] text-hig-blue shadow-lg" :"text-secondary hover:text-[var(--foreground)]"}`}
+ >
+ {sub}
+ </button>
+ ))}
+ </div>
+ </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                  {[
-                    { label: "Active Users", val: "12,482", change: "+14.2%", icon: Users, color: "text-hig-blue" },
-                    { label: "Page Views", val: "1.2M", change: "+5.1%", icon: Eye, color: "text-purple-500" },
-                    { label: "Avg Engagement", val: "8.4m", change: "+2.4%", icon: Zap, color: "text-amber-500" },
-                    { label: "New Content", val: "142", change: "+24.0%", icon: PenTool, color: "text-emerald-500" },
-                  ].map((stat, i) => (
-                    <div key={i} className="hig-card p-10 flex flex-col justify-between h-48 border-[var(--border)]">
-                       <div className="flex items-center justify-between">
-                          <div className={`p-3 rounded-2xl ${stat.color.replace('text-', 'bg-')}/10 ${stat.color}`}>
-                             <stat.icon className="w-6 h-6" />
-                          </div>
-                          <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full">{stat.change}</span>
-                       </div>
-                       <div className="space-y-1">
-                          <p className="text-4xl font-black tracking-tighter text-[var(--foreground)]">{stat.val}</p>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]">{stat.label}</p>
-                       </div>
-                    </div>
-                  ))}
-               </div>
+ <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+ {[
+ { label:"Active Users", val:"12,482", change:"+14.2%", icon: Users, color:"text-hig-blue"},
+ { label:"Page Views", val:"1.2M", change:"+5.1%", icon: Eye, color:"text-purple-500"},
+ { label:"Avg Engagement", val:"8.4m", change:"+2.4%", icon: Zap, color:"text-amber-500"},
+ { label:"New Content", val:"142", change:"+24.0%", icon: PenTool, color:"text-emerald-500"},
+ ].map((stat, i) => (
+ <div key={i} className="hig-card p-10 flex flex-col justify-between h-48">
+ <div className="flex items-center justify-between">
+ <div className={`p-3 rounded-2xl ${stat.color.replace('text-','bg-')}/10 ${stat.color}`}>
+ <stat.icon className="w-6 h-6" />
+ </div>
+ <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full">{stat.change}</span>
+ </div>
+ <div className="space-y-1">
+ <p className="text-4xl font-bold tracking-tighter text-[var(--foreground)]">{stat.val}</p>
+ <p className="text-[10px] font-bold uppercase tracking-widest text-secondary">{stat.label}</p>
+ </div>
+ </div>
+ ))}
+ </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                  <div className="lg:col-span-2 hig-card p-10 h-[500px] flex flex-col justify-between border-[var(--border)]">
-                     <div className="flex items-center justify-between mb-10">
-                        <h3 className="text-2xl font-black tracking-tight flex items-center gap-3 italic text-[var(--foreground)]">
-                           Traffic Flow
-                        </h3>
-                        <div className="flex items-center gap-2">
-                           <span className="w-2 h-2 rounded-full bg-hig-blue animate-pulse" />
-                           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]">Live Stream</span>
-                        </div>
-                     </div>
-                     <div className="flex-1 flex items-end gap-4 pb-8">
-                        {[40, 60, 45, 90, 65, 80, 55, 75, 95, 100, 85, 70, 90, 80, 60, 40].map((h, i) => (
-                          <div key={i} className="flex-1 bg-[var(--muted)] border-x border-t border-[var(--border)]/5 rounded-t-[20px] relative group transition-all">
-                             <div style={{ height: `${h}%` }} className="w-full bg-hig-blue/40 group-hover:bg-hig-blue transition-all duration-500 rounded-t-[20px] relative">
-                                <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-t from-transparent to-[var(--background)]/10 rounded-t-[20px]" />
-                             </div>
-                             <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[var(--foreground)] text-[var(--background)] px-3 py-1.5 rounded-xl text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-[var(--border)]">
-                               {h}k
-                             </div>
-                          </div>
-                        ))}
-                     </div>
-                  </div>
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+ <div className="lg:col-span-2 hig-card p-10 h-[500px] flex flex-col justify-between">
+ <div className="flex items-center justify-between mb-10">
+ <h3 className="text-2xl font-bold tracking-tight flex items-center gap-3 italic text-[var(--foreground)]">
+ Traffic Flow
+ </h3>
+ <div className="flex items-center gap-2">
+ <span className="w-2 h-2 rounded-full bg-hig-blue animate-pulse" />
+ <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">Live Stream</span>
+ </div>
+ </div>
+ <div className="flex-1 flex items-end gap-4 pb-8">
+ {[40, 60, 45, 90, 65, 80, 55, 75, 95, 100, 85, 70, 90, 80, 60, 40].map((h, i) => (
+ <div key={i} className="flex-1 bg-[var(--muted)] rounded-t-[20px] relative group transition-all">
+ <div style={{ height: `${h}%`}} className="w-full bg-hig-blue/40 group-hover:bg-hig-blue transition-all duration-500 rounded-t-[20px] relative">
+ <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-t from-transparent to-[var(--background)] /10 rounded-t-[20px]" />
+ </div>
+ <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[var(--foreground)] text-[var(--background)] px-3 py-1.5 rounded-xl text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+ {h}k
+ </div>
+ </div>
+ ))}
+ </div>
+ </div>
 
-                  <div className="hig-card p-10 h-[500px] border-[var(--border)] flex flex-col">
-                     <div className="flex items-center justify-between mb-10 border-b border-[var(--border)] pb-6">
-                        <h3 className="text-2xl font-black tracking-tight flex items-center gap-3 italic text-[var(--foreground)]">
-                          Top Performers
-                        </h3>
-                        <Sparkles className="w-5 h-5 text-amber-500" />
-                     </div>
-                     <div className="space-y-6 overflow-y-auto pr-4 no-scrollbar flex-1">
-                        {[
-                          { name: "Elena Rossi", views: "142k", engagement: "9.2%", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330" },
-                          { name: "Marc Dubois", views: "98k", engagement: "8.7%", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e" },
-                          { name: "Amina Kadi", views: "74k", engagement: "9.5%", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2" },
-                          { name: "Sarah Jenkins", views: "62k", engagement: "8.1%", img: "https://images.unsplash.com/photo-1580489944761-15a19d654956" },
-                          { name: "David Chen", views: "54k", engagement: "7.8%", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" },
-                        ].map((author, i) => (
-                          <div key={i} className="flex items-center gap-4 group cursor-pointer p-2 rounded-2xl transition-all border border-[var(--border)]/10 hover:bg-[var(--foreground)]/5">
-                             <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-[var(--background)] shadow-lg group-hover:scale-110 transition-transform">
-                                <Image src={`${author.img}?auto=format&fit=crop&q=80&w=100`} alt={author.name} fill className="object-cover" />
-                             </div>
-                             <div className="flex-1">
-                                <p className="font-black text-sm text-[var(--foreground)] group-hover:text-hig-blue transition-colors">{author.name}</p>
-                                <p className="text-[10px] text-[var(--foreground)]/40 font-black uppercase tracking-widest">{author.views} Views • {author.engagement} Eng</p>
-                             </div>
-                             <ArrowUpRight className="w-4 h-4 text-[var(--foreground)]/40 group-hover:text-hig-blue group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
-                          </div>
-                        ))}
-                     </div>
-                  </div>
-               </div>
-            </div>
-          )}
+ <div className="hig-card p-10 h-[500px] flex flex-col">
+ <div className="flex items-center justify-between mb-10 pb-6">
+ <h3 className="text-2xl font-bold tracking-tight flex items-center gap-3 italic text-[var(--foreground)]">
+ Top Performers
+ </h3>
+ <Sparkles className="w-5 h-5 text-amber-500" />
+ </div>
+ <div className="space-y-6 overflow-y-auto pr-4 no-scrollbar flex-1">
+ {[
+ { name:"Elena Rossi", views:"142k", engagement:"9.2%", img:"https://images.unsplash.com/photo-1494790108377-be9c29b29330"},
+ { name:"Marc Dubois", views:"98k", engagement:"8.7%", img:"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"},
+ { name:"Amina Kadi", views:"74k", engagement:"9.5%", img:"https://images.unsplash.com/photo-1573496359142-b8d87734a5a2"},
+ { name:"Sarah Jenkins", views:"62k", engagement:"8.1%", img:"https://images.unsplash.com/photo-1580489944761-15a19d654956"},
+ { name:"David Chen", views:"54k", engagement:"7.8%", img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"},
+ ].map((author, i) => (
+ <div key={i} className="flex items-center gap-4 group cursor-pointer p-2 rounded-2xl transition-all hover:bg-hig-blue/5">
+ <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+ <Image src={`${author.img}?auto=format&fit=crop&q=80&w=100`} alt={author.name} fill className="object-cover" />
+ </div>
+ <div className="flex-1">
+ <p className="font-bold text-sm text-[var(--foreground)] group-hover:text-hig-blue transition-colors">{author.name}</p>
+ <p className="text-[10px] text-tertiary font-bold uppercase tracking-widest">{author.views} Views • {author.engagement} Eng</p>
+ </div>
+ <ArrowUpRight className="w-4 h-4 text-tertiary group-hover:text-hig-blue group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+ </div>
+ ))}
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
 
-          {/* AI Auto-Editor Protocol */}
-          {activeTab === "ai-moderation" && (
-            <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-700">
-               <header className="flex items-end justify-between border-b border-[var(--border)] pb-10">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 text-rose-500 text-[10px] font-black uppercase tracking-[0.3em]">
-                       <ShieldAlert className="w-4 h-4" />
-                       Safety Protocol V4
-                    </div>
-                    <h1 className="text-5xl font-black tracking-tighter leading-none text-[var(--foreground)]">Autonomous Guard.</h1>
-                  </div>
-                  <div className="flex gap-4">
-                     <div className="flex items-center gap-4 bg-[var(--muted)] px-6 py-3 rounded-2xl border border-[var(--border)]">
-                        <div className="flex -space-x-2">
-                           {[1,2,3].map(i => (
-                             <div key={i} className="w-6 h-6 rounded-full bg-[var(--background)] border-2 border-[var(--border)]" />
-                           ))}
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]">3 AI Agents Active</span>
-                     </div>
-                     <button className="hig-button-primary">Sync Core</button>
-                  </div>
-               </header>
+ {/* AI Auto-Editor Protocol */}
+ {activeTab ==="ai-moderation" && (
+ <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-700">
+ <header className="flex items-end justify-between pb-10">
+ <div className="space-y-2">
+ <div className="flex items-center gap-3 text-rose-500 text-[10px] font-bold uppercase tracking-[0.3em]">
+ <ShieldAlert className="w-4 h-4" />
+ Safety Protocol V4
+ </div>
+ <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)]">Autonomous Guard.</h1>
+ </div>
+ <div className="flex gap-4">
+ <div className="flex items-center gap-4 bg-[var(--muted)] px-6 py-3 rounded-2xl">
+ <div className="flex -space-x-2">
+ {[1,2,3].map(i => (
+ <div key={i} className="w-6 h-6 rounded-full bg-[var(--background)]" />
+ ))}
+ </div>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-secondary">3 AI Agents Active</span>
+ </div>
+ <button className="hig-button-primary">Sync Core</button>
+ </div>
+ </header>
 
-               <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
-                  <div className="lg:col-span-3 space-y-10">
-                     <div className="hig-card overflow-hidden border-[var(--border)]">
-                        <div className="bg-[var(--muted)] p-6 flex items-center justify-between border-b border-[var(--border)]">
-                           <div className="flex items-center gap-4 flex-1">
-                              <SearchCode className="w-5 h-5 text-[var(--foreground)]" />
-                              <input placeholder="Search audit logs by signature..." className="bg-transparent border-none outline-none text-sm w-full font-medium text-[var(--foreground)]" />
-                           </div>
-                           <div className="flex items-center gap-2">
-                              <button className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)]">Clear Logs</button>
-                              <button className="px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-hig-blue text-white shadow-lg">Export Report</button>
-                           </div>
-                        </div>
-                        <div className="divide-y divide-[var(--border)]">
-                           {[
-                             { user: "User_842", reason: "Potential Hate Speech", confidence: "94%", status: "Blocked", time: "12m ago", severity: "high" },
-                             { user: "Bot_A9", reason: "DDoS Attempt Pattern", confidence: "99%", status: "Shadowbanned", time: "42m ago", severity: "critical" },
-                             { user: "Author_X", reason: "Copyright Infringement", confidence: "87%", status: "Restricted", time: "2h ago", severity: "medium" },
-                             { user: "User_221", reason: "Spam Injection", confidence: "92%", status: "Deleted", time: "5h ago", severity: "high" },
-                             { user: "Anon_99", reason: "Policy Violation", confidence: "76%", status: "Flagged", time: "8h ago", severity: "low" },
-                           ].map((log, i) => (
-                             <div key={i} className="p-8 flex items-center justify-between group hover:bg-[var(--muted)] transition-all">
-                                <div className="flex items-center gap-6">
-                                   <div className={`w-3 h-3 rounded-full animate-pulse ${
-                                      log.severity === 'critical' ? 'bg-rose-600' :
-                                      log.severity === 'high' ? 'bg-rose-400' :
-                                      log.severity === 'medium' ? 'bg-amber-400' : 'bg-hig-blue'
-                                   }`} />
-                                   <div className="space-y-1">
-                                      <div className="flex items-center gap-4">
-                                         <span className="font-black text-sm text-[var(--foreground)]">{log.user}</span>
-                                         <span className="px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 text-[9px] font-black uppercase tracking-widest">{log.reason}</span>
-                                      </div>
-                                      <p className="text-[10px] text-[var(--foreground)] font-black uppercase tracking-[0.2em]">Confidence {log.confidence} • Signature Verified</p>
-                                   </div>
-                                </div>
-                                <div className="flex items-center gap-8">
-                                   <div className="text-right">
-                                      <span className="text-[11px] font-black uppercase text-[var(--foreground)] block mb-1">{log.status}</span>
-                                      <span className="text-[10px] text-[var(--foreground)] font-bold">{log.time}</span>
-                                   </div>
-                                   <button className="p-3 rounded-2xl bg-[var(--background)] text-[var(--foreground)] hover:text-hig-blue transition-all border border-[var(--border)]"><MoreVertical className="w-5 h-5" /></button>
-                                </div>
-                             </div>
-                           ))}
-                        </div>
-                     </div>
-                  </div>
+ <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+ <div className="lg:col-span-3 space-y-10">
+ <div className="hig-card overflow-hidden">
+ <div className="bg-[var(--muted)] p-6 flex items-center justify-between">
+ <div className="flex items-center gap-4 flex-1">
+ <SearchCode className="w-5 h-5 text-secondary" />
+ <input placeholder="Search audit logs by signature..." className="bg-transparent outline-none text-sm w-full font-medium text-[var(--foreground)]" />
+ </div>
+ <div className="flex items-center gap-2">
+ <button className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase bg-[var(--card-bg-solid)] text-secondary">Clear Logs</button>
+ <button className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase bg-hig-blue text-white shadow-sm">Export Report</button>
+ </div>
+ </div>
+                        <div className="space-y-4 p-4">
+ {[
+ { user:"User_842", reason:"Potential Hate Speech", confidence:"94%", status:"Blocked", time:"12m ago", severity:"high"},
+ { user:"Bot_A9", reason:"DDoS Attempt Pattern", confidence:"99%", status:"Shadowbanned", time:"42m ago", severity:"critical"},
+ { user:"Author_X", reason:"Copyright Infringement", confidence:"87%", status:"Restricted", time:"2h ago", severity:"medium"},
+ { user:"User_221", reason:"Spam Injection", confidence:"92%", status:"Deleted", time:"5h ago", severity:"high"},
+ { user:"Anon_99", reason:"Policy Violation", confidence:"76%", status:"Flagged", time:"8h ago", severity:"low"},
+ ].map((log, i) => (
+                             <div key={i} className="p-8 flex items-center justify-between group hover:bg-hig-blue/5 transition-all rounded-3xl bg-[var(--muted)]/30">
+ <div className="flex items-center gap-6">
+ <div className={`w-3 h-3 rounded-full animate-pulse ${ log.severity ==='critical' ?'bg-rose-600' : log.severity ==='high' ?'bg-rose-400' : log.severity ==='medium' ?'bg-amber-400' :'bg-hig-blue'}`} />
+ <div className="space-y-1">
+ <div className="flex items-center gap-4">
+ <span className="font-bold text-sm text-[var(--foreground)]">{log.user}</span>
+ <span className="px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 text-[9px] font-bold uppercase tracking-widest">{log.reason}</span>
+ </div>
+ <p className="text-[10px] text-tertiary font-bold uppercase tracking-[0.2em]">Confidence {log.confidence} • Signature Verified</p>
+ </div>
+ </div>
+ <div className="flex items-center gap-8">
+ <div className="text-right">
+ <span className="text-[11px] font-bold uppercase text-[var(--foreground)] block mb-1">{log.status}</span>
+ <span className="text-[10px] text-tertiary font-bold">{log.time}</span>
+ </div>
+ <button className="p-3 rounded-2xl bg-[var(--muted)] text-secondary hover:text-hig-blue transition-all"><MoreVertical className="w-5 h-5" /></button>
+ </div>
+ </div>
+ ))}
+ </div>
+ </div>
+ </div>
 
-                  <div className="space-y-10">
-                     <div className="hig-card p-10 space-y-10 bg-[var(--card-bg)] text-[var(--foreground)] border-[var(--border)] shadow-none border-b-2 relative overflow-hidden group">
-                        <div className="relative z-10 space-y-10">
-                           <div className="flex items-center gap-4">
-                              <ShieldAlert className="w-8 h-8 text-rose-500" />
-                              <h3 className="font-black text-xl italic">Core Rules</h3>
-                           </div>
-                           <div className="space-y-6">
-                              {[
-                                { t: "Auto-block Flags", v: "3 Units" },
-                                { t: "AI Plagiarism", v: "80% Threshold" },
-                                { t: "Shadowban Bots", v: "Active" },
-                                { t: "NSFW Shield", v: "Max Level" }
-                              ].map((p, i) => (
-                                <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-[var(--background)] border border-[var(--border)] group/item transition-all hover:bg-hig-blue/5">
-                                   <span className="text-xs font-black uppercase tracking-widest text-[var(--foreground)] group-hover/item:text-hig-blue transition-colors">{p.t}</span>
-                                   <div className="flex items-center gap-3">
-                                      <span className="text-[10px] font-black text-emerald-600">{p.v}</span>
-                                      <div className="w-8 h-4 bg-emerald-500 rounded-full flex items-center px-0.5 shadow-inner">
-                                         <div className="w-3 h-3 bg-white rounded-full ml-auto shadow-sm" />
-                                      </div>
-                                   </div>
-                                </div>
-                              ))}
-                           </div>
-                           <button className="w-full hig-button-primary py-4 text-[10px] hover:scale-105 transition-transform">Update Global Protocol</button>
-                        </div>
-                        <ShieldCheck className="absolute -left-10 -bottom-10 w-40 h-40 text-[var(--foreground)] opacity-5 -rotate-12 group-hover:scale-125 transition-transform duration-1000" />
-                     </div>
-                  </div>
-               </div>
-            </div>
-          )}
+ <div className="space-y-10">
+ <div className="hig-card p-10 space-y-10 relative overflow-hidden group">
+ <div className="relative z-10 space-y-10">
+ <div className="flex items-center gap-4">
+ <ShieldAlert className="w-8 h-8 text-rose-500" />
+ <h3 className="font-bold text-xl italic text-[var(--foreground)]">Core Rules</h3>
+ </div>
+ <div className="space-y-6">
+ {[
+ { t:"Auto-block Flags", v:"3 Units"},
+ { t:"AI Plagiarism", v:"80% Threshold"},
+ { t:"Shadowban Bots", v:"Active"},
+ { t:"NSFW Shield", v:"Max Level"}
+ ].map((p, i) => (
+ <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-[var(--muted)] group/item transition-all hover:bg-hig-blue/5">
+ <span className="text-xs font-bold uppercase tracking-widest text-secondary group-hover/item:text-hig-blue transition-colors">{p.t}</span>
+ <div className="flex items-center gap-3">
+ <span className="text-[10px] font-bold text-emerald-600">{p.v}</span>
+ <div className="w-8 h-4 bg-emerald-500 rounded-full flex items-center px-0.5 shadow-inner">
+ <div className="w-3 h-3 bg-white rounded-full ml-auto shadow-sm" />
+ </div>
+ </div>
+ </div>
+ ))}
+ </div>
+ <button className="w-full hig-button-primary py-4 text-[10px] hover:scale-105 transition-transform">Update Global Protocol</button>
+ </div>
+ <ShieldCheck className="absolute -left-10 -bottom-10 w-40 h-40 text-tertiary opacity-5 -rotate-12 group-hover:scale-125 transition-transform duration-1000" />
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
 
-          {/* User & Permission Management */}
-          {activeTab === "users" && (
-            <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-700">
-               <header className="flex items-end justify-between border-b border-[var(--border)] pb-10">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 text-hig-blue text-[10px] font-black uppercase tracking-[0.3em]">
-                       <Target className="w-4 h-4" />
-                       Network Intelligence
-                    </div>
-                    <h1 className="text-5xl font-black tracking-tighter leading-none text-[var(--foreground)]">Access Control.</h1>
-                  </div>
-                  <div className="flex gap-4">
-                     <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--foreground)]" />
-                        <input
-                           value={searchQuery}
-                           onChange={(e) => setSearchQuery(e.target.value)}
-                           placeholder="Search users..."
-                           className="bg-[var(--muted)] border border-[var(--border)] rounded-2xl py-3 pl-12 pr-6 text-sm font-medium w-80 focus:ring-2 focus:ring-hig-blue/20 transition-all text-[var(--foreground)]"
-                        />
-                     </div>
-                     <button className="hig-button-primary flex items-center gap-3 px-8">
-                        <UserPlus className="w-5 h-5" />
-                        <span className="text-[10px] uppercase tracking-widest">New User</span>
-                     </button>
-                  </div>
-               </header>
+ {/* User & Permission Management */}
+ {activeTab ==="users" && (
+ <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-700">
+ <header className="flex items-end justify-between pb-10">
+ <div className="space-y-2">
+ <div className="flex items-center gap-3 text-hig-blue text-[10px] font-bold uppercase tracking-[0.3em]">
+ <Target className="w-4 h-4" />
+ Network Intelligence
+ </div>
+ <h1 className="text-5xl font-bold tracking-tighter leading-none text-[var(--foreground)]">Access Control.</h1>
+ </div>
+ <div className="flex gap-4">
+ <div className="relative">
+ <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary" />
+ <input
+ value={searchQuery}
+ onChange={(e) => setSearchQuery(e.target.value)}
+ placeholder="Search users..."
+ className="bg-[var(--muted)] rounded-2xl py-3 pl-12 pr-6 text-sm font-medium w-80 focus:ring-2 focus:ring-hig-blue/20 transition-all text-[var(--foreground)]"
+ />
+ </div>
+ <button className="hig-button-primary flex items-center gap-3 px-8">
+ <UserPlus className="w-5 h-5" />
+ <span className="text-[10px] uppercase tracking-widest">New User</span>
+ </button>
+ </div>
+ </header>
 
-               <div className="hig-card overflow-hidden border-[var(--border)] shadow-xl">
-                  <table className="w-full text-left border-collapse">
-                     <thead>
-                        <tr className="bg-[var(--muted)]/50 text-[10px] font-black uppercase tracking-[0.3em] text-[var(--foreground)]">
-                           <th className="px-10 py-8 border-b border-[var(--border)]">Entity Profile</th>
-                           <th className="px-10 py-8 border-b border-[var(--border)]">Authorization</th>
-                           <th className="px-10 py-8 border-b border-[var(--border)]">Connection</th>
-                           <th className="px-10 py-8 border-b border-[var(--border)]">Activity Score</th>
-                           <th className="px-10 py-8 border-b border-[var(--border)] text-right">Admin Actions</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-[var(--border)]">
-                        {users.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map((user, i) => (
-                          <tr key={i} className="group hover:bg-[var(--muted)] transition-all">
-                             <td className="px-10 py-8">
-                                <div className="flex items-center gap-5">
-                                   <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-[var(--background)] shadow-lg group-hover:scale-110 transition-transform">
-                                      <Image src={`${user.img}?auto=format&fit=crop&q=80&w=100`} alt={user.name} fill className="object-cover" />
-                                   </div>
-                                   <div>
-                                      <p className="font-black text-sm text-[var(--foreground)] group-hover:text-hig-blue transition-colors">{user.name}</p>
-                                      <p className="text-xs text-[var(--foreground)]/40 font-medium">{user.email}</p>
-                                   </div>
-                                </div>
-                             </td>
-                             <td className="px-10 py-8">
-                                <button
-                                   onClick={() => togglePro(user.id)}
-                                   className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border transition-all active:scale-95 ${
-                                     user.role === 'pro'
-                                     ? "bg-amber-400 text-white border-amber-500 shadow-lg shadow-amber-400/20"
-                                     : "bg-[var(--muted)] border-[var(--border)] text-[var(--foreground)] hover:border-amber-400 hover:text-amber-500"
-                                   }`}
-                                >
-                                   {user.role} Authorization
-                                </button>
-                             </td>
-                             <td className="px-10 py-8">
-                                <div className="flex items-center gap-3">
-                                   <span className={`w-2 h-2 rounded-full ${user.active === 'Now' ? 'bg-emerald-500 animate-pulse' : 'bg-white'}`} />
-                                   <span className="text-[11px] font-bold text-[var(--foreground)]">{user.active}</span>
-                                </div>
-                             </td>
-                             <td className="px-10 py-8">
-                                <div className="flex items-center gap-4">
-                                   <div className="flex-1 h-1.5 bg-[var(--muted)] rounded-full overflow-hidden min-w-[120px]">
-                                      <div style={{ width: `${user.score}%` }} className={`h-full rounded-full transition-all duration-1000 ${user.score > 80 ? 'bg-emerald-500' : 'bg-hig-blue'}`} />
-                                   </div>
-                                   <span className="text-[11px] font-black text-[var(--foreground)]">{user.score}</span>
-                                </div>
-                             </td>
-                             <td className="px-10 py-8 text-right">
-                                <div className="flex items-center justify-end gap-3">
-                                   <button className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] hover:text-hig-blue hover:shadow-lg transition-all"><Settings2 className="w-5 h-5" /></button>
-                                   <button className="p-3 rounded-2xl bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] hover:text-rose-500 hover:shadow-lg transition-all"><Flag className="w-5 h-5" /></button>
-                                </div>
-                             </td>
-                          </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
-          )}
+ <div className="hig-card overflow-hidden shadow-xl">
+ <table className="w-full text-left">
+ <thead>
+ <tr className="bg-[var(--muted)] /50 text-[10px] font-bold uppercase tracking-[0.3em] text-secondary">
+ <th className="px-10 py-8">Entity Profile</th>
+ <th className="px-10 py-8">Authorization</th>
+ <th className="px-10 py-8">Connection</th>
+ <th className="px-10 py-8">Activity Score</th>
+ <th className="px-10 py-8 text-right">Admin Actions</th>
+ </tr>
+ </thead>
+                     <tbody>
+ {users.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map((user, i) => (
+                          <tr key={i} className="group hover:bg-hig-blue/5 transition-all border-none">
+ <td className="px-10 py-8">
+ <div className="flex items-center gap-5">
+ <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
+ <Image src={`${user.img}?auto=format&fit=crop&q=80&w=100`} alt={user.name} fill className="object-cover" />
+ </div>
+ <div>
+ <p className="font-bold text-sm text-[var(--foreground)] group-hover:text-hig-blue transition-colors">{user.name}</p>
+ <p className="text-xs text-secondary font-medium">{user.email}</p>
+ </div>
+ </div>
+ </td>
+ <td className="px-10 py-8">
+ <button
+ onClick={() => togglePro(user.id)}
+ className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all active:scale-95 ${ user.role ==='pro' ?"bg-amber-400 text-white shadow-lg shadow-amber-400/20" :"bg-[var(--muted)] text-secondary hover: hover:text-amber-500"}`}
+ >
+ {user.role} Authorization
+ </button>
+ </td>
+ <td className="px-10 py-8">
+ <div className="flex items-center gap-3">
+ <span className={`w-2 h-2 rounded-full ${user.active ==='Now' ?'bg-emerald-500 animate-pulse' :'bg-tertiary/20'}`} />
+ <span className="text-[11px] font-bold text-secondary">{user.active}</span>
+ </div>
+ </td>
+ <td className="px-10 py-8">
+ <div className="flex items-center gap-4">
+ <div className="flex-1 h-1.5 bg-[var(--muted)] rounded-full overflow-hidden min-w-[120px]">
+ <div style={{ width: `${user.score}%`}} className={`h-full rounded-full transition-all duration-1000 ${user.score > 80 ?'bg-emerald-500' :'bg-hig-blue'}`} />
+ </div>
+ <span className="text-[11px] font-bold text-secondary">{user.score}</span>
+ </div>
+ </td>
+ <td className="px-10 py-8 text-right">
+ <div className="flex items-center justify-end gap-3">
+ <button className="p-3 rounded-2xl bg-[var(--card-bg-solid)] text-tertiary hover:text-hig-blue hover:shadow-lg transition-all"><Settings2 className="w-5 h-5" /></button>
+ <button className="p-3 rounded-2xl bg-[var(--card-bg-solid)] text-tertiary hover:text-rose-500 hover:shadow-lg transition-all"><Flag className="w-5 h-5" /></button>
+ </div>
+ </td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ )}
 
-          {/* Configuration Portals */}
-          {(activeTab === "seo" || activeTab === "brand" || activeTab === "news-auto" || activeTab === "support" || activeTab === "content") && (
-             <div className="space-y-12 animate-in fade-in duration-700">
-                <header className="border-b border-[var(--border)] pb-10">
-                   <h1 className="text-5xl font-black tracking-tighter leading-none capitalize text-[var(--foreground)]">{activeTab.replace('-', ' ')} Hub.</h1>
-                </header>
+ {/* Configuration Portals */}
+ {(activeTab ==="seo" || activeTab ==="brand" || activeTab ==="news-auto" || activeTab ==="support" || activeTab ==="content") && (
+ <div className="space-y-12 animate-in fade-in duration-700">
+ <header className=" pb-10">
+ <h1 className="text-5xl font-bold tracking-tighter leading-none capitalize text-[var(--foreground)]">{activeTab.replace('-','')} Hub.</h1>
+ </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                   {/* Interactive Config Panel */}
-                   <div className="lg:col-span-2 hig-card p-10 space-y-8 border-[var(--border)]">
-                      <div className="flex items-center justify-between">
-                         <h3 className="text-2xl font-black tracking-tight italic text-[var(--foreground)]">Engine Configuration</h3>
-                         <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">System Ready</span>
-                         </div>
-                      </div>
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+ {/* Interactive Config Panel */}
+ <div className="lg:col-span-2 hig-card p-10 space-y-8">
+ <div className="flex items-center justify-between">
+ <h3 className="text-2xl font-bold tracking-tight italic text-[var(--foreground)]">Engine Configuration</h3>
+ <div className="flex items-center gap-2">
+ <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+ <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">System Ready</span>
+ </div>
+ </div>
 
-                      <div className="space-y-6">
-                         {[
-                           { label: "AI Creativity Index", value: 85, desc: "Controls the variation in generated headlines and content hooks." },
-                           { label: "SEO Keyword Density", value: 1.8, desc: "Optimal target for automated semantic injections.", unit: "%" },
-                           { label: "Global Brand Variance", value: 12, desc: "Allowed deviation from core style guide for localized content.", unit: "%" }
-                         ].map((item, i) => (
-                           <div key={i} className="p-6 rounded-2xl bg-[var(--muted)] border border-[var(--border)] space-y-4 group">
-                              <div className="flex items-center justify-between">
-                                 <div>
-                                    <h4 className="font-black text-sm text-[var(--foreground)]">{item.label}</h4>
-                                    <p className="text-xs text-[var(--foreground)] font-medium">{item.desc}</p>
-                                 </div>
-                                 <span className="text-lg font-black text-hig-blue">{item.value}{item.unit || ""}</span>
-                              </div>
-                              <div className="h-1.5 w-full bg-[var(--background)] rounded-full overflow-hidden">
-                                 <div
-                                    style={{ width: `${(item.value / (item.unit === '%' ? 100 : item.value * 1.2)) * 100}%` }}
-                                    className="h-full bg-hig-blue rounded-full transition-all group-hover:brightness-110"
-                                 />
-                              </div>
-                           </div>
-                         ))}
-                      </div>
+ <div className="space-y-6">
+ {[
+ { label:"AI Creativity Index", value: 85, desc:"Controls the variation in generated headlines and content hooks."},
+ { label:"SEO Keyword Density", value: 1.8, desc:"Optimal target for automated semantic injections.", unit:"%"},
+ { label:"Global Brand Variance", value: 12, desc:"Allowed deviation from core style guide for localized content.", unit:"%"}
+ ].map((item, i) => (
+ <div key={i} className="p-6 rounded-2xl bg-[var(--muted)] space-y-4 group">
+ <div className="flex items-center justify-between">
+ <div>
+ <h4 className="font-bold text-sm text-[var(--foreground)]">{item.label}</h4>
+ <p className="text-xs text-secondary font-medium">{item.desc}</p>
+ </div>
+ <span className="text-lg font-bold text-hig-blue">{item.value}{item.unit ||""}</span>
+ </div>
+ <div className="h-1.5 w-full bg-[var(--card-bg-solid)] rounded-full overflow-hidden">
+ <div
+ style={{ width: `${(item.value / (item.unit ==='%' ? 100 : item.value * 1.2)) * 100}%`}}
+ className="h-full bg-hig-blue rounded-full transition-all group-hover:brightness-110"
+ />
+ </div>
+ </div>
+ ))}
+ </div>
 
-                      <div className="flex gap-4">
-                         <button className="hig-button-primary flex-1">Save Global Config</button>
-                         <button className="hig-button-secondary border-none bg-[var(--muted)] flex-1 text-[var(--foreground)] hover:text-hig-blue">Reset Defaults</button>
-                      </div>
-                   </div>
+ <div className="flex gap-4">
+ <button className="hig-button-primary flex-1">Save Global Config</button>
+ <button className="hig-button-secondary bg-[var(--muted)] flex-1 text-secondary hover:text-hig-blue transition-colors">Reset Defaults</button>
+ </div>
+ </div>
 
-                   {/* Quick Info & Stats */}
-                   <div className="space-y-10">
-                      <div className="hig-card p-10 bg-hig-blue text-white border-none shadow-2xl relative overflow-hidden group cursor-pointer">
-                         <div className="relative z-10 space-y-6">
-                           <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                              <Sparkles className="w-6 h-6 text-white" />
-                           </div>
-                           <h3 className="text-xl font-black italic">Optimization Score</h3>
-                           <p className="text-4xl font-black tracking-tighter">98.2</p>
-                           <p className="text-xs text-white/60 font-medium leading-relaxed">Your current {activeTab} strategy is performing in the top 1% of the industry.</p>
-                         </div>
-                         <Zap className="absolute -bottom-10 -right-10 w-40 h-40 text-white/10 -rotate-12 group-hover:scale-125 transition-transform duration-700" />
-                      </div>
+ {/* Quick Info & Stats */}
+ <div className="space-y-10">
+ <div className="hig-card p-10 bg-hig-blue text-white shadow-lg shadow-hig-blue/20 relative overflow-hidden group cursor-pointer">
+ <div className="relative z-10 space-y-6">
+ <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+ <Sparkles className="w-6 h-6 text-white" />
+ </div>
+ <h3 className="text-xl font-bold italic">Optimization Score</h3>
+ <p className="text-4xl font-bold tracking-tighter">98.2</p>
+ <p className="text-xs text-white/70 font-medium leading-relaxed">Your current {activeTab} strategy is performing in the top 1% of the industry.</p>
+ </div>
+ <Zap className="absolute -bottom-10 -right-10 w-40 h-40 text-white/10 -rotate-12 group-hover:scale-125 transition-transform duration-700" />
+ </div>
 
-                      <div className="hig-card p-10 border-[var(--border)] space-y-6">
-                         <h4 className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]">Recent Audit Logs</h4>
-                         <div className="space-y-4">
-                            {[
-                              { event: "Global SEO Re-index", time: "2m ago" },
-                              { event: "Brand Asset Sync", time: "1h ago" },
-                              { event: "Auto-content Flush", time: "4h ago" }
-                            ].map((log, i) => (
-                              <div key={i} className="flex items-center justify-between border-b border-[var(--border)] pb-3 last:border-0">
-                                 <span className="text-xs font-bold text-[var(--foreground)]">{log.event}</span>
-                                 <span className="text-[10px] text-[var(--foreground)] font-bold">{log.time}</span>
-                              </div>
-                            ))}
-                         </div>
-                         <button className="w-full py-3 bg-[var(--muted)] text-[var(--foreground)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-hig-blue transition-colors">View All Logs</button>
-                      </div>
-                   </div>
-                </div>
-             </div>
-          )}
-        </main>
-      </div>
-    </div>
-  );
+ <div className="hig-card p-10 space-y-6">
+ <h4 className="text-[10px] font-bold uppercase tracking-widest text-secondary">Recent Audit Logs</h4>
+ <div className="space-y-4">
+ {[
+ { event:"Global SEO Re-index", time:"2m ago"},
+ { event:"Brand Asset Sync", time:"1h ago"},
+ { event:"Auto-content Flush", time:"4h ago"}
+ ].map((log, i) => (
+ <div key={i} className="flex items-center justify-between pb-3 last:">
+ <span className="text-xs font-bold text-[var(--foreground)]">{log.event}</span>
+ <span className="text-[10px] text-tertiary font-bold">{log.time}</span>
+ </div>
+ ))}
+ </div>
+ <button className="w-full py-3 bg-[var(--muted)] text-secondary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:text-hig-blue transition-colors">View All Logs</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
+ </main>
+ </div>
+ </div>
+ );
 }

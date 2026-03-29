@@ -3,43 +3,61 @@
 
 @theme {
   --color-hig-blue: #007aff;
-  --color-hig-gray-100: #ffffff;
-  --color-hig-gray-200: #ffffff;
-  --color-hig-gray-300: #ffffff;
-  --color-hig-gray-400: #000000;
-  --color-hig-gray-600: #000000;
+  --color-hig-green: #34c759;
+  --color-hig-red: #ff3b30;
+  --color-hig-orange: #ff9500;
+  --color-hig-yellow: #ffcc00;
+  --color-hig-purple: #5856d6;
+  --color-hig-pink: #ff2d55;
+  --color-hig-teal: #5ac8fa;
+  --color-hig-indigo: #5856d6;
 
   --radius-hig: 24px;
   --radius-hig-inner: 16px;
 
-  --shadow-hig: 0 4px 24px rgba(0, 0, 0, 0.04);
-  --shadow-hig-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-hig: 0 8px 32px rgba(0, 122, 255, 0.08);
+  --shadow-hig-hover: 0 12px 48px rgba(0, 122, 255, 0.12);
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-serif: "Iowan Old Style", "Apple Garamond", "Palatino", "Georgia", serif;
 }
 
 :root {
   --background: #ffffff;
   --foreground: #000000;
-  --card-bg: #ffffff;
-  --card-bg-solid: #ffffff;
-  --border: #000000;
-  --muted: #ffffff;
-  --sidebar-bg: #ffffff;
+  --secondary-label: #004080;
+  --tertiary-label: #007aff;
+  --quaternary-label: #e6f2ff;
+
+  --card-bg: rgba(240, 247, 255, 0.7);
+  --card-bg-solid: #f0f7ff;
+  --border: transparent;
+  --muted: #f0f7ff;
+  --sidebar-bg: rgba(230, 242, 255, 0.8);
   --hig-selection: rgba(0, 122, 255, 0.2);
-  --pulse-bg: #ffffff;
+  --pulse-bg: #e6f2ff;
+
+  --system-grouped-background: #ffffff;
+  --secondary-system-grouped-background: #f0f7ff;
 }
 
 .dark {
   --background: #000000;
   --foreground: #ffffff;
-  --card-bg: #000000;
-  --card-bg-solid: #000000;
-  --border: #ffffff;
-  --muted: #000000;
-  --sidebar-bg: #000000;
+  --secondary-label: #80bfff;
+  --tertiary-label: #007aff;
+  --quaternary-label: #001122;
+
+  --card-bg: rgba(0, 17, 34, 0.7);
+  --card-bg-solid: #001122;
+  --border: transparent;
+  --muted: #001122;
+  --sidebar-bg: rgba(0, 17, 34, 0.8);
   --hig-selection: rgba(0, 122, 255, 0.4);
-  --pulse-bg: #000000;
+  --pulse-bg: #001122;
+
+  --system-grouped-background: #000000;
+  --secondary-system-grouped-background: #001122;
 }
 
 body {
@@ -51,23 +69,35 @@ body {
 
 @layer components {
   .hig-card {
-    @apply bg-[var(--card-bg)] border border-[var(--border)] rounded-[var(--radius-hig)] shadow-sm transition-all duration-500 hover:shadow-md hover:-translate-y-0.5;
+    @apply bg-[var(--card-bg-solid)] dark:bg-[var(--secondary-system-grouped-background)] rounded-[var(--radius-hig)] shadow-[var(--shadow-hig)] transition-all duration-300 hover:shadow-[var(--shadow-hig-hover)] active:scale-[0.98];
+  }
+
+  .hig-card-glass {
+    @apply bg-[var(--card-bg)] backdrop-blur-xl rounded-[var(--radius-hig)] shadow-[var(--shadow-hig)] transition-all duration-300 hover:shadow-[var(--shadow-hig-hover)] active:scale-[0.98];
   }
 
   .hig-glass {
-    @apply bg-[var(--card-bg)] backdrop-blur-3xl border-b border-[var(--border)];
+    @apply bg-[var(--card-bg)] backdrop-blur-2xl shadow-sm;
   }
 
   .hig-button-primary {
-    @apply bg-hig-blue text-white px-8 py-3 rounded-full font-bold shadow-[0_4px_12px_rgba(0,122,255,0.25)] transition-all active:scale-95 hover:shadow-[0_8px_24px_rgba(0,122,255,0.35)] hover:brightness-110;
+    @apply bg-hig-blue text-white px-6 py-2.5 rounded-full font-semibold transition-all active:scale-95 hover:brightness-110 shadow-md;
   }
 
   .hig-button-secondary {
-    @apply bg-[var(--muted)] text-hig-blue px-8 py-3 rounded-full font-bold transition-all active:scale-95 hover:brightness-95 border border-[var(--border)];
+    @apply bg-[var(--muted)] text-[var(--foreground)] px-6 py-2.5 rounded-full font-semibold transition-all active:scale-95 hover:bg-hig-blue/10;
   }
 
   .premium-gradient {
-    background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+    background: linear-gradient(135deg, var(--color-hig-blue) 0%, var(--color-hig-indigo) 100%);
+  }
+
+  .text-secondary {
+    color: var(--secondary-label);
+  }
+
+  .text-tertiary {
+    color: var(--tertiary-label);
   }
 
   .text-balance {
@@ -75,7 +105,7 @@ body {
   }
 
   .pro-editorial {
-    @apply border-t-8 border-amber-400;
+    @apply bg-amber-400/10 p-1 rounded-full inline-block mb-4;
   }
 
   /* Improved Layout Utility */
@@ -84,21 +114,26 @@ body {
   }
 }
 
-/* Medium-like Typography - Improved for Light Mode */
+/* Medium-like Typography */
 article {
   @apply max-w-3xl mx-auto;
 }
 
 h1 {
-  @apply text-4xl md:text-6xl font-black tracking-tight mb-8 leading-[1.1] text-black dark:text-white;
+  @apply text-4xl md:text-6xl font-black tracking-tight mb-8 leading-[1.1];
 }
 
 h2 {
-  @apply text-2xl md:text-3xl font-bold tracking-tight mt-12 mb-6 text-black dark:text-white;
+  @apply text-2xl md:text-3xl font-bold tracking-tight mt-12 mb-6;
 }
 
 p {
-  @apply text-lg leading-relaxed mb-6 text-black dark:text-white font-medium;
+  @apply text-lg leading-relaxed mb-6 font-normal;
+}
+
+.body-serif {
+  font-family: var(--font-serif);
+  @apply text-xl leading-[1.6] mb-8;
 }
 
 a {
@@ -121,11 +156,12 @@ a {
   background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--color-hig-blue);
+  opacity: 0.5;
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  background: var(--color-hig-blue);
 }
 
 .no-scrollbar::-webkit-scrollbar {
