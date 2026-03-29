@@ -84,26 +84,26 @@ export default function EditorPage() {
           className={`relative group aspect-[21/9] w-full rounded-[48px] overflow-hidden border-2 border-dashed transition-all duration-500 flex flex-col items-center justify-center gap-6 cursor-pointer ${
             coverImage
             ? 'border-transparent'
-            : 'bg-white dark:bg-white/50 border-[var(--border)] dark:border-[var(--border)] hover:border-hig-blue hover:bg-hig-blue/[0.02]'
+              : 'bg-[var(--background)] border-[var(--border)] hover:border-hig-blue'
           }`}
         >
           {coverImage ? (
             <>
               <Image src={coverImage} alt="Cover Preview" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                 <div className="p-4 rounded-full bg-white text-hig-blue font-bold text-xs uppercase tracking-widest flex items-center gap-2 shadow-2xl scale-90 group-hover:scale-100 transition-transform">
+                   <div className="p-4 rounded-full bg-[var(--background)] text-hig-blue font-bold text-xs uppercase tracking-widest flex items-center gap-2 shadow-2xl scale-90 group-hover:scale-100 transition-transform">
                     <ImageIcon className="w-5 h-5" /> Change Cover Photo
                  </div>
               </div>
             </>
           ) : (
             <>
-              <div className="p-8 rounded-full bg-white dark:bg-white shadow-xl group-hover:scale-110 transition-transform ring-4 ring-zinc-50 dark:ring-zinc-900/50 group-hover:ring-hig-blue/10">
+                <div className="p-8 rounded-full bg-[var(--background)] border border-[var(--border)] shadow-xl group-hover:scale-110 transition-transform">
                 <ImageIcon className="w-10 h-10 text-hig-blue" />
               </div>
               <div className="text-center space-y-2">
-                <p className="text-xl font-black text-[var(--foreground)] dark:text-black">Add an evocative cover image</p>
-                <p className="text-sm text-[var(--foreground)] font-medium">1600 x 900px recommended. Max 10MB.</p>
+                  <p className="text-xl font-black text-[var(--foreground)]">Add an evocative cover image</p>
+                  <p className="text-sm text-[var(--foreground)]/60 font-black uppercase tracking-widest">1600 x 900px recommended. Max 10MB.</p>
               </div>
             </>
           )}
@@ -187,25 +187,25 @@ export default function EditorPage() {
                 <X className="w-5 h-5" />
               </Link>
 
-              <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-full border border-black/10 dark:border-white/10">
+              <div className="flex items-center gap-1 bg-[var(--foreground)]/5 p-1 rounded-full border border-[var(--border)]/10">
                   <button
                     onClick={() => applyFormat("**", "**")}
-                    className="p-3 rounded-full hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black text-[var(--foreground)] transition-all" title="Bold">
+                    className="p-3 rounded-full hover:bg-[var(--foreground)] hover:text-[var(--background)] text-[var(--foreground)] transition-all" title="Bold">
                     <Bold className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => applyFormat("_", "_")}
-                    className="p-3 rounded-full hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black text-[var(--foreground)] transition-all" title="Italic">
+                    className="p-3 rounded-full hover:bg-[var(--foreground)] hover:text-[var(--background)] text-[var(--foreground)] transition-all" title="Italic">
                     <Italic className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => applyFormat("> ", "")}
-                    className="p-3 rounded-full hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black text-[var(--foreground)] transition-all" title="Quote">
+                    className="p-3 rounded-full hover:bg-[var(--foreground)] hover:text-[var(--background)] text-[var(--foreground)] transition-all" title="Quote">
                     <Quote className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => applyFormat("[", "](https://)")}
-                    className="p-3 rounded-full hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black text-[var(--foreground)] transition-all" title="Link">
+                    className="p-3 rounded-full hover:bg-[var(--foreground)] hover:text-[var(--background)] text-[var(--foreground)] transition-all" title="Link">
                     <LinkIcon className="w-4 h-4" />
                   </button>
               </div>
@@ -236,26 +236,26 @@ export default function EditorPage() {
             <div className="flex items-center gap-10 flex-1 justify-center px-10">
               <div className="flex flex-col items-center">
                  <span className="text-[10px] font-black uppercase tracking-tighter text-hig-blue">Editing</span>
-                 <span className="text-[10px] font-bold text-[var(--foreground)] opacity-40">Saved 12:42</span>
+                 <span className="text-[10px] font-bold text-[var(--foreground)]">Saved 12:42</span>
               </div>
               <div className="flex flex-col items-center border-l border-black/10 dark:border-white/10 pl-10">
-                 <span className="text-[10px] font-black uppercase text-[var(--foreground)] opacity-40 leading-none">Words</span>
+                 <span className="text-[10px] font-black uppercase text-[var(--foreground)] leading-none">Words</span>
                  <span className="text-sm font-black text-[var(--foreground)] mt-1">{content.split(/\s+/).filter(Boolean).length}</span>
               </div>
               <div className="flex flex-col items-center border-l border-black/10 dark:border-white/10 pl-10">
-                 <span className="text-[10px] font-black uppercase text-[var(--foreground)] opacity-40 leading-none">Read</span>
+                 <span className="text-[10px] font-black uppercase text-[var(--foreground)] leading-none">Read</span>
                  <span className="text-sm font-black text-[var(--foreground)] mt-1">{Math.ceil(content.split(/\s+/).filter(Boolean).length / 200)}m</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-               <button className="p-3 rounded-full border-2 border-black dark:border-white text-[var(--foreground)] hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all">
+               <button className="p-3 rounded-full border-2 border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)] transition-all">
                   <Eye className="w-5 h-5" />
                </button>
                <button
                 onClick={handlePublish}
                 disabled={isPublishing}
-                className="bg-hig-blue text-white px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-3"
+                className="bg-hig-blue text-white px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center gap-3"
                >
                  {isPublishing ? "..." : "Publish Now"} <Send className="w-4 h-4" />
                </button>

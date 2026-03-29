@@ -126,9 +126,9 @@ export const SpotlightSearch = ({ isOpen, onClose }: { isOpen: boolean; onClose:
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-white dark:bg-white rounded-md border border-[var(--border)] dark:border-[var(--border)]">
-            <Command className="w-3 h-3 text-[var(--foreground)] dark:text-[var(--foreground)]" />
-            <span className="text-xs font-black text-black dark:text-[var(--foreground)]">K</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--background)] rounded-md border border-[var(--border)]">
+            <Command className="w-3 h-3 text-[var(--foreground)]" />
+            <span className="text-xs font-black text-[var(--foreground)]">K</span>
           </div>
           <button onClick={onClose}>
             <X className="w-5 h-5 text-[var(--foreground)] hover:text-black" />

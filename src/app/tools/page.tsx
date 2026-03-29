@@ -47,7 +47,7 @@ export default function ToolsPage() {
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
                     className={`text-sm font-medium text-left transition-all ${
-                     activeCategory === cat ? "text-hig-blue translate-x-1" : "text-[var(--foreground)] hover:text-[var(--foreground)] dark:hover:text-[var(--foreground)]"
+                     activeCategory === cat ? "text-hig-blue translate-x-1" : "text-[var(--foreground)] hover:text-hig-blue"
                    }`}>
                      {cat}
                    </button>
@@ -68,11 +68,11 @@ export default function ToolsPage() {
         <div className="flex-1 space-y-10">
            <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
               <div className="relative flex-1 max-w-md w-full group">
-                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--foreground)] dark:text-[var(--foreground)]" />
+                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--foreground)]/40" />
                  <input
                    value={searchQuery}
                    onChange={(e) => setSearchQuery(e.target.value)}
-                   className="w-full bg-white dark:bg-white border border-[var(--border)] dark:border-[var(--border)] rounded-2xl py-3 pl-12 pr-6 text-[var(--foreground)] focus:ring-2 focus:ring-hig-blue/20 shadow-none transition-all group-hover:border-[var(--border)] dark:group-hover:border-[var(--border)] font-black"
+                   className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl py-3 pl-12 pr-6 text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:ring-2 focus:ring-hig-blue/20 shadow-none transition-all font-black"
                    placeholder="Search tools..."
                  />
               </div>
@@ -101,15 +101,15 @@ export default function ToolsPage() {
            {viewMode === "grid" ? (
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {filteredTools.map((tool) => (
-                  <Link key={tool.id} href={`/tools/${tool.id}`} className="hig-card group overflow-hidden flex flex-col bg-white dark:bg-white/50 border-[var(--border)] dark:border-[var(--border)] shadow-none hover:border-[var(--border)]">
-                    <div className="h-[200px] overflow-hidden relative">
+                  <Link key={tool.id} href={`/tools/${tool.id}`} className="hig-card group overflow-hidden flex flex-col bg-[var(--background)] border-[var(--border)] shadow-none hover:border-[var(--border)]">
+                    <div className="h-[200px] overflow-hidden relative border-b border-[var(--border)]">
                         <Image
                           src={tool.image}
                           alt={tool.name}
                           fill
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
-                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-hig-blue shadow-sm">
+                        <div className="absolute top-4 right-4 bg-[var(--background)] border border-[var(--border)] px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-hig-blue shadow-sm">
                            {tool.category}
                         </div>
                     </div>
@@ -150,7 +150,7 @@ export default function ToolsPage() {
            ) : (
              <div className="space-y-4">
                 {filteredTools.map((tool) => (
-                  <Link key={tool.id} href={`/tools/${tool.id}`} className="hig-card p-6 flex items-center gap-6 group hover:bg-white dark:hover:bg-white/50 bg-white dark:bg-white/50 border-[var(--border)] dark:border-[var(--border)] shadow-none">
+                  <Link key={tool.id} href={`/tools/${tool.id}`} className="hig-card p-6 flex items-center gap-6 group hover:bg-[var(--foreground)]/5 bg-[var(--background)] border-[var(--border)] shadow-none">
                      <div className="w-20 h-20 relative rounded-2xl overflow-hidden shrink-0 border border-[var(--border)]">
                         <Image src={tool.image} alt={tool.name} fill className="object-cover" />
                      </div>

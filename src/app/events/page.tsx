@@ -12,9 +12,9 @@ export default function EventsPage() {
             The most significant marketing, PR, and advertising events worldwide, gathered in one place.
           </p>
           <div className="relative group max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground)]" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground)]/40" />
             <input
-              className="w-full bg-[var(--background)] dark:bg-[var(--background)] border-none rounded-2xl py-4 pl-12 pr-6 text-[var(--foreground)] dark:text-[var(--foreground)] focus:ring-2 focus:ring-hig-blue/20"
+              className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl py-4 pl-12 pr-6 text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:ring-2 focus:ring-hig-blue/20"
               placeholder="Search for events, cities or topics..."
             />
           </div>
@@ -46,7 +46,7 @@ export default function EventsPage() {
                     <Star className="w-3.5 h-3.5 fill-white" />
                     Featured
                   </span>
-                  <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+                  <span className="bg-[var(--background)]/20 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border border-white/10">
                     {EVENTS[0].type}
                   </span>
                </div>
