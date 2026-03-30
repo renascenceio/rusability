@@ -47,14 +47,14 @@ export default function NewsPage() {
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
  {mainNews.map((news) => (
- <div key={news.id} className="hig-card p-10 group cursor-pointer relative overflow-hidden">
- <div className="relative z-10 space-y-6">
- <div className="flex items-center justify-between">
+ <div key={news.id} className="hig-card p-10 group cursor-pointer relative overflow-hidden text-center flex flex-col items-center">
+ <div className="relative z-10 space-y-6 flex flex-col items-center">
+ <div className="flex items-center gap-4">
  <span className="bg-hig-blue/10 text-hig-blue px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">{news.category}</span>
  <span className="flex items-center gap-2 text-tertiary text-[10px] font-bold uppercase tracking-widest"><Clock className="w-3.5 h-3.5" /> 2m {t("news.timeAgo")}</span>
  </div>
- <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-[var(--foreground)]">{news.title}</h3>
- <p className="text-secondary text-sm leading-relaxed font-medium">
+ <h3 className="text-3xl font-bold leading-tight group-hover:text-hig-blue transition-colors text-[var(--foreground)] max-w-lg">{news.title}</h3>
+ <p className="text-secondary text-sm leading-relaxed font-medium max-w-md">
  {t("news.recentDevelopments")}
  </p>
  <div className="pt-4 flex items-center gap-3">
@@ -62,7 +62,6 @@ export default function NewsPage() {
  <button className="hig-button-secondary p-2.5 rounded-full"><Sparkles className="w-4 h-4" /></button>
  </div>
  </div>
- <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/5 rounded-full blur-3xl" />
  </div>
  ))}
  </div>
@@ -136,7 +135,6 @@ export default function NewsPage() {
  </p>
  <button className="w-full text-[10px] font-bold uppercase tracking-widest bg-white text-hig-blue py-3 rounded-full hover:brightness-110 transition-all">{t("news.prepareSummary")}</button>
  </div>
- <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-16 translate-x-16" />
  </div>
  </aside>
  </div>

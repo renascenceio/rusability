@@ -57,7 +57,7 @@ export const Header = () => {
  )}
  </Link>
 
- <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-secondary uppercase tracking-widest">
+ <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-secondary uppercase tracking-widest">
  <Link href="/" className="flex items-center gap-2 hover:text-[var(--foreground)] transition-colors">
  {t("nav.home")}
  </Link>
@@ -95,7 +95,7 @@ export const Header = () => {
 
  <ThemeToggle />
 
- <Link href="/editor" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-hig-blue text-white text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-sm group">
+ <Link href="/editor" className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-hig-blue text-white text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-sm group">
  <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
  {t("nav.write")}
  </Link>

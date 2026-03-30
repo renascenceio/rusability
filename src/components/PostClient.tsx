@@ -48,8 +48,8 @@ export default function PostClient({ displayData, authorArticles, relatedNews }:
             <div className="w-14 h-14 rounded-full bg-[var(--muted)] flex items-center justify-center shadow-sm">
               <User className="w-7 h-7 text-tertiary" />
             </div>
-            <div className="space-y-0.5">
-              <p className="text-lg font-bold text-[var(--foreground)] leading-none">{displayData.author}</p>
+ <div className="flex flex-col gap-0.5">
+ <p className="text-lg font-bold text-[var(--foreground)] leading-tight">{displayData.author}</p>
               <p className="text-sm text-secondary font-medium tracking-tight">Chief Content Strategist</p>
             </div>
           </div>
