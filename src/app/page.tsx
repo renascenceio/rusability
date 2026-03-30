@@ -21,8 +21,8 @@ export default function Home() {
  return (
  <div className="max-w-7xl mx-auto px-6 py-8 md:py-16 space-y-16 md:space-y-24">
  {/* Hero Section - Featured Story */}
- <section className="relative group overflow-hidden rounded-[32px] bg-[var(--card-bg-solid)] shadow-sm">
- <Link href={`/posts/${featuredArticle.id}`} className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] md:min-h-[600px]">
+ <section className="relative group overflow-hidden rounded-[32px] bg-[var(--card-bg-solid)] shadow-sm text-center">
+ <Link href={`/posts/${featuredArticle.id}`} className="flex flex-col min-h-[500px] md:min-h-[600px]">
  <div className="relative h-[300px] lg:h-full overflow-hidden">
  <Image
  src={featuredArticle.image}
@@ -33,7 +33,7 @@ export default function Home() {
  />
  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent lg:hidden" />
  </div>
- <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center space-y-6 md:space-y-8">
+ <div className="p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center space-y-6 md:space-y-8">
  <div className="flex items-center gap-3 text-hig-blue font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">
  <Sparkles className="w-4 h-4" />
  <span>{t("home.storyOfDay")}</span>
@@ -44,12 +44,12 @@ export default function Home() {
  <p className="text-base md:text-xl text-secondary leading-relaxed line-clamp-3 font-medium">
  {featuredArticle.excerpt}
  </p>
- <div className="flex items-center justify-between pt-4 md:pt-8 dark:">
- <div className="flex items-center gap-4">
+ <div className="flex flex-col items-center gap-6 pt-4 md:pt-8 dark:">
+ <div className="flex flex-col items-center gap-4">
  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--background)] flex items-center justify-center">
  <User className="w-5 h-5 md:w-6 md:h-6 text-[var(--foreground)]" />
  </div>
- <div className="flex flex-col">
+ <div className="flex flex-col gap-0.5">
  <span className="font-bold text-sm md:text-base text-black dark:text-white">{featuredArticle.author}</span>
  <span className="text-xs text-black/60 dark:text-white/60 font-black tracking-widest uppercase">{featuredArticle.category} • {featuredArticle.time}</span>
  </div>
@@ -75,10 +75,10 @@ export default function Home() {
  <div className="relative w-16 h-16 rounded-full overflow-hidden shadow-md ring-1 ring-transparent transition-all">
  <Image src={author.avatar} alt={author.name} fill className="object-cover" />
  </div>
- <div className="flex flex-col">
- <p className="text-[10px] font-bold uppercase tracking-widest text-hig-blue mb-1">{author.role}</p>
- <h4 className="text-2xl font-bold text-[var(--foreground)]">{author.name}</h4>
- <p className="text-[10px] font-bold uppercase tracking-tighter text-tertiary mt-1">{author.articlesCount} {t("home.articlesCount")}</p>
+ <div className="flex flex-col gap-1 items-center">
+ <h4 className="text-3xl font-bold text-[var(--foreground)] tracking-tight">{author.name}</h4>
+ <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-hig-blue">{author.role}</p>
+ <p className="text-[10px] font-bold uppercase tracking-tighter text-tertiary mt-2">{author.articlesCount} {t("home.articlesCount")}</p>
  </div>
  </Link>
  ))}
@@ -100,11 +100,11 @@ export default function Home() {
  {/* 2/3 and 1/3 Content Grid - Matched Height Refinement */}
  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
  {/* 2/3 Width Article */}
- <Link href={`/posts/${otherArticles[0].id}`} className="md:col-span-2 group flex flex-col space-y-6">
- <div className="relative flex-1 min-h-[300px] md:min-h-[440px] rounded-[32px] overflow-hidden">
+ <Link href={`/posts/${otherArticles[0].id}`} className="md:col-span-2 group flex flex-col space-y-6 text-center items-center">
+ <div className="relative w-full aspect-video rounded-[32px] overflow-hidden">
  <Image src={otherArticles[0].image} alt={otherArticles[0].title} fill className="object-cover transition-transform duration-1000 group-hover:scale-105" />
  </div>
- <div className="space-y-4">
+ <div className="space-y-4 flex flex-col items-center">
  <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-hig-blue">
  <span>{otherArticles[0].category}</span>
  <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
@@ -120,11 +120,11 @@ export default function Home() {
  </Link>
 
  {/* 1/3 Width Article - Now matched height with 2/3 visually */}
- <Link href={`/posts/${otherArticles[1].id}`} className="md:col-span-1 group flex flex-col space-y-6">
- <div className="relative flex-1 min-h-[300px] rounded-[32px] overflow-hidden">
+ <Link href={`/posts/${otherArticles[1].id}`} className="md:col-span-1 group flex flex-col space-y-6 text-center items-center">
+ <div className="relative w-full aspect-[4/5] rounded-[32px] overflow-hidden">
  <Image src={otherArticles[1].image} alt={otherArticles[1].title} fill className="object-cover transition-transform duration-1000 group-hover:scale-110" />
  </div>
- <div className="space-y-4">
+ <div className="space-y-4 flex flex-col items-center">
  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-hig-blue">
  <span>{otherArticles[1].category}</span>
  </div>
@@ -153,18 +153,17 @@ export default function Home() {
  {t("home.tryNow")} <ExternalLink className="w-4 h-4" />
  </Link>
  </div>
- <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-hig-blue/5 rounded-full blur-3xl" />
  </div>
  );
 })()}
 
  {/* Remaining Articles in the expanded list */}
  {otherArticles.slice(2).map((article) => (
- <Link key={article.id} href={`/posts/${article.id}`} className="group flex flex-col space-y-6 h-full">
- <div className="relative aspect-[4/3] rounded-[32px] overflow-hidden shrink-0">
+ <Link key={article.id} href={`/posts/${article.id}`} className="group flex flex-col space-y-6 h-full text-center items-center relative z-10">
+ <div className="relative w-full aspect-[4/3] rounded-[32px] overflow-hidden shrink-0">
  <Image src={article.image} alt={article.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
  </div>
- <div className="space-y-3 flex-1">
+ <div className="space-y-3 flex-1 flex flex-col items-center">
  <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-hig-blue">
  <span>{article.category}</span>
  <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
@@ -206,8 +205,6 @@ export default function Home() {
  ))}
  </div>
  </div>
- {/* Background Accent */}
- <div className="absolute top-0 right-0 w-1/2 h-full bg-hig-blue/5 blur-[120px] -z-0 rounded-full" />
  </section>
  </div>
 
@@ -225,8 +222,8 @@ export default function Home() {
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
  {personalizedFeed.map((article) => (
- <Link key={article.id} href={`/posts/${article.id}`} className="group flex flex-col space-y-4">
- <div className="relative aspect-[16/10] rounded-2xl overflow-hidden">
+ <Link key={article.id} href={`/posts/${article.id}`} className="group flex flex-col space-y-4 text-center items-center">
+ <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden">
  <Image src={article.image} alt={article.title} fill className="object-cover transition-transform group-hover:scale-105" />
  <div className="absolute top-2 right-2">
  <div className="bg-[var(--card-bg)] backdrop-blur px-2 py-1 rounded-md text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-sm">
@@ -235,7 +232,7 @@ export default function Home() {
  </div>
  </div>
  </div>
- <div className="space-y-2">
+ <div className="space-y-2 flex flex-col items-center">
  <h3 className="text-sm font-bold leading-tight group-hover:text-hig-blue transition-colors line-clamp-2 uppercase tracking-tight text-[var(--foreground)]">{article.title}</h3>
  <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-tertiary">
  <span>{article.category}</span>
@@ -249,7 +246,7 @@ export default function Home() {
  {/* Industry Pulse & Trending - Side by Side */}
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
  {/* Industry Pulse News */}
- <div className="hig-card p-8 bg-[var(--card-bg-solid)] dark:bg-[var(--secondary-system-grouped-background)] shadow-sm">
+ <div className="hig-card p-8 bg-[var(--card-bg-solid)] dark:bg-[var(--secondary-system-grouped-background)] shadow-sm relative z-10">
  <div className="flex items-center gap-2 mb-8 pb-4">
  <Flame className="w-5 h-5 text-orange-600" />
  <h3 className="font-bold text-xl text-[var(--foreground)] uppercase tracking-tight">{t("home.pulseNews")}</h3>
@@ -314,7 +311,6 @@ export default function Home() {
  {t("home.customizeFeed")} <ArrowUpRight className="w-5 h-5" />
  </Link>
  </div>
- <div className="absolute top-0 right-0 w-1/3 h-full bg-hig-blue/5 blur-[120px] -z-0 rounded-full" />
  </div>
  </div>
  </div>
