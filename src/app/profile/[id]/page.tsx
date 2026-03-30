@@ -1,8 +1,6 @@
 "use client";
 
-"use client";
-
-import { User, Settings, Sparkles, Heart, Clock, Sliders, ChevronRight, TrendingUp, Users, Target, Edit3, BookOpen, MessageCircle, FileText, Trash2, Shield, Bell, ArrowRight} from"lucide-react";
+import { User, Settings, Sparkles, Heart, Clock, Sliders, ChevronRight, TrendingUp, Users, Target, Edit3, BookOpen, MessageCircle, FileText, Trash2, Shield, Bell, ArrowRight } from "lucide-react";
 import { CURRENT_USER} from"@/lib/data";
 import Link from"next/link";
 import { useState} from"react";
@@ -124,7 +122,7 @@ export default function ProfilePage() {
  ))}
 
  {activeTab ==="drafts" && contentMap.drafts.map((article) => (
- <Link href="/editor" key={article.title} className="hig-card p-6 flex items-center justify-between group bg-[var(--background)] shadow-none hover:">
+ <Link href="/editor" key={article.title} className="hig-card p-6 flex items-center justify-between group bg-[var(--background)] shadow-none hover:bg-hig-blue/5">
  <div className="space-y-2">
  <div className="flex items-center gap-3">
  <h3 className="font-black text-lg group-hover:text-hig-blue transition-colors text-[var(--foreground)]">{article.title}</h3>
@@ -142,7 +140,7 @@ export default function ProfilePage() {
  ))}
 
  {activeTab ==="published" && contentMap.published.map((article) => (
- <div key={article.title} className="hig-card p-6 flex items-center justify-between group bg-[var(--background)] shadow-none hover:">
+ <div key={article.title} className="hig-card p-6 flex items-center justify-between group bg-[var(--background)] shadow-none hover:bg-hig-blue/5">
  <div className="space-y-2">
  <h3 className="font-black text-lg group-hover:text-hig-blue transition-colors text-[var(--foreground)]">{article.title}</h3>
  <div className="flex items-center gap-4 text-[10px] text-[var(--foreground)] font-black uppercase tracking-widest">
@@ -158,7 +156,7 @@ export default function ProfilePage() {
  ))}
 
  {activeTab ==="activity" && contentMap.activity.map((item, i) => (
- <div key={i} className="flex items-center gap-6 p-4 hover: transition-colors">
+ <div key={i} className="flex items-center gap-6 p-4 hover:bg-hig-blue/5 transition-colors">
  <div className="w-10 h-10 rounded-full bg-[var(--background)] flex items-center justify-center shrink-0">
  {item.action.includes("Comment") ? <MessageCircle className="w-4 h-4 text-hig-blue" /> : <Sparkles className="w-4 h-4 text-amber-500" />}
  </div>
@@ -232,7 +230,7 @@ export default function ProfilePage() {
 
  <div className="flex flex-wrap gap-2">
  {INTERESTS.map((tag) => (
- <span key={tag} className="bg-[var(--muted)] px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-secondary hover: hover:text-hig-blue transition-all cursor-pointer">
+ <span key={tag} className="bg-[var(--muted)] px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-secondary hover:text-hig-blue transition-all cursor-pointer">
  {tag}
  </span>
  ))}

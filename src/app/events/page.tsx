@@ -146,7 +146,7 @@ export default function EventsPage() {
  ))}
 
  {/* Placeholder for more */}
- <div className="hig-card p-8 flex flex-col items-center justify-center text-center space-y-6 group cursor-pointer hover: transition-colors">
+ <div className="hig-card p-8 flex flex-col items-center justify-center text-center space-y-6 group cursor-pointer hover:bg-hig-blue/5 transition-colors">
  <div className="w-16 h-16 rounded-full bg-[var(--muted)] flex items-center justify-center transition-colors group-hover:bg-hig-blue/5">
  <Calendar className="w-6 h-6 text-tertiary group-hover:text-hig-blue" />
  </div>

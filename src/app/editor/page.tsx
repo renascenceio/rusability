@@ -83,7 +83,7 @@ export default function EditorPage() {
  {/* Functional Image Uploader */}
  <div
  onClick={() => fileInputRef.current?.click()}
- className={`relative group aspect-[21/9] w-full rounded-[40px] overflow-hidden transition-all duration-500 flex flex-col items-center justify-center gap-6 cursor-pointer ${ coverImage ?'' :'bg-[var(--muted)] hover: hover:bg-hig-blue/5'}`}
+ className={`relative group aspect-[21/9] w-full rounded-[40px] overflow-hidden transition-all duration-500 flex flex-col items-center justify-center gap-6 cursor-pointer ${ coverImage ?'' :'bg-[var(--muted)] hover:bg-hig-blue/5'}`}
  >
  {coverImage ? (
  <>

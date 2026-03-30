@@ -16,7 +16,7 @@ export const ThemeToggle = () => {
  return (
  <button
  onClick={() => setTheme(theme ==="dark" ?"light" :"dark")}
- className="p-2.5 rounded-full bg-[var(--card-bg-solid)] text-[var(--foreground)] hover:text-hig-blue transition-all active:scale-90 shadow-lg hover:shadow-hig-blue/5 scale-110"
+ className="p-2.5 rounded-full bg-amber-400/10 text-[var(--foreground)] hover:text-hig-blue transition-all active:scale-90"
  aria-label="Toggle Theme"
  >
  {theme ==="dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

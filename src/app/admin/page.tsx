@@ -1,6 +1,6 @@
 "use client";
 
-import { useState} from"react";
+import { useState } from "react";
 import {
  Users,
  FileText,
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
  <div className="max-w-[1600px] mx-auto flex gap-0">
 
  {/* Sidebar Nav */}
- <aside className="w-72 h-[calc(100vh-80px sticky top-20 p-6 flex flex-col justify-between overflow-y-auto bg-[var(--card-bg)] backdrop-blur-3xl">
+ <aside className="w-72 h-[calc(100vh-80px)] sticky top-20 p-6 flex flex-col justify-between overflow-y-auto bg-[var(--card-bg)] backdrop-blur-3xl">
  <div className="space-y-1">
  <div className="px-5 py-8 mb-10 bg-amber-400/5 rounded-[32px] relative overflow-hidden group/admin">
  <div className="relative z-10">
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
  </aside>
 
  {/* Main Content Area */}
- <main className="flex-1 p-10 min-h-[calc(100vh-80px bg-[var(--background)]">
+ <main className="flex-1 p-10 min-h-[calc(100vh-80px)] bg-[var(--background)]">
 
  {/* Analytics Engine */}
  {activeTab ==="analytics" && (
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
  <td className="px-10 py-8">
  <button
  onClick={() => togglePro(user.id)}
- className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all active:scale-95 ${ user.role ==='pro' ?"bg-amber-400 text-white shadow-lg shadow-amber-400/20" :"bg-[var(--muted)] text-secondary hover: hover:text-amber-500"}`}
+ className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all active:scale-95 ${ user.role ==='pro' ?"bg-amber-400 text-white shadow-lg shadow-amber-400/20" :"bg-[var(--muted)] text-secondary hover:text-amber-500"}`}
  >
  {user.role} Authorization
  </button>
@@ -469,7 +469,7 @@ export default function AdminDashboard() {
  { event:"Brand Asset Sync", time:"1h ago"},
  { event:"Auto-content Flush", time:"4h ago"}
  ].map((log, i) => (
- <div key={i} className="flex items-center justify-between pb-3 last:">
+ <div key={i} className="flex items-center justify-between pb-3 last:pb-0">
  <span className="text-xs font-bold text-[var(--foreground)]">{log.event}</span>
  <span className="text-[10px] text-tertiary font-bold">{log.time}</span>
  </div>

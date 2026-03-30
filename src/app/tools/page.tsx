@@ -139,7 +139,7 @@ export default function ToolsPage() {
  <button className="flex-1 bg-hig-blue text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-sm">
  {t("tools.connect")} <ArrowRight className="w-4 h-4" />
  </button>
- <button className="px-5 py-3 rounded-xl text-tertiary hover:text-hig-blue hover: transition-all">
+ <button className="px-5 py-3 rounded-xl text-tertiary hover:text-hig-blue transition-all">
  <ExternalLink className="w-4 h-4" />
  </button>
  </div>
