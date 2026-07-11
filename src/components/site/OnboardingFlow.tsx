@@ -95,7 +95,7 @@ export function OnboardingFlow() {
         {/* STEP 0 — Welcome */}
         {step === 0 && (
           <div className="text-center">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#4D5AFF] to-[#6d4dff] text-3xl font-black text-white shadow-[0_12px_40px_-8px_rgba(77,90,255,0.7)]">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-[#5b67ff] to-[#3d49e6] text-3xl font-black text-white shadow-[0_12px_40px_-8px_rgba(77,90,255,0.7)]">
               R
             </div>
             <h1 className="font-serif text-3xl font-black text-white">
@@ -350,7 +350,7 @@ export function OnboardingFlow() {
                   key={it.t}
                   className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3"
                 >
-                  <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-[#4D5AFF]/40 to-[#6d4dff]/30" />
+                  <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-[#5b67ff]/40 to-[#3d49e6]/30" />
                   <div>
                     <div className="text-sm font-semibold leading-snug text-white">{it.t}</div>
                     <div className="mt-0.5 text-xs text-white/40">{it.m}</div>

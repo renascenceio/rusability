@@ -8,10 +8,16 @@
 export type CategorySlug =
   | "design"
   | "marketing"
+  | "pr"
+  | "seo"
+  | "analytics"
   | "ux"
   | "business"
+  | "smm"
+  | "media"
   | "ai"
   | "tech"
+  | "ecommerce"
   | "science";
 
 export interface Category {

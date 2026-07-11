@@ -3,10 +3,16 @@ import type { Category, NewsCategory } from "@/lib/types";
 export const CATEGORIES: Category[] = [
   { slug: "design", name: "Дизайн", short: "Дизайн", accent: "accent" },
   { slug: "marketing", name: "Маркетинг", short: "Маркетинг", accent: "primary" },
-  { slug: "ux", name: "UX", short: "UX", accent: "gold" },
+  { slug: "pr", name: "PR", short: "PR", accent: "gold" },
+  { slug: "seo", name: "SEO", short: "SEO", accent: "success" },
+  { slug: "analytics", name: "Аналитика", short: "Аналитика", accent: "primary" },
+  { slug: "ai", name: "Нейросети", short: "Нейросети", accent: "primary" },
+  { slug: "ux", name: "UX/UI", short: "UX/UI", accent: "gold" },
   { slug: "business", name: "Бизнес", short: "Бизнес", accent: "success" },
-  { slug: "ai", name: "Искусственный интеллект", short: "ИИ", accent: "primary" },
+  { slug: "smm", name: "SMM", short: "SMM", accent: "accent" },
+  { slug: "media", name: "Медиа", short: "Медиа", accent: "primary" },
   { slug: "tech", name: "Технологии", short: "Технологии", accent: "accent" },
+  { slug: "ecommerce", name: "E-commerce", short: "E-commerce", accent: "success" },
 ];
 
 export const NEWS_CATEGORIES: { slug: NewsCategory; name: string }[] = [

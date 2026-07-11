@@ -223,6 +223,17 @@ h1, h2, h3, h4, h5 {
   background: rgba(77, 90, 255, 0.08);
 }
 
+/* Editor body — blue drop cap on first paragraph */
+.editor-body > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 3.4rem;
+  line-height: 0.82;
+  padding: 0.1rem 0.6rem 0 0;
+  color: #4d5aff;
+}
+
 /* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
