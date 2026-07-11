@@ -66,3 +66,8 @@ export const EVENTS: EventItem[] = [
 export function getEvent(id: string): EventItem | undefined {
   return EVENTS.find((e) => e.id === id);
 }
+
+/** Sorted soonest-first */
+export const UPCOMING_EVENTS: EventItem[] = [...EVENTS].sort(
+  (a, b) => +new Date(a.date) - +new Date(b.date),
+);

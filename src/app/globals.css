@@ -44,6 +44,17 @@
   --elite: #1a1410;
   --elite-foreground: #f0ebe3;
 
+  /* Component aliases */
+  --surface: #ffffff;
+  --surface-2: #f5f2ec;
+  --surface-3: #ece5da;
+  --ink: #1a1410;
+  --on-ink: #f5f0e8;
+  --gold-ink: #a56a1e;
+  --danger: #c4443b;
+  --shadow-card: 0 1px 3px rgba(26, 20, 16, 0.06), 0 8px 24px -12px rgba(26, 20, 16, 0.12);
+  --shadow-lift: 0 16px 40px -16px rgba(26, 20, 16, 0.25);
+
   --radius: 16px;
   --radius-pill: 40px;
 }
@@ -78,6 +89,17 @@
 
   --elite: #0d0b09;
   --elite-foreground: #f0ebe3;
+
+  /* Component aliases */
+  --surface: #211b15;
+  --surface-2: #2a231c;
+  --surface-3: #352c23;
+  --ink: #0d0b09;
+  --on-ink: #f0ebe3;
+  --gold-ink: #e8a85a;
+  --danger: #e0655c;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 16px 40px -16px rgba(0, 0, 0, 0.6);
 }
 
 @theme inline {
@@ -109,6 +131,13 @@
 
   --color-elite: var(--elite);
   --color-elite-foreground: var(--elite-foreground);
+
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --color-danger: var(--danger);
 
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-alegreya), Georgia, "Times New Roman", serif;
@@ -147,91 +176,12 @@ h1, h2, h3, h4, h5 {
   background: rgba(77, 90, 255, 0.2);
 }
 
-@layer components {
-  /* Pill button */
-  .btn-pill {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50;
-  }
-  .btn-primary {
-    @apply btn-pill bg-primary text-primary-foreground hover:brightness-110 shadow-[0_4px_20px_-4px_rgba(77,90,255,0.5)];
-  }
-  .btn-ghost {
-    @apply btn-pill bg-muted text-foreground hover:bg-primary-soft;
-  }
-  .btn-outline {
-    @apply btn-pill border border-border bg-transparent text-foreground hover:bg-muted;
-  }
-  .btn-dark {
-    @apply btn-pill bg-foreground text-background hover:opacity-90;
-  }
-
-  /* Editorial card */
-  .card-surface {
-    @apply rounded-[var(--radius-lg)] border border-border bg-card transition-all duration-300;
-  }
-  .card-hover {
-    @apply hover:-translate-y-[3px] hover:shadow-[0_16px_40px_-16px_rgba(26,20,16,0.25)];
-  }
-
-  /* Uppercase eyebrow label */
-  .eyebrow {
-    @apply text-[11px] font-bold uppercase tracking-[0.14em];
-  }
-
-  /* Category chip */
-  .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold transition-colors;
-  }
-  .chip-active {
-    @apply border-transparent bg-foreground text-background;
-  }
-
-  .container-editorial {
-    @apply mx-auto w-full max-w-[1200px] px-5 md:px-8;
-  }
-  .container-reading {
-    @apply mx-auto w-full max-w-[720px] px-5;
-  }
-}
-
-/* Article body typography */
-.prose-editorial {
-  font-family: var(--font-serif);
-}
-.prose-editorial p {
-  font-size: 1.25rem;
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
-  color: var(--foreground);
-}
-.prose-editorial h2 {
-  font-size: 1.9rem;
-  margin: 2.5rem 0 1rem;
-}
-.prose-editorial h3 {
-  font-size: 1.45rem;
-  margin: 2rem 0 0.75rem;
-}
-.prose-editorial blockquote {
-  border-left: 3px solid var(--primary);
-  padding-left: 1.5rem;
-  font-style: italic;
-  margin: 1.75rem 0;
-  color: var(--muted-foreground);
-}
-.prose-editorial a {
+/* Article body links */
+.article-prose a {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.prose-editorial ul, .prose-editorial ol {
-  font-family: var(--font-serif);
-  font-size: 1.2rem;
-  line-height: 1.8;
-  padding-left: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-.prose-editorial li { margin-bottom: 0.5rem; }
 
 /* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
