@@ -1,6 +1,7 @@
 import { Plus, Flame } from "lucide-react";
 import { PageHeader, Panel, Tag, AdminButton, Table, Th, Td, KpiCard } from "@/components/admin/ui";
-import { NEWS, newsCategoryName } from "@/lib/mock";
+import { allNews } from "@/lib/data/news";
+import { newsCategoryName } from "@/lib/taxonomy";
 import { formatNumber } from "@/lib/utils";
 
 export const metadata = { title: "Новости — Rusability" };
@@ -21,7 +22,8 @@ const PIPELINE_LABEL = {
   rejected: "Отклонено",
 } as const;
 
-export default function AdminNewsPage() {
+export default async function AdminNewsPage() {
+  const NEWS = await allNews();
   const published = NEWS.filter((n) => (n.pipeline ?? "published") === "published").length;
 
   return (

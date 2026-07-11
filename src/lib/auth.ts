@@ -23,6 +23,10 @@ export const auth = betterAuth({
     ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
       : []),
+    // In development / v0 preview the browser Origin is the sandbox/preview
+    // host (and localhost during local testing), which we can't enumerate up
+    // front — trust all origins there. Production stays locked to the env list.
+    ...(process.env.NODE_ENV === "development" ? ["*"] : []),
   ],
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

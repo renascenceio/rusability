@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BarChart3, Sparkles, DollarSign, PenLine } from "lucide-react";
-import { ARTICLES } from "@/lib/mock";
+import { articlesByAuthor } from "@/lib/data/articles";
 import { formatNumber, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Дашборд — Rusability" };
@@ -13,8 +13,8 @@ function seoOf(id: string) {
   return 74 + (h % 22);
 }
 
-export default function AuthorDashboardPage() {
-  const mine = ARTICLES.filter((a) => a.authorId === AUTHOR_ID);
+export default async function AuthorDashboardPage() {
+  const mine = await articlesByAuthor(AUTHOR_ID);
   const recent = [...mine]
     .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
     .slice(0, 3);
