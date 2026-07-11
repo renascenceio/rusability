@@ -1,20 +1,25 @@
 import { MetadataRoute } from "next";
-import { ARTICLES } from "@/lib/mock/articles";
-import { NEWS } from "@/lib/mock/news";
+import { publishedArticles } from "@/lib/data/articles";
+import { publishedNews } from "@/lib/data/news";
 
 const BASE = "https://rusability.vercel.app";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const articles = ARTICLES.filter((a) => a.status === "published").map((a) => ({
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [publishedA, publishedN] = await Promise.all([
+    publishedArticles(),
+    publishedNews(),
+  ]);
+
+  const articles = publishedA.map((a) => ({
     url: `${BASE}/articles/${a.slug}`,
-    lastModified: new Date(a.publishedAt),
+    lastModified: a.publishedAt ? new Date(a.publishedAt) : new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
-  const news = NEWS.filter((n) => n.pipeline === "published").map((n) => ({
+  const news = publishedN.map((n) => ({
     url: `${BASE}/news/${n.slug}`,
-    lastModified: new Date(n.publishedAt),
+    lastModified: n.publishedAt ? new Date(n.publishedAt) : new Date(),
     changeFrequency: "daily" as const,
     priority: 0.7,
   }));

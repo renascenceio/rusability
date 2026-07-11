@@ -1,33 +1,35 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, Flame } from "lucide-react";
-import { getNews, latestNews, newsByCategory } from "@/lib/mock/news";
-import { newsCategoryName } from "@/lib/mock/categories";
+import { getNews, latestNews, newsByCategory } from "@/lib/data/news";
+import { newsCategoryName } from "@/lib/taxonomy";
 import { NewsRow, NewsMiniCard } from "@/components/site/NewsCard";
 import { Chip, Divider } from "@/components/ui/kit";
 import { formatNumber } from "@/lib/utils";
 
-export function generateStaticParams() {
-  return latestNews().map((n) => ({ slug: n.slug }));
+export async function generateStaticParams() {
+  return (await latestNews()).map((n) => ({ slug: n.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const news = getNews(slug);
+  const news = await getNews(slug);
   if (!news) return {};
   return { title: `${news.title} — Rusability`, description: news.excerpt };
 }
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const news = getNews(slug);
+  const news = await getNews(slug);
   if (!news || (news.pipeline && news.pipeline !== "published")) notFound();
 
   const categoryLabel = newsCategoryName(news.category);
-  const related = newsByCategory(news.category)
-    .filter((n) => n.id !== news.id)
-    .slice(0, 4);
-  const more = latestNews(6).filter((n) => n.id !== news.id).slice(0, 5);
+  const [related, more] = await Promise.all([
+    newsByCategory(news.category).then((list) =>
+      list.filter((n) => n.id !== news.id).slice(0, 4),
+    ),
+    latestNews(6).then((list) => list.filter((n) => n.id !== news.id).slice(0, 5)),
+  ]);
 
   return (
     <div className="container-editorial py-8 md:py-12">

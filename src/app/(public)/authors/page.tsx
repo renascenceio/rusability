@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Crown, Sparkles } from "lucide-react";
-import { AUTHORS } from "@/lib/mock/authors";
+import { allAuthors } from "@/lib/data/authors";
 import { Avatar, Badge, Card } from "@/components/ui/kit";
 import { formatNumber } from "@/lib/utils";
 
@@ -9,7 +9,8 @@ export const metadata = {
   description: "Эксперты, исследователи и практики, которые пишут для Rusability.",
 };
 
-export default function AuthorsPage() {
+export default async function AuthorsPage() {
+  const AUTHORS = await allAuthors();
   return (
     <div className="container-editorial py-10 md:py-14">
       <header className="mb-10 max-w-2xl">

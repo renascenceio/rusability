@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutGrid,
   FileText,
@@ -13,9 +14,13 @@ import {
   Bell,
   ShieldCheck,
   ArrowLeft,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { authClient } from "@/lib/auth-client";
+
+export type AuthorShellUser = { name: string; username: string };
 
 type Item = { href: string; label: string; icon: typeof LayoutGrid; badge?: string; isNew?: boolean };
 
@@ -41,8 +46,23 @@ const GROUPS: { title: string; items: Item[] }[] = [
   },
 ];
 
-export function AuthorShell({ children }: { children: React.ReactNode }) {
+export function AuthorShell({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user: AuthorShellUser;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function onSignOut() {
+    setSigningOut(true);
+    await authClient.signOut();
+    router.push("/sign-in");
+    router.refresh();
+  }
 
   return (
     <div className="flex min-h-dvh bg-[var(--background)]">
@@ -107,13 +127,23 @@ export function AuthorShell({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-              А
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
+              {(user.name || user.username).charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[var(--foreground)]">Анна Соколова</p>
-              <p className="truncate text-xs text-[var(--muted-foreground)]">@anna_sokolova</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-[var(--foreground)]">{user.name}</p>
+              <p className="truncate text-xs text-[var(--muted-foreground)]">@{user.username}</p>
             </div>
+            <button
+              type="button"
+              onClick={onSignOut}
+              disabled={signingOut}
+              aria-label="Выйти"
+              title="Выйти"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[var(--muted-foreground)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--foreground)] disabled:opacity-50"
+            >
+              <LogOut className="h-[15px] w-[15px]" />
+            </button>
           </div>
         </div>
       </aside>

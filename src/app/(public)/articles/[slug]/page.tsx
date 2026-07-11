@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Clock, Eye, Crown, Sparkles, Calendar } from "lucide-react";
-import { getArticle, relatedArticles, publishedArticles } from "@/lib/mock/articles";
-import { getAuthor } from "@/lib/mock/authors";
-import { categoryName, categoryAccent } from "@/lib/mock/categories";
-import { COMMENTS } from "@/lib/mock/comments";
+import { getArticle, relatedArticles, publishedArticles } from "@/lib/data/articles";
+import { categoryName, categoryAccent } from "@/lib/taxonomy";
+import { commentsForArticle } from "@/lib/data/comments";
 import { ArticleBody } from "@/components/site/ArticleBody";
 import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
@@ -12,17 +11,20 @@ import { CommentThread } from "@/components/site/CommentThread";
 import { ArticleActions } from "@/components/site/ArticleActions";
 import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
 
-export function generateStaticParams() {
-  return publishedArticles().map((a) => ({ slug: a.slug }));
+export async function generateStaticParams() {
+  return (await publishedArticles()).map((a) => ({ slug: a.slug }));
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await getArticle(slug);
   if (!article || article.status !== "published") notFound();
 
-  const author = getAuthor(article.authorId);
-  const related = relatedArticles(article);
+  const author = article.author;
+  const [related, comments] = await Promise.all([
+    relatedArticles(article),
+    commentsForArticle(article.id),
+  ]);
   const isElite = article.tier === "elite";
   const accent = categoryAccent(article.category);
 
@@ -182,7 +184,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
         )}
 
-        <CommentThread comments={COMMENTS} />
+        <CommentThread comments={comments} />
       </div>
 
       {/* Related */}

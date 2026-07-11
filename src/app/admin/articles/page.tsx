@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Plus, Eye, Heart, MessageCircle } from "lucide-react";
 import { PageHeader, Panel, Tag, AdminButton, Table, Th, Td, KpiCard } from "@/components/admin/ui";
-import { ARTICLES, getAuthor, categoryName } from "@/lib/mock";
+import { allArticles } from "@/lib/data/articles";
+import { categoryName } from "@/lib/taxonomy";
 import { formatNumber, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Статьи — Rusability" };
@@ -22,8 +23,8 @@ const STATUS_LABEL = {
   quarantine: "Карантин РКН",
 } as const;
 
-export default function AdminArticlesPage() {
-  const articles = ARTICLES;
+export default async function AdminArticlesPage() {
+  const articles = await allArticles();
   const published = articles.filter((a) => a.status === "published").length;
   const totalViews = articles.reduce((s, a) => s + a.views, 0);
 
@@ -59,7 +60,7 @@ export default function AdminArticlesPage() {
           </thead>
           <tbody>
             {articles.map((a) => {
-              const author = getAuthor(a.authorId);
+              const author = a.author;
               return (
                 <tr key={a.id} className="transition-colors hover:bg-[var(--muted)]">
                   <Td>

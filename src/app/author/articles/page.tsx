@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PenLine } from "lucide-react";
-import { ARTICLES, categoryName } from "@/lib/mock";
+import { articlesByAuthor } from "@/lib/data/articles";
+import { categoryName } from "@/lib/taxonomy";
 import { formatNumber, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Мои статьи — Rusability" };
@@ -15,8 +16,8 @@ const STATUS_LABEL: Record<string, string> = {
   quarantine: "Карантин",
 };
 
-export default function AuthorArticlesPage() {
-  const mine = ARTICLES.filter((a) => a.authorId === AUTHOR_ID);
+export default async function AuthorArticlesPage() {
+  const mine = await articlesByAuthor(AUTHOR_ID);
 
   return (
     <div>

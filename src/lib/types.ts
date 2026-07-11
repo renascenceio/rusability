@@ -79,6 +79,9 @@ export interface Article {
   /** GEO score for elite articles */
   geoScore?: number;
   featured?: boolean;
+  /** Optionally embedded author (populated by data-layer joins) so shared /
+   *  client card components can render bylines without a DB lookup. */
+  author?: Author;
 }
 
 export type ArticleBlock =

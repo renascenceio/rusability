@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import {
@@ -21,8 +21,20 @@ import {
   X,
   Sun,
   Moon,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
+
+export type ShellUser = { name: string; email: string; role: string };
+
+const ROLE_LABELS: Record<string, string> = {
+  superadmin: "Суперадмин",
+  admin: "Администратор",
+  editor: "Редактор",
+  author: "Автор",
+  reader: "Читатель",
+};
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
 type NavGroup = { title: string; items: NavItem[] };
@@ -96,7 +108,23 @@ function ThemeControl() {
   );
 }
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user: ShellUser;
+}) {
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function onSignOut() {
+    setSigningOut(true);
+    await authClient.signOut();
+    router.push("/sign-in");
+    router.refresh();
+  }
+
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -171,16 +199,26 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <ThemeControl />
           <div className="flex items-center gap-2.5 border-t border-[var(--border)] px-3.5 py-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4d5aff] to-[#7a8aff] text-xs font-bold text-white">
-              С
+              {(user.name || user.email).charAt(0).toUpperCase()}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-semibold text-[var(--foreground)]">
-                Суперадмин
+                {ROLE_LABELS[user.role] ?? user.role}
               </div>
               <div className="truncate text-[11px] text-[var(--muted-foreground)]">
-                admin@rusability.ru
+                {user.email}
               </div>
             </div>
+            <button
+              type="button"
+              onClick={onSignOut}
+              disabled={signingOut}
+              aria-label="Выйти"
+              title="Выйти"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[var(--muted-foreground)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--foreground)] disabled:opacity-50"
+            >
+              <LogOut className="h-[15px] w-[15px]" />
+            </button>
           </div>
         </div>
       </aside>

@@ -2,7 +2,7 @@ import { ARTICLES } from "@/lib/mock/articles";
 import { NEWS } from "@/lib/mock/news";
 import { APPS } from "@/lib/mock/apps";
 import { UPCOMING_EVENTS } from "@/lib/mock/events";
-import { categoryName } from "@/lib/mock/categories";
+import { categoryName } from "@/lib/taxonomy";
 import { getAuthor } from "@/lib/mock/authors";
 import { formatDate } from "@/lib/utils";
 
