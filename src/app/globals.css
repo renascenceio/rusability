@@ -176,6 +176,23 @@ h1, h2, h3, h4, h5 {
   background: rgba(77, 90, 255, 0.2);
 }
 
+/* Layout containers */
+.container-editorial {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1200px;
+  padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+  .container-editorial { padding-inline: 2rem; }
+}
+.container-reading {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 720px;
+  padding-inline: 1.25rem;
+}
+
 /* Article body links */
 .article-prose a {
   color: var(--primary);

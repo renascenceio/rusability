@@ -77,6 +77,32 @@ export function Badge({
   );
 }
 
+export function Chip({
+  active,
+  className,
+  children,
+  ...props
+}: ComponentProps<"span"> & { active?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors",
+        active
+          ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
+          : "border-[var(--border)] text-[var(--foreground)]",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function Divider({ className }: { className?: string }) {
+  return <hr className={cn("border-0 border-t border-[var(--border)]", className)} />;
+}
+
 /* ---------------- Card ---------------- */
 
 export function Card({ className, children, ...props }: ComponentProps<"div">) {
