@@ -238,10 +238,45 @@ h1, h2, h3, h4, h5 {
   color: #4d5aff;
 }
 
-/* Admin shell background (warm cream regardless of theme toggle in preview) */
+/* Admin shell — scoped tokens matching the Rusability Admin prototype.
+   Terracotta (#D45E42) primary, white/near-black sidebar, follows light/dark. */
 .admin-root {
+  --background: #f5f3f0;
+  --sidebar: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f0ede8;
+  --surface-3: #e4ddd2;
+  --muted: #f0ede8;
+  --card: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(0, 0, 0, 0.045);
+  --foreground: #1a1612;
+  --muted-foreground: rgba(26, 22, 18, 0.5);
+  --faint: rgba(26, 22, 18, 0.28);
+  --primary: #d45e42;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(212, 94, 66, 0.09);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 3px 10px rgba(0, 0, 0, 0.04);
   background: var(--background);
   min-height: 100dvh;
+}
+.dark .admin-root {
+  --background: #0a0806;
+  --sidebar: #060504;
+  --surface: #1c1917;
+  --surface-2: #141210;
+  --surface-3: #2a2420;
+  --muted: #141210;
+  --card: #1c1917;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-soft: rgba(255, 255, 255, 0.035);
+  --foreground: #f0ebe3;
+  --muted-foreground: rgba(240, 235, 227, 0.48);
+  --faint: rgba(240, 235, 227, 0.22);
+  --primary: #d45e42;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(212, 94, 66, 0.1);
+  --shadow-card: none;
 }
 
 /* Scrollbar */
@@ -253,3 +288,8 @@ h1, h2, h3, h4, h5 {
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

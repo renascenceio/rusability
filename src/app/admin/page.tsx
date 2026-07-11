@@ -1,99 +1,146 @@
-import {
-  FileText,
-  Users,
-  Eye,
-  Wallet,
-  PenLine,
-  Newspaper,
-  Bot,
-  Mail,
-  CheckCircle2,
-  ShieldAlert,
-} from "lucide-react";
-import { PageHeader, KpiCard, Panel, AdminButton } from "@/components/admin/ui";
-import { AreaChart, ScoreRing } from "@/components/ui/charts";
-import { TRAFFIC_SERIES, SEO_SCORES, ADMIN_ACTIVITY } from "@/lib/mock";
+import Link from "next/link";
+import { PenLine, Newspaper, Mail, ShieldAlert, ChevronRight } from "lucide-react";
 
 export const metadata = { title: "Обзор платформы — Rusability" };
 
-const QUICK_ACTIONS = [
-  { label: "Новая статья", icon: PenLine, href: "/editor" },
-  { label: "Добавить новость", icon: Newspaper, href: "/admin/news" },
-  { label: "ИИ-авторы", icon: Bot, href: "/admin/ai-authors" },
-  { label: "Отправить рассылку", icon: Mail, href: "/admin/newsletter" },
+type Stat = {
+  label: string;
+  value: string;
+  valueColor: string;
+  sub: string;
+  subColor: string;
+};
+
+const STATS: Stat[] = [
+  {
+    label: "Читателей",
+    value: "284K",
+    valueColor: "text-[var(--foreground)]",
+    sub: "▲ 12% за месяц",
+    subColor: "text-[#6aaa4a]",
+  },
+  {
+    label: "Статей",
+    value: "1 248",
+    valueColor: "text-[#d45e42]",
+    sub: "48 за сегодня",
+    subColor: "text-[var(--muted-foreground)]",
+  },
+  {
+    label: "Подписчиков",
+    value: "24.8K",
+    valueColor: "text-[#4d5aff]",
+    sub: "▲ 753 за неделю",
+    subColor: "text-[#6aaa4a]",
+  },
+  {
+    label: "РКН на проверке",
+    value: "3",
+    valueColor: "text-[#d45e42]",
+    sub: "Требуют решения",
+    subColor: "text-[var(--muted-foreground)]",
+  },
 ];
+
+const QUICK_ACTIONS = [
+  { label: "Написать статью", icon: PenLine, href: "/editor" },
+  { label: "Управление новостями", icon: Newspaper, href: "/admin/news" },
+  { label: "Создать рассылку", icon: Mail, href: "/admin/newsletter" },
+];
+
+const ACTIVITY = [
+  { dot: "#6aaa4a", pulse: true, text: "Аналитик опубликовал «SEO-тренды 2026»", time: "11:30" },
+  { dot: "#6aaa4a", pulse: false, text: "Практик опубликовал «Топ SEO-инструментов»", time: "08:00" },
+  { dot: "#d45e42", pulse: false, text: "РКН заблокировал 1 материал (94%)", time: "07:44" },
+  { dot: "#e8a85a", pulse: false, text: "Новости-бот собрал 48 материалов", time: "06:00" },
+];
+
+function Card({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] ${className ?? ""}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function AdminOverviewPage() {
   return (
-    <div className="mx-auto max-w-[1180px]">
-      <PageHeader
-        title="Обзор платформы"
-        subtitle="Ключевые показатели и активность за сегодня"
-        action={<AdminButton href="/editor" variant="primary"><PenLine className="h-4 w-4" /> Написать</AdminButton>}
-      />
+    <div className="mx-auto max-w-[1180px] animate-[fadein_.2s_ease]">
+      <header className="mb-7">
+        <h1 className="font-serif text-[26px] font-bold leading-tight text-[var(--foreground)]">
+          Обзор платформы
+        </h1>
+        <p className="mt-1 text-[13px] text-[var(--muted-foreground)]">Июль 2026</p>
+      </header>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <KpiCard label="Статей опубликовано" value="1 284" delta="12% за месяц" deltaUp icon={<FileText className="h-4 w-4" />} />
-        <KpiCard label="Читателей за месяц" value="342K" delta="8,4%" deltaUp icon={<Users className="h-4 w-4" />} />
-        <KpiCard label="Просмотров сегодня" value="18 402" delta="3,1%" deltaUp icon={<Eye className="h-4 w-4" />} />
-        <KpiCard label="Доход за месяц" value="₽ 486K" delta="1,2%" icon={<Wallet className="h-4 w-4" />} />
+      {/* KPI row */}
+      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+        {STATS.map((s) => (
+          <Card key={s.label} className="p-5">
+            <div className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+              {s.label}
+            </div>
+            <div className={`font-serif text-[32px] font-bold leading-none ${s.valueColor}`}>
+              {s.value}
+            </div>
+            <div className={`mt-1.5 text-xs font-medium ${s.subColor}`}>{s.sub}</div>
+          </Card>
+        ))}
       </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <Panel title="Трафик за 14 дней" className="lg:col-span-2">
-          <AreaChart data={TRAFFIC_SERIES} height={220} />
-        </Panel>
-
-        <Panel title="Готовность контента">
-          <div className="flex flex-col gap-5">
-            {SEO_SCORES.map((s) => (
-              <div key={s.label} className="flex items-center gap-4">
-                <ScoreRing value={s.value} color={s.color} label={s.label} />
-                <div>
-                  <div className="text-sm font-bold text-[var(--foreground)]">{s.label}</div>
-                  <div className="text-xs text-[var(--muted-foreground)]">{s.caption}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </div>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <Panel title="Быстрые действия" className="lg:col-span-1">
-          <div className="grid grid-cols-2 gap-3">
+      {/* Two panels */}
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        {/* Quick actions */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-[15px] font-bold text-[var(--foreground)]">Быстрые действия</h2>
+          <div className="flex flex-col gap-2">
             {QUICK_ACTIONS.map((a) => {
               const Icon = a.icon;
               return (
-                <AdminButton
+                <Link
                   key={a.label}
                   href={a.href}
-                  variant="ghost"
-                  className="h-auto flex-col gap-2 rounded-2xl py-5 text-center"
+                  className="flex items-center justify-between rounded-[10px] border border-[var(--border-soft)] bg-[var(--surface-2)] px-4 py-3 transition-colors hover:border-[var(--border)]"
                 >
-                  <Icon className="h-5 w-5 text-[var(--primary)]" />
-                  <span className="text-xs font-semibold">{a.label}</span>
-                </AdminButton>
+                  <span className="flex items-center gap-2.5 text-[13px] font-medium text-[var(--foreground)]">
+                    <Icon className="h-4 w-4 text-[var(--muted-foreground)]" />
+                    {a.label}
+                  </span>
+                  <ChevronRight className="h-3.5 w-3.5 text-[var(--faint)]" />
+                </Link>
               );
             })}
+            <Link
+              href="/admin/ai-filter"
+              className="flex items-center justify-between rounded-[10px] border border-[#d45e42]/20 bg-[#d45e42]/[0.06] px-4 py-3 transition-colors hover:bg-[#d45e42]/10"
+            >
+              <span className="flex items-center gap-2.5 text-[13px] font-medium text-[#d45e42]">
+                <ShieldAlert className="h-4 w-4" />
+                РКН-очередь (3)
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-[#d45e42]" />
+            </Link>
           </div>
-        </Panel>
+        </Card>
 
-        <Panel title="Активность сегодня" className="lg:col-span-2">
-          <ul className="space-y-3">
-            {ADMIN_ACTIVITY.map((a, i) => (
-              <li key={i} className="flex items-center gap-3 text-sm">
-                {a.tone === "danger" ? (
-                  <ShieldAlert className="h-4 w-4 shrink-0 text-[var(--danger)]" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--success)]" />
-                )}
-                <span className="flex-1 text-[var(--foreground)]">{a.text}</span>
-                <span className="shrink-0 text-xs text-[var(--muted-foreground)]">{a.time}</span>
+        {/* Activity */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-[15px] font-bold text-[var(--foreground)]">Активность сегодня</h2>
+          <ul className="flex flex-col gap-3">
+            {ACTIVITY.map((a, i) => (
+              <li key={i} className="flex items-center gap-3">
+                <span
+                  className={`h-[7px] w-[7px] shrink-0 rounded-full ${a.pulse ? "animate-pulse" : ""}`}
+                  style={{ background: a.dot }}
+                />
+                <span className="flex-1 text-[13px] text-[var(--muted-foreground)]">{a.text}</span>
+                <span className="shrink-0 text-[11px] text-[var(--faint)]">{a.time}</span>
               </li>
             ))}
           </ul>
-        </Panel>
+        </Card>
       </div>
     </div>
   );
