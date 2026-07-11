@@ -6,3 +6,4 @@ export * from "./events";
 export * from "./apps";
 export * from "./comments";
 export * from "./analytics";
+export * from "./admin";

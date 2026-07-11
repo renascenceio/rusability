@@ -147,3 +147,30 @@ export const ADMIN_ACTIVITY = [
   { text: "РКН заблокировал 1 материал (94%)", time: "07:44", tone: "danger" },
   { text: "Новости-бот собрал 48 материалов", time: "06:00", tone: "ok" },
 ] as const;
+
+export interface PlatformUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "Читатель" | "Автор" | "Редактор" | "Админ";
+  plan: "Free" | "Premium";
+  joined: string;
+  articles: number;
+  status: "active" | "banned";
+}
+
+export const PLATFORM_USERS: PlatformUser[] = [
+  { id: "u1", name: "Мария Ковалёва", email: "m.kovaleva@rusability.ru", role: "Автор", plan: "Premium", joined: "12.03.2025", articles: 48, status: "active" },
+  { id: "u2", name: "Дмитрий Соколов", email: "d.sokolov@rusability.ru", role: "Редактор", plan: "Premium", joined: "04.11.2024", articles: 132, status: "active" },
+  { id: "u3", name: "Анна Лебедева", email: "anna.l@gmail.com", role: "Читатель", plan: "Premium", joined: "28.06.2026", articles: 0, status: "active" },
+  { id: "u4", name: "Игорь Волков", email: "i.volkov@yandex.ru", role: "Автор", plan: "Free", joined: "15.01.2026", articles: 12, status: "active" },
+  { id: "u5", name: "Елена Морозова", email: "e.morozova@rusability.ru", role: "Админ", plan: "Premium", joined: "01.09.2023", articles: 7, status: "active" },
+  { id: "u6", name: "Спам-аккаунт", email: "bot4821@temp.mail", role: "Читатель", plan: "Free", joined: "09.07.2026", articles: 0, status: "banned" },
+];
+
+export const MONETIZATION_STATS = {
+  mrr: "₽ 812 000",
+  subscribers: 4820,
+  arpu: "₽ 168",
+  churn: "2,1%",
+};

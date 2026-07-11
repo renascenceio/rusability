@@ -164,3 +164,50 @@ export function Donut({ data, size = 180 }: { data: MetricPoint[]; size?: number
     </div>
   );
 }
+
+/* ---------------- Score ring ---------------- */
+
+export function ScoreRing({
+  value,
+  color = "var(--primary)",
+  label,
+  size = 64,
+}: {
+  value: number;
+  color?: string;
+  label?: string;
+  size?: number;
+}) {
+  const r = 26;
+  const c = 2 * Math.PI * r;
+  const dash = (value / 100) * c;
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 64 64" style={{ width: size, height: size }}>
+        <circle cx="32" cy="32" r={r} fill="none" stroke="var(--border)" strokeWidth={7} />
+        <g transform="rotate(-90 32 32)">
+          <circle
+            cx="32"
+            cy="32"
+            r={r}
+            fill="none"
+            stroke={color}
+            strokeWidth={7}
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${c - dash}`}
+          />
+        </g>
+        <text
+          x="32"
+          y="37"
+          textAnchor="middle"
+          className="fill-[var(--foreground)]"
+          style={{ fontSize: 15, fontWeight: 700 }}
+        >
+          {value}
+        </text>
+      </svg>
+      {label && <span className="sr-only">{label}</span>}
+    </div>
+  );
+}

@@ -41,7 +41,7 @@ export const TOP_PAGES: { path: string; views: number; delta: number }[] = [
   { path: "/articles/metriki-produkta", views: 22100, delta: -4 },
 ];
 
-export const AI_AUTHORS: AiAuthorConfig[] = [
+export const AI_AUTHOR_CONFIGS: AiAuthorConfig[] = [
   {
     id: "ai-1",
     name: "Аврора",
