@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { publishedArticles } from "@/lib/mock/articles";
 import { ArticlesBrowser } from "@/components/site/ArticlesBrowser";
 
@@ -16,7 +17,9 @@ export default function ArticlesPage() {
           Разборы, гайды и исследования от авторов и экспертов индустрии.
         </p>
       </header>
-      <ArticlesBrowser articles={articles} />
+      <Suspense fallback={<div className="h-64" />}>
+        <ArticlesBrowser articles={articles} />
+      </Suspense>
     </div>
   );
 }

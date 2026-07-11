@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Search, FileText, Newspaper, AppWindow } from "lucide-react";
 import type { Article, NewsItem, AppTool } from "@/lib/types";
 import { ArticleCard } from "@/components/site/ArticleCard";

@@ -1,5 +1,5 @@
 import { Plug, Check } from "lucide-react";
-import { PageHeader, Panel, Tag, AdminButton } from "@/components/admin/ui";
+import { PageHeader, Tag, AdminButton } from "@/components/admin/ui";
 import { CONNECTIONS } from "@/lib/mock";
 
 export const metadata = { title: "Подключения — Rusability" };
