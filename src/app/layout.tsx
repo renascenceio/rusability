@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Alegreya, Plus_Jakarta_Sans } from "next/font/google";
+import { Lora, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
@@ -10,10 +10,10 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const alegreya = Alegreya({
-  variable: "--font-alegreya",
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin", "latin-ext", "cyrillic"],
-  weight: ["400", "500", "700", "900"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -46,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning className="bg-background">
       <body
-        className={`${jakarta.variable} ${alegreya.variable} font-sans antialiased`}
+        className={`${jakarta.variable} ${lora.variable} font-sans antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}

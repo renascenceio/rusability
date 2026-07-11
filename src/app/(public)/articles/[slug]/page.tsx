@@ -6,6 +6,7 @@ import { getAuthor } from "@/lib/mock/authors";
 import { categoryName, categoryAccent } from "@/lib/mock/categories";
 import { COMMENTS } from "@/lib/mock/comments";
 import { ArticleBody } from "@/components/site/ArticleBody";
+import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { CommentThread } from "@/components/site/CommentThread";
 import { ArticleActions } from "@/components/site/ArticleActions";
@@ -24,6 +25,40 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const related = relatedArticles(article);
   const isElite = article.tier === "elite";
   const accent = categoryAccent(article.category);
+
+  if (isElite) {
+    return (
+      <EliteArticle
+        data={{
+          title: article.title,
+          excerpt: article.excerpt,
+          cover: article.cover || "/placeholder.svg",
+          categoryLabel: categoryName(article.category),
+          publishedLabel: new Date(article.publishedAt).toLocaleDateString("ru-RU", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+          readingMinutes: article.readingMinutes,
+          claps: article.claps,
+          body: article.body,
+          author: {
+            name: author?.name ?? "Автор",
+            avatar: author?.avatar ?? "/placeholder.svg",
+            role: author?.elite ? "Elite-автор Rusability" : "Автор Rusability",
+            articlesCount: author?.articlesCount ?? 0,
+          },
+          related: related.map((a) => ({
+            slug: a.slug,
+            title: a.title,
+            cover: a.cover || "/placeholder.svg",
+            readingMinutes: a.readingMinutes,
+            claps: a.claps,
+          })),
+        }}
+      />
+    );
+  }
 
   return (
     <article>

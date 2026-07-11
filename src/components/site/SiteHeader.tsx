@@ -24,9 +24,18 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center" aria-label="Rusability">
-          <span className="text-xl font-extrabold uppercase tracking-[0.02em] text-[var(--foreground)]">
-            Rus<span className="text-[var(--primary)]">a</span>bility
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/rusability-logo-black.png"
+            alt="Rusability"
+            className="h-[18px] w-auto dark:hidden"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/rusability-logo-white.png"
+            alt="Rusability"
+            className="hidden h-[18px] w-auto dark:block"
+          />
         </Link>
 
         <nav className="ml-3 hidden items-center gap-1 md:flex">
@@ -37,10 +46,10 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                  "rounded-full px-3 py-1.5 text-sm transition-colors",
                   active
-                    ? "bg-[var(--foreground)] text-[var(--background)]"
-                    : "text-[var(--muted-foreground)] hover:bg-[var(--surface-2)] hover:text-[var(--foreground)]",
+                    ? "bg-black/[0.06] font-bold text-[var(--foreground)] dark:bg-white/[0.08]"
+                    : "font-normal text-[var(--muted-foreground)] hover:bg-black/[0.04] hover:text-[var(--foreground)] dark:hover:bg-white/[0.05]",
                 )}
               >
                 {item.label}

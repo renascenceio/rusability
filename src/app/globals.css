@@ -10,19 +10,21 @@
 */
 
 :root {
-  /* Warm neutrals */
-  --background: #faf8f5;
-  --foreground: #1a1410;
+  /* Warm neutrals — matched to Rusability prototype */
+  --background: #f7f5f2;
+  --foreground: #1a1612;
   --card: #ffffff;
-  --card-foreground: #1a1410;
+  --card-foreground: #1a1612;
   --popover: #ffffff;
-  --popover-foreground: #1a1410;
+  --popover-foreground: #1a1612;
 
-  --muted: #f0ebe3;
-  --muted-foreground: #8a7060;
-  --warm-white: #f0ebe3;
-  --border: rgba(26, 20, 16, 0.1);
-  --input: rgba(26, 20, 16, 0.12);
+  --muted: #f0ede8;
+  --muted-foreground: rgba(26, 22, 18, 0.5);
+  --faint: rgba(26, 22, 18, 0.28);
+  --warm-white: #f0ede8;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(0, 0, 0, 0.05);
+  --input: rgba(0, 0, 0, 0.12);
   --ring: #4d5aff;
 
   /* Brand */
@@ -46,10 +48,10 @@
 
   /* Component aliases */
   --surface: #ffffff;
-  --surface-2: #f5f2ec;
-  --surface-3: #ece5da;
-  --ink: #1a1410;
-  --on-ink: #f5f0e8;
+  --surface-2: #f0ede8;
+  --surface-3: #e4ddd2;
+  --ink: #0d0b09;
+  --on-ink: #f0ebe3;
   --gold-ink: #a56a1e;
   --danger: #c4443b;
   --shadow-card: 0 1px 3px rgba(26, 20, 16, 0.06), 0 8px 24px -12px rgba(26, 20, 16, 0.12);
@@ -60,18 +62,20 @@
 }
 
 .dark {
-  --background: #14110d;
+  --background: #0d0b09;
   --foreground: #f0ebe3;
-  --card: #211b15;
+  --card: #1c1917;
   --card-foreground: #f0ebe3;
-  --popover: #211b15;
+  --popover: #1c1917;
   --popover-foreground: #f0ebe3;
 
-  --muted: #2a231c;
-  --muted-foreground: #a89684;
-  --warm-white: #2a231c;
-  --border: rgba(240, 235, 227, 0.1);
-  --input: rgba(240, 235, 227, 0.14);
+  --muted: #141210;
+  --muted-foreground: rgba(240, 235, 227, 0.5);
+  --faint: rgba(240, 235, 227, 0.25);
+  --warm-white: #141210;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-soft: rgba(255, 255, 255, 0.04);
+  --input: rgba(255, 255, 255, 0.12);
   --ring: #7a8aff;
 
   --primary: #6a76ff;
@@ -91,9 +95,9 @@
   --elite-foreground: #f0ebe3;
 
   /* Component aliases */
-  --surface: #211b15;
-  --surface-2: #2a231c;
-  --surface-3: #352c23;
+  --surface: #1c1917;
+  --surface-2: #141210;
+  --surface-3: #2a2420;
   --ink: #0d0b09;
   --on-ink: #f0ebe3;
   --gold-ink: #e8a85a;
@@ -139,8 +143,8 @@
   --color-on-ink: var(--on-ink);
   --color-danger: var(--danger);
 
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-alegreya), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-jakarta), "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
 
   --radius-sm: 10px;
   --radius-md: 14px;
