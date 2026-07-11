@@ -1,172 +1,447 @@
 import Link from "next/link";
-import { ArrowRight, Heart, TrendingUp } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
+import type { Article } from "@/lib/types";
 import { featuredArticles, publishedArticles } from "@/lib/mock/articles";
-import { latestNews, popularNews } from "@/lib/mock/news";
-import { CATEGORIES, categoryName } from "@/lib/mock/categories";
+import { latestNews } from "@/lib/mock/news";
+import { UPCOMING_EVENTS } from "@/lib/mock/events";
+import { categoryName, categoryAccent } from "@/lib/mock/categories";
 import { getAuthor } from "@/lib/mock/authors";
-import { ArticleCard } from "@/components/site/ArticleCard";
-import { NewsRow, NewsMiniCard } from "@/components/site/NewsCard";
-import { ButtonLink, SectionHeading, Avatar } from "@/components/ui/kit";
+import { Avatar } from "@/components/ui/kit";
 import { formatDate } from "@/lib/utils";
+
+const ACCENT_VAR: Record<string, string> = {
+  primary: "var(--primary)",
+  accent: "var(--accent)",
+  gold: "var(--gold-ink)",
+  success: "var(--success)",
+};
+function catColor(cat: string): string {
+  return ACCENT_VAR[categoryAccent(cat)] ?? "var(--primary)";
+}
+
+const HERO_FILTERS = [
+  { label: "Все", slug: "" },
+  { label: "Дизайн", slug: "design" },
+  { label: "Маркетинг", slug: "marketing" },
+  { label: "PR", slug: "pr" },
+  { label: "SEO", slug: "seo" },
+  { label: "ИИ", slug: "ai" },
+];
 
 export default function HomePage() {
   const featured = featuredArticles();
   const hero = featured[0];
-  const secondary = featured[1];
-  const feed = publishedArticles()
-    .filter((a) => a.id !== hero?.id && a.id !== secondary?.id)
-    .slice(0, 6);
-  const news = latestNews(6);
-  const popular = popularNews(4);
   const heroAuthor = hero ? getAuthor(hero.authorId) : undefined;
 
+  const used = new Set<string>();
+  if (hero) used.add(hero.id);
+
+  // 1/3 featured card next to the Premium CTA
+  const featuredSide =
+    publishedArticles().find((a) => !used.has(a.id)) ?? featured[1];
+  if (featuredSide) used.add(featuredSide.id);
+
+  // "Читать сейчас" — three category columns
+  const pick = (cats: string[], n: number): Article[] => {
+    const out = publishedArticles()
+      .filter((a) => cats.includes(a.category) && !used.has(a.id))
+      .slice(0, n);
+    out.forEach((a) => used.add(a.id));
+    return out;
+  };
+  const columns = [
+    { label: "Дизайн", items: pick(["design", "ux"], 5) },
+    { label: "Маркетинг", items: pick(["marketing", "smm"], 5) },
+    { label: "PR & SEO", items: pick(["pr", "seo", "analytics", "ai"], 5) },
+  ];
+  // fill any short column from the remaining pool
+  const rest = publishedArticles().filter((a) => !used.has(a.id));
+  let ri = 0;
+  for (const col of columns) {
+    while (col.items.length < 4 && ri < rest.length) {
+      col.items.push(rest[ri]);
+      used.add(rest[ri].id);
+      ri++;
+    }
+  }
+
+  // Популярное — four cover cards
+  const popular = featuredArticles()
+    .concat(publishedArticles())
+    .filter((a, i, arr) => arr.findIndex((x) => x.id === a.id) === i)
+    .slice(0, 4);
+
+  const events = UPCOMING_EVENTS.slice(0, 3);
+  const news = latestNews(4);
+
   return (
-    <div className="container-editorial py-6 md:py-8">
-      {/* Hero */}
-      {hero && (
-        <section className="mb-6">
-          <Link
-            href={`/articles/${hero.slug}`}
-            className="group relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-3xl bg-[var(--ink)] p-8 text-[var(--on-ink)] md:min-h-[520px] md:p-12"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={hero.cover || "/placeholder.svg"}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30" />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -right-4 top-1/3 select-none font-serif text-[180px] font-black leading-none text-white/5 md:text-[240px]"
+    <div className="container-editorial py-8 md:py-10">
+      <div className="mx-auto max-w-5xl">
+        {/* ---------- HERO ---------- */}
+        {hero && (
+          <section className="mb-7">
+            <Link
+              href={`/articles/${hero.slug}`}
+              className="group relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-[26px] bg-[var(--ink)] p-7 text-white md:min-h-[500px] md:p-10"
             >
-              2026
-            </span>
-
-            <div className="relative">
-              <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
-                {categoryName(hero.category)}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={hero.cover || "/placeholder.svg"}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-45 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/25" />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute right-2 top-1/4 select-none font-serif text-[150px] font-black leading-none text-white/[0.06] md:text-[220px]"
+              >
+                2026
               </span>
-            </div>
 
-            <div className="relative">
-              <h1 className="max-w-3xl font-serif text-4xl font-black leading-[1.05] text-balance text-white md:text-6xl">
-                {hero.title}
-              </h1>
-              <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  {heroAuthor && (
-                    <Avatar src={heroAuthor.avatar} alt={heroAuthor.name} size={44} />
-                  )}
-                  <div>
-                    <div className="font-semibold text-white">{heroAuthor?.name}</div>
-                    <div className="text-sm text-white/60">
-                      {formatDate(hero.publishedAt)} · {hero.claps} реакций
+              <div className="relative">
+                <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
+                  {categoryName(hero.category)}
+                </span>
+              </div>
+
+              <div className="relative">
+                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/60">
+                  Главное сегодня · {hero.readingMinutes} мин чтения
+                </div>
+                <h1 className="max-w-3xl font-serif text-4xl font-black leading-[1.04] text-balance text-white md:text-[3.4rem]">
+                  {hero.title}
+                </h1>
+                <div className="mt-7 flex flex-wrap items-end justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    {heroAuthor && (
+                      <Avatar src={heroAuthor.avatar} alt={heroAuthor.name} size={40} />
+                    )}
+                    <div>
+                      <div className="text-sm font-semibold text-white">
+                        {heroAuthor?.name}
+                      </div>
+                      <div className="text-xs text-white/60">
+                        {formatDate(hero.publishedAt)} · {hero.claps} реакций
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[var(--ink)] transition-transform group-hover:scale-[1.03]">
-                    Читать <ArrowRight className="h-4 w-4" />
-                  </span>
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/25 text-white">
-                    <Heart className="h-5 w-5" />
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[var(--ink)] transition-transform group-hover:scale-[1.03]">
+                      Читать <ArrowRight className="h-4 w-4" />
+                    </span>
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white">
+                      <Heart className="h-[18px] w-[18px]" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        </section>
-      )}
-
-      {/* Premium + featured row */}
-      <section className="mb-12 grid gap-6 lg:grid-cols-2">
-        <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-[#3a3ff0] to-[#6d4dff] p-8 text-white md:p-10">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-[0.14em] text-white/70">
-              Rusability Premium
-            </div>
-            <h2 className="mt-3 max-w-sm font-serif text-2xl font-bold leading-tight text-balance md:text-3xl">
-              Читайте глубже. Пишите лучше. Растите быстрее.
-            </h2>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-white/80">
-              Полный доступ к статьям, Elite-материалам и аналитике. Без рекламы.
-            </p>
-          </div>
-          <div className="mt-6">
-            <Link
-              href="/onboarding"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[var(--primary)] transition-transform hover:scale-[1.03]"
-            >
-              Попробовать бесплатно <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-        </div>
-        {secondary && <ArticleCard article={secondary} variant="feature" />}
-      </section>
+          </section>
+        )}
 
-      {/* Category chips */}
-      <div className="mb-12 flex flex-wrap gap-2">
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c.slug}
-            href={`/articles?category=${c.slug}`}
-            className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:border-[var(--primary)] hover:text-[var(--primary)]"
+        {/* ---------- PREMIUM CTA (2/3) + FEATURED (1/3) ---------- */}
+        <section className="mb-6 grid gap-5 lg:grid-cols-[2fr_1fr]">
+          <div
+            className="relative flex flex-col justify-between overflow-hidden rounded-[26px] p-8 text-white md:p-9"
+            style={{
+              background:
+                "linear-gradient(135deg, #06083a 0%, #1a1e6a 55%, #4d5aff 130%)",
+            }}
           >
-            {c.name}
-          </Link>
-        ))}
-      </div>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
+                Rusability Premium
+              </div>
+              <h2 className="mt-3 max-w-sm font-serif text-3xl font-bold leading-[1.1] text-balance md:text-[2rem]">
+                Читайте глубже. Пишите лучше. Растите быстрее.
+              </h2>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
+                Полный доступ к статьям, Elite-материалам и аналитике. Без рекламы.
+              </p>
+            </div>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#1a1e6a] transition-transform hover:scale-[1.03]"
+              >
+                Попробовать бесплатно <ArrowRight className="h-4 w-4" />
+              </Link>
+              <span className="text-xs text-white/55">14 дней · без карты</span>
+            </div>
+          </div>
 
-      <div className="grid gap-12 lg:grid-cols-[1fr_340px]">
-        {/* Main feed */}
-        <div>
-          <SectionHeading
-            title="Свежие статьи"
-            action={
-              <ButtonLink href="/articles" variant="ghost" size="sm">
-                Все статьи <ArrowRight className="h-4 w-4" />
-              </ButtonLink>
-            }
-          />
-          <div className="grid gap-6 sm:grid-cols-2">
-            {feed.map((a) => (
-              <ArticleCard key={a.id} article={a} />
+          {featuredSide && (
+            <Link
+              href={`/articles/${featuredSide.slug}`}
+              className="group relative flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[26px] bg-[var(--ink)] p-6 text-white"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={featuredSide.cover || "/placeholder.svg"}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+              <div className="relative">
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-white/75">
+                  {categoryName(featuredSide.category)}
+                </div>
+                <h3 className="font-serif text-lg font-bold leading-snug text-balance text-white group-hover:text-white/90">
+                  {featuredSide.title}
+                </h3>
+                <div className="mt-3 text-xs text-white/65">
+                  {getAuthor(featuredSide.authorId)?.name} · {featuredSide.readingMinutes} мин
+                </div>
+              </div>
+            </Link>
+          )}
+        </section>
+
+        {/* ---------- NEWSLETTER BAND ---------- */}
+        <section className="mb-12 flex flex-col gap-4 rounded-2xl bg-[var(--primary-soft)] p-5 md:flex-row md:items-center md:justify-between md:px-7 md:py-5">
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
+              Дайджест Rusability
+            </div>
+            <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
+              Лучшее за неделю — каждый понедельник
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <form className="flex items-center gap-2">
+              <input
+                type="email"
+                placeholder="Ваш email"
+                className="w-44 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+              >
+                Подписаться
+              </button>
+            </form>
+            <span className="hidden text-xs text-[var(--muted-foreground)] lg:block">
+              24 853 подписчика
+            </span>
+          </div>
+        </section>
+
+        {/* ---------- ЧИТАТЬ СЕЙЧАС ---------- */}
+        <section className="mb-14">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-serif text-3xl font-bold text-[var(--foreground)]">
+              Читать сейчас
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {HERO_FILTERS.map((f, i) => (
+                <Link
+                  key={f.label}
+                  href={f.slug ? `/articles?category=${f.slug}` : "/articles"}
+                  className={
+                    i === 0
+                      ? "rounded-full bg-[var(--primary)] px-3.5 py-1.5 text-xs font-semibold text-white"
+                      : "rounded-full px-3.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)] transition-colors hover:text-[var(--primary)]"
+                  }
+                >
+                  {f.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-x-8 gap-y-2 md:grid-cols-3">
+            {columns.map((col) => (
+              <div key={col.label}>
+                <div
+                  className="mb-4 text-[11px] font-bold uppercase tracking-[0.14em]"
+                  style={{ color: catColor(col.items[0]?.category ?? "design") }}
+                >
+                  {col.label}
+                </div>
+                <div className="flex flex-col">
+                  {col.items.map((a) => {
+                    const au = getAuthor(a.authorId);
+                    return (
+                      <Link
+                        key={a.id}
+                        href={`/articles/${a.slug}`}
+                        className="group border-t border-[var(--border)] py-4 first:border-t-0 first:pt-0"
+                      >
+                        <h3 className="font-serif text-[17px] font-bold leading-snug text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
+                          {a.title}
+                        </h3>
+                        <div className="mt-2 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                          <span>{au?.name}</span>
+                          <span>·</span>
+                          <span>{a.readingMinutes} мин</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
-        </div>
+        </section>
+      </div>
 
-        {/* Sidebar */}
-        <aside className="flex flex-col gap-10">
-          <section>
-            <SectionHeading
-              title="Новости"
-              className="mb-3"
-              action={
-                <Link href="/news" className="text-sm font-medium text-[var(--primary)]">
-                  Все
+      {/* ---------- ПОПУЛЯРНОЕ (full-bleed light band) ---------- */}
+      <section className="-mx-5 mb-14 bg-[var(--surface-2)] px-5 py-12 md:-mx-8 md:px-8">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="font-serif text-3xl font-bold text-[var(--foreground)]">
+              Популярное
+            </h2>
+            <Link
+              href="/articles"
+              className="text-sm font-medium text-[var(--primary)] hover:underline"
+            >
+              Все статьи →
+            </Link>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {popular.map((a) => {
+              const au = getAuthor(a.authorId);
+              return (
+                <Link
+                  key={a.id}
+                  href={`/articles/${a.slug}`}
+                  className="group relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-2xl bg-[var(--ink)] p-5 text-white"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={a.cover || "/placeholder.svg"}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+                  <div className="relative">
+                    <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                      {categoryName(a.category)}
+                    </span>
+                    <h3 className="mt-3 font-serif text-base font-bold leading-snug text-white">
+                      {a.title}
+                    </h3>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-white/70">
+                      {au && <Avatar src={au.avatar} alt={au.name} size={22} />}
+                      <span>{au?.name}</span>
+                      <span>·</span>
+                      <span>{a.readingMinutes} мин</span>
+                    </div>
+                  </div>
                 </Link>
-              }
-            />
-            <div>
-              {news.map((n) => (
-                <NewsRow key={n.id} item={n} />
-              ))}
-            </div>
-          </section>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-          <section>
-            <div className="mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-[var(--accent)]" />
-              <h2 className="font-serif text-xl font-bold text-[var(--foreground)]">Популярное</h2>
+      <div className="mx-auto max-w-5xl">
+        {/* ---------- СОБЫТИЯ + НОВОСТИ ---------- */}
+        <section className="mb-14 grid gap-10 md:grid-cols-2">
+          {/* События */}
+          <div>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="font-serif text-2xl font-bold text-[var(--foreground)]">
+                События
+              </h2>
+              <span className="text-sm font-medium text-[var(--muted-foreground)]">
+                Все →
+              </span>
             </div>
-            <div className="grid gap-3">
-              {popular.map((n) => (
-                <NewsMiniCard key={n.id} item={n} />
+            <div className="flex flex-col">
+              {events.map((ev) => {
+                const d = new Date(ev.date);
+                const day = d.getDate();
+                const month = d
+                  .toLocaleDateString("ru-RU", { month: "short" })
+                  .replace(".", "")
+                  .toUpperCase();
+                return (
+                  <div
+                    key={ev.id}
+                    className="flex items-center gap-4 border-t border-[var(--border)] py-4 first:border-t-0 first:pt-0"
+                  >
+                    <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
+                      <span className="text-lg font-bold leading-none">{day}</span>
+                      <span className="text-[10px] font-semibold uppercase">{month}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[var(--foreground)]">
+                        {ev.title}
+                      </div>
+                      <div className="mt-0.5 text-sm text-[var(--muted-foreground)]">
+                        {ev.city} · {ev.venue}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Новости */}
+          <div>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="font-serif text-2xl font-bold text-[var(--foreground)]">
+                Новости
+              </h2>
+              <Link
+                href="/news"
+                className="text-sm font-medium text-[var(--primary)] hover:underline"
+              >
+                Все →
+              </Link>
+            </div>
+            <div className="flex flex-col">
+              {news.map((n) => (
+                <Link
+                  key={n.id}
+                  href="/news"
+                  className="group flex items-baseline gap-4 border-t border-[var(--border)] py-3.5 first:border-t-0 first:pt-0"
+                >
+                  <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+                    {n.timeLabel}
+                  </span>
+                  <span className="text-[15px] font-medium leading-snug text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
+                    {n.title}
+                  </span>
+                </Link>
               ))}
             </div>
-          </section>
-        </aside>
+          </div>
+        </section>
+
+        {/* ---------- AUTHOR CTA ---------- */}
+        <section
+          className="mb-6 overflow-hidden rounded-[26px] p-8 text-white md:p-12"
+          style={{
+            background: "linear-gradient(135deg, #2a1410 0%, #7a2f1c 60%, #c4523b 130%)",
+          }}
+        >
+          <div className="max-w-2xl">
+            <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
+              Для авторов
+            </div>
+            <h2 className="mt-3 font-serif text-3xl font-bold leading-tight text-balance md:text-4xl">
+              Ваши идеи заслуживают аудитории. Начните писать на Rusability.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/70">
+              Монетизация с первой статьи, Elite-статус для лучших авторов, встроенные
+              SEO/AEO инструменты.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#7a2f1c] transition-transform hover:scale-[1.03]"
+              >
+                Стать автором <ArrowRight className="h-4 w-4" />
+              </Link>
+              <span className="text-xs text-white/55">Бесплатно · без одобрения</span>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
