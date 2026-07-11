@@ -22,7 +22,7 @@ const STATS: Stat[] = [
   {
     label: "Статей",
     value: "1 248",
-    valueColor: "text-[#d45e42]",
+    valueColor: "text-[var(--primary)]",
     sub: "48 за сегодня",
     subColor: "text-[var(--muted-foreground)]",
   },

@@ -153,7 +153,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     className={cn(
                       "my-px flex items-center gap-2.5 rounded-lg border-l-2 px-3 py-[7px] text-[13px] transition-colors",
                       active
-                        ? "border-[#d45e42] bg-[var(--primary-soft)] font-semibold text-[var(--foreground)]"
+                        ? "border-[var(--primary)] bg-[var(--primary-soft)] font-semibold text-[var(--foreground)]"
                         : "border-transparent font-normal text-[var(--muted-foreground)] hover:bg-[var(--surface-2)] hover:text-[var(--foreground)]",
                     )}
                   >
@@ -170,7 +170,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="border-t border-[var(--border)]">
           <ThemeControl />
           <div className="flex items-center gap-2.5 border-t border-[var(--border)] px-3.5 py-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#d45e42] to-[#e8a85a] text-xs font-bold text-white">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4d5aff] to-[#7a8aff] text-xs font-bold text-white">
               С
             </div>
             <div className="min-w-0">
