@@ -200,6 +200,29 @@ h1, h2, h3, h4, h5 {
   text-underline-offset: 3px;
 }
 
+/* Onboarding — self-contained dark surface (theme-independent) */
+.onboarding-dark {
+  background:
+    radial-gradient(ellipse at top, #16131f 0%, #0d0b09 55%);
+  color: #f0ebe3;
+}
+.ob-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.9rem;
+  color: #f0ebe3;
+  transition: border-color 0.2s, background 0.2s;
+}
+.ob-input::placeholder { color: rgba(240, 235, 227, 0.35); }
+.ob-input:focus {
+  outline: none;
+  border-color: #4d5aff;
+  background: rgba(77, 90, 255, 0.08);
+}
+
 /* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

@@ -107,14 +107,20 @@ export function SearchClient({
               <SectionLabel icon={<AppWindow className="h-4 w-4" />} label={`Инструменты · ${foundApps.length}`} />
               <div className="grid gap-3 sm:grid-cols-2">
                 {foundApps.map((app) => (
-                  <Link
+                  <div
                     key={app.id}
-                    href="/apps"
-                    className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 transition-colors hover:bg-[var(--surface-2)]"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
                   >
-                    <div className="font-semibold text-[var(--foreground)]">{app.name}</div>
-                    <div className="text-sm text-[var(--muted-foreground)]">{app.tagline}</div>
-                  </Link>
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[var(--foreground)]">{app.name}</div>
+                      <div className="truncate text-sm text-[var(--muted-foreground)]">
+                        {app.tagline}
+                      </div>
+                    </div>
+                    <button className="shrink-0 rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)]">
+                      Попробовать
+                    </button>
+                  </div>
                 ))}
               </div>
             </section>

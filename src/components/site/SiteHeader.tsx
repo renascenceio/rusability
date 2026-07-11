@@ -11,8 +11,6 @@ const NAV = [
   { href: "/", label: "Лента", exact: true },
   { href: "/articles", label: "Статьи" },
   { href: "/news", label: "Новости" },
-  { href: "/events", label: "События" },
-  { href: "/apps", label: "Сервисы" },
 ];
 
 export function SiteHeader() {
@@ -26,7 +24,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center" aria-label="Rusability">
-          <span className="font-serif text-2xl font-black tracking-tight text-[var(--foreground)]">
+          <span className="text-xl font-extrabold uppercase tracking-[0.02em] text-[var(--foreground)]">
             Rus<span className="text-[var(--primary)]">a</span>bility
           </span>
         </Link>

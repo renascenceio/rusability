@@ -1,38 +1,111 @@
 import Link from "next/link";
-import { ArrowRight, Crown, TrendingUp } from "lucide-react";
+import { ArrowRight, Heart, TrendingUp } from "lucide-react";
 import { featuredArticles, publishedArticles } from "@/lib/mock/articles";
 import { latestNews, popularNews } from "@/lib/mock/news";
-import { UPCOMING_EVENTS } from "@/lib/mock/events";
-import { CATEGORIES } from "@/lib/mock/categories";
+import { CATEGORIES, categoryName } from "@/lib/mock/categories";
+import { getAuthor } from "@/lib/mock/authors";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { NewsRow, NewsMiniCard } from "@/components/site/NewsCard";
-import { EventCard } from "@/components/site/EventCard";
-import { ButtonLink, SectionHeading, Badge } from "@/components/ui/kit";
+import { ButtonLink, SectionHeading, Avatar } from "@/components/ui/kit";
+import { formatDate } from "@/lib/utils";
 
 export default function HomePage() {
   const featured = featuredArticles();
   const hero = featured[0];
-  const secondary = featured.slice(1, 3);
-  const feed = publishedArticles().filter((a) => !a.featured).slice(0, 6);
+  const secondary = featured[1];
+  const feed = publishedArticles()
+    .filter((a) => a.id !== hero?.id && a.id !== secondary?.id)
+    .slice(0, 6);
   const news = latestNews(6);
   const popular = popularNews(4);
-  const events = UPCOMING_EVENTS.slice(0, 3);
+  const heroAuthor = hero ? getAuthor(hero.authorId) : undefined;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="container-editorial py-6 md:py-8">
       {/* Hero */}
-      <section className="mb-16">
-        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          {hero && <ArticleCard article={hero} variant="feature" />}
-          <div className="flex flex-col gap-6">
-            {secondary.map((a) => (
-              <ArticleCard key={a.id} article={a} />
-            ))}
+      {hero && (
+        <section className="mb-6">
+          <Link
+            href={`/articles/${hero.slug}`}
+            className="group relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-3xl bg-[var(--ink)] p-8 text-[var(--on-ink)] md:min-h-[520px] md:p-12"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={hero.cover || "/placeholder.svg"}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30" />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-4 top-1/3 select-none font-serif text-[180px] font-black leading-none text-white/5 md:text-[240px]"
+            >
+              2026
+            </span>
+
+            <div className="relative">
+              <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
+                {categoryName(hero.category)}
+              </span>
+            </div>
+
+            <div className="relative">
+              <h1 className="max-w-3xl font-serif text-4xl font-black leading-[1.05] text-balance text-white md:text-6xl">
+                {hero.title}
+              </h1>
+              <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  {heroAuthor && (
+                    <Avatar src={heroAuthor.avatar} alt={heroAuthor.name} size={44} />
+                  )}
+                  <div>
+                    <div className="font-semibold text-white">{heroAuthor?.name}</div>
+                    <div className="text-sm text-white/60">
+                      {formatDate(hero.publishedAt)} · {hero.claps} реакций
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[var(--ink)] transition-transform group-hover:scale-[1.03]">
+                    Читать <ArrowRight className="h-4 w-4" />
+                  </span>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-white/25 text-white">
+                    <Heart className="h-5 w-5" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </section>
+      )}
+
+      {/* Premium + featured row */}
+      <section className="mb-12 grid gap-6 lg:grid-cols-2">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br from-[#3a3ff0] to-[#6d4dff] p-8 text-white md:p-10">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-[0.14em] text-white/70">
+              Rusability Premium
+            </div>
+            <h2 className="mt-3 max-w-sm font-serif text-2xl font-bold leading-tight text-balance md:text-3xl">
+              Читайте глубже. Пишите лучше. Растите быстрее.
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-white/80">
+              Полный доступ к статьям, Elite-материалам и аналитике. Без рекламы.
+            </p>
+          </div>
+          <div className="mt-6">
+            <Link
+              href="/onboarding"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[var(--primary)] transition-transform hover:scale-[1.03]"
+            >
+              Попробовать бесплатно <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
+        {secondary && <ArticleCard article={secondary} variant="feature" />}
       </section>
 
-      {/* Category pills */}
+      {/* Category chips */}
       <div className="mb-12 flex flex-wrap gap-2">
         {CATEGORIES.map((c) => (
           <Link
@@ -60,23 +133,6 @@ export default function HomePage() {
             {feed.map((a) => (
               <ArticleCard key={a.id} article={a} />
             ))}
-          </div>
-
-          {/* Elite band */}
-          <div className="mt-16 overflow-hidden rounded-3xl bg-[var(--ink)] p-8 text-[var(--on-ink)] md:p-12">
-            <Badge tone="gold">
-              <Crown className="h-3 w-3" /> Rusability Elite
-            </Badge>
-            <h2 className="mt-4 max-w-xl font-serif text-3xl font-bold text-balance">
-              Глубокие материалы от практиков индустрии
-            </h2>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-[var(--on-ink)]/70">
-              Elite-статьи — это разборы, исследования и стратегии, которые проходят усиленную
-              редактуру и оптимизируются под цитируемость в поиске и ИИ-ответах.
-            </p>
-            <ButtonLink href="/articles?tier=elite" variant="accent" size="md" className="mt-6">
-              Читать Elite <ArrowRight className="h-4 w-4" />
-            </ButtonLink>
           </div>
         </div>
 
@@ -112,23 +168,6 @@ export default function HomePage() {
           </section>
         </aside>
       </div>
-
-      {/* Events */}
-      <section className="mt-20">
-        <SectionHeading
-          title="Ближайшие события"
-          action={
-            <ButtonLink href="/events" variant="ghost" size="sm">
-              Все события <ArrowRight className="h-4 w-4" />
-            </ButtonLink>
-          }
-        />
-        <div className="grid gap-6 md:grid-cols-3">
-          {events.map((e) => (
-            <EventCard key={e.id} event={e} />
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

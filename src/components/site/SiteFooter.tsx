@@ -6,8 +6,8 @@ const COLS: { title: string; links: { href: string; label: string }[] }[] = [
     links: [
       { href: "/articles", label: "Статьи" },
       { href: "/news", label: "Новости" },
-      { href: "/events", label: "События" },
-      { href: "/apps", label: "Сервисы" },
+      { href: "/authors", label: "Авторы" },
+      { href: "/search", label: "Поиск" },
     ],
   },
   {
