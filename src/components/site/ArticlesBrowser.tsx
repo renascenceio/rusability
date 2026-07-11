@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, Heart, Crown } from "lucide-react";
+import { Search, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES, categoryName, categoryAccent } from "@/lib/mock/categories";
 import { getAuthor } from "@/lib/mock/authors";
@@ -94,18 +94,20 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
           Ничего не найдено. Попробуйте изменить фильтры.
         </p>
       ) : (
-        <div className="grid auto-rows-auto grid-cols-1 gap-9 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid auto-rows-auto grid-cols-1 items-start gap-x-9 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((a, i) => {
             const featured = i === 0;
-            const dark = featured || a.tier === "elite";
-            return (
-              <div key={a.id} className={cn(featured && "sm:col-span-2")}>
-                {dark ? (
-                  <DarkCard article={a} wide={featured} />
-                ) : (
-                  <LightCard article={a} />
-                )}
-              </div>
+            if (featured) {
+              return (
+                <div key={a.id} className="sm:col-span-2">
+                  <FeaturedCard article={a} />
+                </div>
+              );
+            }
+            return a.tier === "elite" ? (
+              <EliteCard key={a.id} article={a} />
+            ) : (
+              <PlainCard key={a.id} article={a} />
             );
           })}
         </div>
@@ -125,52 +127,43 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
   );
 }
 
-/* ---------- Dark overlay card (featured / Elite) ---------- */
-function DarkCard({ article, wide }: { article: Article; wide?: boolean }) {
+/* ---------- Featured card (span-2, full-bleed overlay) ---------- */
+function FeaturedCard({ article }: { article: Article }) {
   const author = getAuthor(article.authorId);
   return (
     <Link
       href={`/articles/${article.slug}`}
-      className={cn(
-        "group relative flex flex-col justify-end overflow-hidden rounded-[22px] bg-[var(--ink)] p-6 text-white",
-        wide ? "min-h-[340px]" : "min-h-[420px]",
-      )}
+      className="group relative flex min-h-[340px] flex-col justify-end overflow-hidden rounded-[20px] bg-[var(--ink)] p-6 text-white"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={article.cover || "/placeholder.svg"}
         alt=""
-        className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/15" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
 
-      <div className="absolute left-5 top-5 flex items-center gap-2">
+      <div className="absolute left-5 top-5 flex items-center gap-2.5">
         {article.tier === "elite" && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--gold)] px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#3a2a10]">
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
             <Crown className="h-3 w-3" /> Elite
           </span>
         )}
-        <span className="text-[11px] font-bold uppercase tracking-wider text-white/80">
+        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/60">
           {categoryName(article.category)}
         </span>
       </div>
 
       <div className="relative">
-        <h3
-          className={cn(
-            "font-serif font-bold leading-snug text-balance text-white",
-            wide ? "max-w-xl text-2xl md:text-3xl" : "text-xl",
-          )}
-        >
+        <h2 className="max-w-xl font-serif text-2xl font-bold leading-snug text-balance text-white md:text-[28px]">
           {article.title}
-        </h3>
-        <div className="mt-4 flex items-center gap-2 text-xs text-white/70">
-          {author && <Avatar src={author.avatar} alt={author.name} size={24} />}
-          <span className="font-medium text-white/90">{author?.name}</span>
-          <span>·</span>
-          <span>{article.readingMinutes} мин</span>
-          <span className="ml-1 inline-flex items-center gap-1">
-            · {formatCount(article.claps)} <Heart className="h-3 w-3" />
+        </h2>
+        <div className="mt-4 flex items-center gap-2.5 text-[13px]">
+          {author && <Avatar src={author.avatar} alt={author.name} size={30} />}
+          <span className="font-semibold text-white/90">{author?.name}</span>
+          <span className="text-white/30">·</span>
+          <span className="text-white/55">
+            {article.readingMinutes} мин · {formatCount(article.claps)} ♥
           </span>
         </div>
       </div>
@@ -178,15 +171,50 @@ function DarkCard({ article, wide }: { article: Article; wide?: boolean }) {
   );
 }
 
-/* ---------- Light card (default) ---------- */
-function LightCard({ article }: { article: Article }) {
+/* ---------- Elite card (contained dark, image top + dark body) ---------- */
+function EliteCard({ article }: { article: Article }) {
   const author = getAuthor(article.authorId);
   return (
     <Link
       href={`/articles/${article.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-card)] transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[16px] bg-[var(--ink)] text-white transition-transform duration-300 hover:-translate-y-1"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-[var(--surface-3)]">
+      <div className="relative h-[190px] overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={article.cover || "/placeholder.svg"}
+          alt=""
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1 rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
+          <Crown className="h-3 w-3" /> Elite
+        </span>
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/50">
+          {categoryName(article.category)}
+        </div>
+        <h3 className="font-serif text-[23px] font-bold leading-snug text-balance text-white">
+          {article.title}
+        </h3>
+        <div className="mt-auto flex items-center gap-2 pt-5 text-xs text-white/55">
+          {author && <Avatar src={author.avatar} alt={author.name} size={22} />}
+          <span className="text-white/80">{author?.name}</span>
+          <span className="text-white/30">·</span>
+          <span>{article.readingMinutes} мин</span>
+          <span className="ml-auto text-white/40">{formatCount(article.claps)} ♥</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/* ---------- Plain card (bare: rounded image + text on page bg) ---------- */
+function PlainCard({ article }: { article: Article }) {
+  const author = getAuthor(article.authorId);
+  return (
+    <Link href={`/articles/${article.slug}`} className="group flex h-full flex-col">
+      <div className="mb-4 h-[190px] overflow-hidden rounded-[16px] bg-[var(--surface-3)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={article.cover || "/placeholder.svg"}
@@ -194,33 +222,26 @@ function LightCard({ article }: { article: Article }) {
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="flex flex-1 flex-col p-5">
-        <div
-          className="mb-2 text-[11px] font-bold uppercase tracking-wider"
-          style={{ color: catColor(article.category) }}
-        >
-          {categoryName(article.category)}
-        </div>
-        <h3 className="font-serif text-xl font-bold leading-snug text-balance text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
-          {article.title}
-        </h3>
-        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-          {article.excerpt}
-        </p>
-        <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-          <div className="flex items-center gap-2">
-            {author && <Avatar src={author.avatar} alt={author.name} size={26} />}
-            <span className="text-sm font-medium text-[var(--foreground)]">
-              {author?.name}
-            </span>
-            <span className="text-xs text-[var(--muted-foreground)]">
-              · {article.readingMinutes} мин
-            </span>
-          </div>
-          <span className="inline-flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
-            {formatCount(article.claps)} <Heart className="h-3 w-3" />
-          </span>
-        </div>
+      <div
+        className="mb-1.5 text-[10px] font-bold uppercase tracking-wider"
+        style={{ color: catColor(article.category) }}
+      >
+        {categoryName(article.category)}
+      </div>
+      <h3 className="font-serif text-[23px] font-bold leading-snug text-balance text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
+        {article.title}
+      </h3>
+      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+        {article.excerpt}
+      </p>
+      <div className="mt-auto flex items-center gap-2 pt-4 text-xs text-[var(--muted-foreground)]">
+        {author && <Avatar src={author.avatar} alt={author.name} size={22} />}
+        <span className="text-[var(--foreground)]">{author?.name}</span>
+        <span className="text-[var(--muted-foreground)]/50">·</span>
+        <span>{article.readingMinutes} мин</span>
+        <span className="ml-auto text-[var(--muted-foreground)]/70">
+          {formatCount(article.claps)} ♥
+        </span>
       </div>
     </Link>
   );
