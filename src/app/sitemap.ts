@@ -1,39 +1,32 @@
-import { MetadataRoute } from 'next';
-import { ARTICLES } from '@/lib/data';
+import { MetadataRoute } from "next";
+import { ARTICLES } from "@/lib/mock/articles";
+import { NEWS } from "@/lib/mock/news";
+
+const BASE = "https://rusability.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = ARTICLES.map((post) => ({
-    url: `https://rusability.vercel.app/posts/${post.id}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
+  const articles = ARTICLES.filter((a) => a.status === "published").map((a) => ({
+    url: `${BASE}/articles/${a.slug}`,
+    lastModified: new Date(a.publishedAt),
+    changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
-  return [
-    {
-      url: 'https://rusability.vercel.app',
+  const news = NEWS.filter((n) => n.pipeline === "published").map((n) => ({
+    url: `${BASE}/news/${n.slug}`,
+    lastModified: new Date(n.publishedAt),
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
+  const staticRoutes = ["", "/articles", "/news", "/events", "/apps", "/search"].map(
+    (path) => ({
+      url: `${BASE}${path}`,
       lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1,
-    },
-    {
-      url: 'https://rusability.vercel.app/news',
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: 'https://rusability.vercel.app/tools',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: 'https://rusability.vercel.app/events',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    ...posts,
-  ];
+      changeFrequency: "daily" as const,
+      priority: path === "" ? 1 : 0.6,
+    }),
+  );
+
+  return [...staticRoutes, ...articles, ...news];
 }

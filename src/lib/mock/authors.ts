@@ -1,0 +1,95 @@
+import type { Author } from "@/lib/types";
+
+export const AUTHORS: Author[] = [
+  {
+    id: "au-1",
+    username: "elena-marsheva",
+    name: "Елена Маршева",
+    role: "elite",
+    avatar: "/images/avatars/a-1.png",
+    bio: "Продуктовый дизайнер и исследователь. Пишу о том, как интерфейсы влияют на поведение пользователей. Ex-Яндекс, ex-Avito.",
+    location: "Москва",
+    followers: 12840,
+    articlesCount: 47,
+    elite: true,
+    joinedAt: "2023-02-14",
+    socials: { telegram: "@marsheva_ux", site: "marsheva.design" },
+  },
+  {
+    id: "au-2",
+    username: "dmitry-volkov",
+    name: "Дмитрий Волков",
+    role: "author",
+    avatar: "/images/avatars/a-2.png",
+    bio: "Директор по маркетингу. 15 лет в перформансе и бренд-стратегии. Разбираю кейсы роста без воды.",
+    location: "Санкт-Петербург",
+    followers: 8320,
+    articlesCount: 31,
+    elite: false,
+    joinedAt: "2023-05-20",
+    socials: { telegram: "@volkov_growth" },
+  },
+  {
+    id: "au-3",
+    username: "anna-kravchenko",
+    name: "Анна Кравченко",
+    role: "elite",
+    avatar: "/images/avatars/a-3.png",
+    bio: "UX-исследователь и автор курсов. Помогаю командам принимать решения на основе данных, а не мнений.",
+    location: "Тбилиси",
+    followers: 15600,
+    articlesCount: 58,
+    elite: true,
+    joinedAt: "2022-11-03",
+    socials: { telegram: "@kravchenko_research", site: "annak.io" },
+  },
+  {
+    id: "au-4",
+    username: "sergey-petrov",
+    name: "Сергей Петров",
+    role: "author",
+    avatar: "/images/avatars/a-4.png",
+    bio: "Разработчик и техноблогер. Пишу о фронтенде, инструментах и о том, куда движется веб.",
+    location: "Ереван",
+    followers: 6540,
+    articlesCount: 24,
+    elite: false,
+    joinedAt: "2023-08-11",
+  },
+  {
+    id: "au-5",
+    username: "maria-orlova",
+    name: "Мария Орлова",
+    role: "author",
+    avatar: "/images/avatars/a-5.png",
+    bio: "Основательница digital-агентства. Рассказываю о бизнесе, командах и продуктовом мышлении.",
+    location: "Дубай",
+    followers: 9870,
+    articlesCount: 38,
+    elite: false,
+    joinedAt: "2023-01-29",
+    socials: { telegram: "@orlova_biz" },
+  },
+  {
+    id: "au-ai-1",
+    username: "aurora-ai",
+    name: "Аврора",
+    role: "ai",
+    avatar: "/images/avatars/ai-1.png",
+    bio: "ИИ-обозреватель Rusability. Архетип: аналитик. Ежедневно разбираю тренды в технологиях и данных.",
+    archetype: "Аналитик",
+    location: "Rusability AI",
+    followers: 4210,
+    articlesCount: 112,
+    elite: false,
+    joinedAt: "2024-03-01",
+  },
+];
+
+export function getAuthor(id: string): Author | undefined {
+  return AUTHORS.find((a) => a.id === id);
+}
+
+export function getAuthorByUsername(username: string): Author | undefined {
+  return AUTHORS.find((a) => a.username === username);
+}

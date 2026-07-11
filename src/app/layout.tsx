@@ -1,99 +1,57 @@
-import type { Metadata} from"next";
-import { Geist, Geist_Mono, Playfair_Display} from"next/font/google";
-import"./globals.css";
-import { Header} from"@/components/Header";
-import { Footer} from"@/components/Footer";
-import { ThemeProvider} from"@/components/providers/ThemeProvider";
-import { LanguageProvider } from "@/lib/i18n/context";
-import { getSiteSettings } from "@/lib/settings";
+import type { Metadata } from "next";
+import { Alegreya, Plus_Jakarta_Sans } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
-const geistSans = Geist({
- variable:"--font-geist-sans",
- subsets: ["latin"],
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
- variable:"--font-geist-mono",
- subsets: ["latin"],
+const alegreya = Alegreya({
+  variable: "--font-alegreya",
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  weight: ["400", "500", "700", "900"],
+  display: "swap",
 });
 
-const playfair = Playfair_Display({
- variable:"--font-serif",
- subsets: ["latin"],
-});
+export const metadata: Metadata = {
+  title: {
+    default: "Rusability — редакционная платформа нового поколения",
+    template: "%s — Rusability",
+  },
+  description:
+    "Русскоязычная редакционная платформа: статьи, новости, авторская среда и ИИ-редакция. Digital, маркетинг, технологии и UX.",
+  metadataBase: new URL("https://rusability.vercel.app"),
+  openGraph: {
+    title: "Rusability",
+    description: "Русскоязычная редакционная платформа нового поколения",
+    type: "website",
+    locale: "ru_RU",
+  },
+};
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings();
-  const isRu = settings.default_language === "ru";
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#14110d" },
+  ],
+};
 
-  return {
-    title: isRu ? settings.site_title_ru : settings.site_title_en,
-    description: isRu ? settings.site_description_ru : settings.site_description_en,
-    metadataBase: new URL('https://rusability.vercel.app'),
-    openGraph: {
-      title: isRu ? settings.site_title_ru : settings.site_title_en,
-      description: isRu ? settings.site_description_ru : settings.site_description_en,
-      url: 'https://rusability.vercel.app',
-      siteName: 'rusability',
-      images: [
-        {
-          url: settings.og_image,
-          width: 1200,
-          height: 630,
-          alt: 'rusability magazine',
-        },
-      ],
-      locale: 'en_US',
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: isRu ? settings.site_title_ru : settings.site_title_en,
-      description: isRu ? settings.site_description_ru : settings.site_description_en,
-      images: [settings.og_image],
-    },
-  };
-}
-
-export default async function RootLayout({
- children,
-}: Readonly<{
- children: React.ReactNode;
-}>) {
-  const settings = await getSiteSettings();
-
- return (
- <html lang={settings.default_language} suppressHydrationWarning>
- <head>
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
-"@context":"https://schema.org",
-"@type":"WebSite",
-"name":"rusability",
-"url":"https://rusability.vercel.app",
-"description":"Marketing Intelligence Magazine",
-"potentialAction": {
-"@type":"SearchAction",
-"target":"https://rusability.vercel.app/search?q={search_term_string}",
-"query-input":"required name=search_term_string"
-}
-})
-}}
- />
- </head>
- <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased selection:bg-hig-blue selection:text-white`}>
- <LanguageProvider initialLocale={settings.default_language}>
- <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
- <Header />
- <main className="min-h-screen pt-16">
- {children}
- </main>
- <Footer />
- </ThemeProvider>
- </LanguageProvider>
- </body>
- </html>
- );
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="ru" suppressHydrationWarning className="bg-background">
+      <body
+        className={`${jakarta.variable} ${alegreya.variable} font-sans antialiased`}
+      >
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  );
 }
