@@ -5,8 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Search, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
-import { CATEGORIES, categoryName, categoryAccent } from "@/lib/mock/categories";
-import { getAuthor } from "@/lib/mock/authors";
+import { CATEGORIES, categoryName, categoryAccent } from "@/lib/taxonomy";
 import { Avatar, formatCount } from "@/components/ui/kit";
 import { cn } from "@/lib/utils";
 
@@ -129,7 +128,7 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
 
 /* ---------- Featured card (span-2, full-bleed overlay) ---------- */
 function FeaturedCard({ article }: { article: Article }) {
-  const author = getAuthor(article.authorId);
+  const author = article.author;
   return (
     <Link
       href={`/articles/${article.slug}`}
@@ -173,7 +172,7 @@ function FeaturedCard({ article }: { article: Article }) {
 
 /* ---------- Elite card (contained dark, image top + dark body) ---------- */
 function EliteCard({ article }: { article: Article }) {
-  const author = getAuthor(article.authorId);
+  const author = article.author;
   return (
     <Link
       href={`/articles/${article.slug}`}
@@ -211,7 +210,7 @@ function EliteCard({ article }: { article: Article }) {
 
 /* ---------- Plain card (bare: rounded image + text on page bg) ---------- */
 function PlainCard({ article }: { article: Article }) {
-  const author = getAuthor(article.authorId);
+  const author = article.author;
   return (
     <Link href={`/articles/${article.slug}`} className="group flex h-full flex-col">
       <div className="mb-4 h-[190px] overflow-hidden rounded-[16px] bg-[var(--surface-3)]">

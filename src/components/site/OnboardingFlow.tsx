@@ -13,7 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AUTHORS } from "@/lib/mock/authors";
-import { CATEGORIES } from "@/lib/mock/categories";
+import { CATEGORIES } from "@/lib/taxonomy";
 import { formatNumber, cn } from "@/lib/utils";
 
 type Role = "reader" | "author" | "both";

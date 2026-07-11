@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { publishedArticles } from "@/lib/mock/articles";
+import { publishedArticles } from "@/lib/data/articles";
 import { ArticlesBrowser } from "@/components/site/ArticlesBrowser";
 
 export const metadata = {
@@ -7,8 +7,8 @@ export const metadata = {
   description: "Аналитика, практика и мнения о маркетинге, дизайне и технологиях.",
 };
 
-export default function ArticlesPage() {
-  const articles = publishedArticles();
+export default async function ArticlesPage() {
+  const articles = await publishedArticles();
   return (
     <div className="container-editorial py-9 md:py-12">
       <div className="mx-auto max-w-5xl">

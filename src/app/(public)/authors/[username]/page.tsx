@@ -1,29 +1,31 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Send, Globe, Crown, Sparkles, ArrowLeft } from "lucide-react";
-import { AUTHORS, getAuthorByUsername } from "@/lib/mock/authors";
-import { articlesByAuthor } from "@/lib/mock/articles";
+import { allAuthors, getAuthorByUsername } from "@/lib/data/authors";
+import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { Avatar, Badge, Button } from "@/components/ui/kit";
 import { formatNumber } from "@/lib/utils";
 
-export function generateStaticParams() {
-  return AUTHORS.map((a) => ({ username: a.username }));
+export async function generateStaticParams() {
+  return (await allAuthors()).map((a) => ({ username: a.username }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const author = getAuthorByUsername(username);
+  const author = await getAuthorByUsername(username);
   if (!author) return {};
   return { title: `${author.name} — Rusability`, description: author.bio };
 }
 
 export default async function AuthorPage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const author = getAuthorByUsername(username);
+  const author = await getAuthorByUsername(username);
   if (!author) notFound();
 
-  const articles = articlesByAuthor(author.id).filter((a) => a.status === "published");
+  const articles = (await articlesByAuthor(author.id)).filter(
+    (a) => a.status === "published",
+  );
 
   return (
     <div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { NewsItem } from "@/lib/types";
-import { newsCategoryName } from "@/lib/mock/categories";
+import { newsCategoryName } from "@/lib/taxonomy";
 
 const NEWS_ACCENT: Record<string, string> = {
   tech: "var(--accent)",

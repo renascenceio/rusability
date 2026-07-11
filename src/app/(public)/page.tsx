@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import type { Article } from "@/lib/types";
-import { featuredArticles, publishedArticles } from "@/lib/mock/articles";
-import { latestNews } from "@/lib/mock/news";
-import { UPCOMING_EVENTS } from "@/lib/mock/events";
-import { categoryName, categoryAccent } from "@/lib/mock/categories";
-import { getAuthor } from "@/lib/mock/authors";
+import { featuredArticles, publishedArticles } from "@/lib/data/articles";
+import { latestNews } from "@/lib/data/news";
+import { upcomingEvents } from "@/lib/data/events";
+import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { Avatar } from "@/components/ui/kit";
 import { formatDate } from "@/lib/utils";
 
@@ -28,22 +27,26 @@ const HERO_FILTERS = [
   { label: "ИИ", slug: "ai" },
 ];
 
-export default function HomePage() {
-  const featured = featuredArticles();
+export default async function HomePage() {
+  const [featured, published, allEvents, news] = await Promise.all([
+    featuredArticles(),
+    publishedArticles(),
+    upcomingEvents(),
+    latestNews(4),
+  ]);
   const hero = featured[0];
-  const heroAuthor = hero ? getAuthor(hero.authorId) : undefined;
+  const heroAuthor = hero?.author;
 
   const used = new Set<string>();
   if (hero) used.add(hero.id);
 
   // 1/3 featured card next to the Premium CTA
-  const featuredSide =
-    publishedArticles().find((a) => !used.has(a.id)) ?? featured[1];
+  const featuredSide = published.find((a) => !used.has(a.id)) ?? featured[1];
   if (featuredSide) used.add(featuredSide.id);
 
   // "Читать сейчас" — three category columns
   const pick = (cats: string[], n: number): Article[] => {
-    const out = publishedArticles()
+    const out = published
       .filter((a) => cats.includes(a.category) && !used.has(a.id))
       .slice(0, n);
     out.forEach((a) => used.add(a.id));
@@ -55,7 +58,7 @@ export default function HomePage() {
     { label: "PR & SEO", items: pick(["pr", "seo", "analytics", "ai"], 5) },
   ];
   // fill any short column from the remaining pool
-  const rest = publishedArticles().filter((a) => !used.has(a.id));
+  const rest = published.filter((a) => !used.has(a.id));
   let ri = 0;
   for (const col of columns) {
     while (col.items.length < 4 && ri < rest.length) {
@@ -66,13 +69,12 @@ export default function HomePage() {
   }
 
   // Популярное — four cover cards
-  const popular = featuredArticles()
-    .concat(publishedArticles())
+  const popular = featured
+    .concat(published)
     .filter((a, i, arr) => arr.findIndex((x) => x.id === a.id) === i)
     .slice(0, 4);
 
-  const events = UPCOMING_EVENTS.slice(0, 3);
-  const news = latestNews(4);
+  const events = allEvents.slice(0, 3);
 
   return (
     <div className="container-editorial py-8 md:py-10">
@@ -190,7 +192,7 @@ export default function HomePage() {
                   {featuredSide.title}
                 </h3>
                 <div className="mt-3 text-xs text-white/65">
-                  {getAuthor(featuredSide.authorId)?.name} · {featuredSide.readingMinutes} мин
+                  {featuredSide.author?.name} · {featuredSide.readingMinutes} мин
                 </div>
               </div>
             </Link>
@@ -261,7 +263,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex flex-col">
                   {col.items.map((a) => {
-                    const au = getAuthor(a.authorId);
+                    const au = a.author;
                     return (
                       <Link
                         key={a.id}
@@ -302,7 +304,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {popular.map((a) => {
-              const au = getAuthor(a.authorId);
+              const au = a.author;
               return (
                 <Link
                   key={a.id}

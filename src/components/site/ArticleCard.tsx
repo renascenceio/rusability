@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Clock, Eye, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
-import { getAuthor } from "@/lib/mock/authors";
-import { categoryName, categoryAccent } from "@/lib/mock/categories";
+import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { Avatar, Badge, formatCount } from "@/components/ui/kit";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +12,7 @@ export function ArticleCard({
   article: Article;
   variant?: "default" | "compact" | "feature";
 }) {
-  const author = getAuthor(article.authorId);
+  const author = article.author;
   const accent = categoryAccent(article.category);
 
   if (variant === "compact") {

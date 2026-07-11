@@ -120,7 +120,7 @@ function Field({
   label: string;
   value: string;
   onChange: (v: string) => void;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-[13px] font-medium text-[var(--foreground)]">{label}</span>

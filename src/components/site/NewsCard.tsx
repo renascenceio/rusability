@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Flame, Eye } from "lucide-react";
 import type { NewsItem } from "@/lib/types";
-import { newsCategoryName } from "@/lib/mock/categories";
+import { newsCategoryName } from "@/lib/taxonomy";
 import { Badge, formatCount } from "@/components/ui/kit";
 
 export function NewsRow({ item }: { item: NewsItem }) {
