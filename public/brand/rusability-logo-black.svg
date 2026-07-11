@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 22 660 84" width="660" height="84">
+  
+  <defs>
+    <clipPath id="cutL"><path d="M -10 -30 L 380 -30 L 281 160 L -10 160 Z"></path></clipPath>
+    <clipPath id="cutR"><path d="M 380 -30 L 700 -30 L 700 160 L 281 160 Z"></path></clipPath>
+  </defs>
+  <g fill="#111111">
+    <g clip-path="url(#cutL)">
+      <text style="font-family:&#39;Plus Jakarta Sans&#39;,system-ui,sans-serif;font-weight:700;font-size:84px;letter-spacing:-2px;" x="0" y="96">RU</text>
+      <text style="font-family:&#39;Plus Jakarta Sans&#39;,system-ui,sans-serif;font-weight:700;font-size:84px;letter-spacing:-2px;" transform="translate(220.2 96) scale(-1 1)">S</text>
+      <text style="font-family:&#39;Plus Jakarta Sans&#39;,system-ui,sans-serif;font-weight:700;font-size:84px;letter-spacing:-2px;" x="222.2" y="96">ABILITY</text>
+    </g>
+    <g clip-path="url(#cutR)" transform="translate(17 0)">
+      <text style="font-family:&#39;Plus Jakarta Sans&#39;,system-ui,sans-serif;font-weight:700;font-size:84px;letter-spacing:-2px;" x="0" y="96">RU</text>
+      <text style="font-family:&#39;Plus Jakarta Sans&#39;,system-ui,sans-serif;font-weight:700;font-size:84px;letter-spacing:-2px;" transform="translate(220.2 96) scale(-1 1)">S</text>
+      <text style="font-family:&#39;Plus Jakarta Sans&#39;,system-ui,sans-serif;font-weight:700;font-size:84px;letter-spacing:-2px;" x="222.2" y="96">ABILITY</text>
+    </g>
+  </g>
+</svg>
