@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutGrid,
   FileText,
@@ -13,9 +14,13 @@ import {
   Bell,
   ShieldCheck,
   ArrowLeft,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { authClient } from "@/lib/auth-client";
+
+export type AuthorShellUser = { name: string; username: string };
 
 type Item = { href: string; label: string; icon: typeof LayoutGrid; badge?: string; isNew?: boolean };
 
