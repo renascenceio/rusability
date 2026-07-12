@@ -75,7 +75,10 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     "",
     preamble,
     "",
-    `Объём статьи — не меньше ${minWords} слов. Обязательно: минимум один разбор кейса или пример с цифрами.`,
+    `Объём статьи — строго не меньше ${minWords} слов (это жёсткое требование, а не ориентир; лучше ${Math.round(
+      minWords * 1.2,
+    )}). Раскрывай каждый подзаголовок минимум в 3–4 содержательных абзаца, добавляй подтемы, чтобы полностью закрыть тему.`,
+    "Обязательно: минимум один разбор кейса или пример с конкретными цифрами.",
     "Не используй разметку markdown внутри текстовых блоков — только чистый текст.",
   ]
     .filter(Boolean)
@@ -105,6 +108,45 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     } else {
       const text = (b.text ?? "").trim();
       if (text) body.push({ type: b.type, text });
+    }
+  }
+
+  // Enforce the word floor with one bounded expansion pass: if the draft is
+  // short, ask for extra sections and append them (the model routinely
+  // under-delivers on length even when asked, so we top it up rather than
+  // regenerate the whole piece).
+  if (countWords(body) < minWords) {
+    try {
+      const have = countWords(body);
+      const outline = body
+        .filter((b) => b.type === "h2" || b.type === "h3")
+        .map((b) => ("text" in b ? b.text : ""))
+        .filter(Boolean)
+        .join("; ");
+      const { output: extra } = await generateText({
+        model: CONTENT_MODEL,
+        output: Output.object({ schema: z.object({ body: z.array(blockSchema) }) }),
+        system,
+        prompt: `Статья по теме «${topic}» пока слишком короткая (${have} слов, нужно не меньше ${minWords}).
+Уже раскрыты разделы: ${outline || "(введение)"}.
+Напиши ДОПОЛНИТЕЛЬНЫЕ разделы (новые подзаголовки h2/h3, абзацы, списки, при желании кейс с цифрами), которые НЕ повторяют уже написанное и добавляют минимум ${
+          minWords - have + 150
+        } слов. Верни только новые блоки.`,
+      });
+      for (const b of extra.body) {
+        if (b.type === "list") {
+          const items = (b.items ?? []).map((x) => x.trim()).filter(Boolean);
+          if (items.length) body.push({ type: "list", items });
+        } else if (b.type === "quote") {
+          const text = (b.text ?? "").trim();
+          if (text) body.push({ type: "quote", text, ...(b.cite ? { cite: b.cite.trim() } : {}) });
+        } else {
+          const text = (b.text ?? "").trim();
+          if (text) body.push({ type: b.type, text });
+        }
+      }
+    } catch {
+      // If the expansion pass fails, keep the original draft rather than error.
     }
   }
 
