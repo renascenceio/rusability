@@ -2,8 +2,9 @@
 
 import { db } from "@/lib/db";
 import { articles, authors } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth-helpers";
+import { glyphAvatar } from "@/lib/avatar";
 import { getCreditState, consumeCredits, type CreditState } from "@/lib/credits";
 import { generateUserArticle } from "@/lib/ai/generate-user-article";
 import { generateArticleCover } from "@/lib/ai/generate-image";
@@ -30,12 +31,37 @@ function serializeCredits(s: CreditState | null): CreditInfo {
   };
 }
 
-/** Resolve the author row bound to the signed-in user (creating none). */
+/**
+ * Resolve the author row bound to the signed-in user, provisioning a fresh
+ * (non-Elite) author profile on first use so any registered reader can start
+ * writing without a manual setup step.
+ */
 async function currentAuthor() {
   const u = await getCurrentUser();
   if (!u) return null;
   const rows = await db.select().from(authors).where(eq(authors.userId, u.id)).limit(1);
-  return { user: u, author: rows[0] ?? null };
+  if (rows[0]) return { user: u, author: rows[0] };
+
+  const name = u.name?.trim() || (u.email ? u.email.split("@")[0] : "Автор");
+  const base = slugify(name).slice(0, 24) || "author";
+  let username = base;
+  const clash = await db.select({ id: authors.id }).from(authors).where(eq(authors.username, username)).limit(1);
+  if (clash[0]) username = `${base}-${u.id.slice(0, 6)}`;
+
+  const created = await db
+    .insert(authors)
+    .values({
+      id: crypto.randomUUID(),
+      username,
+      name,
+      role: "Автор",
+      avatar: glyphAvatar(username, { elite: false }),
+      bio: "",
+      elite: false,
+      userId: u.id,
+    })
+    .returning();
+  return { user: u, author: created[0] };
 }
 
 /** Read the current user's credit state for rendering the editor. */
