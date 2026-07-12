@@ -18,6 +18,10 @@ export const CATEGORIES: Category[] = [
   { slug: "media", name: "Медиа", short: "Медиа", accent: "primary" },
   { slug: "tech", name: "Технологии", short: "Технологии", accent: "accent" },
   { slug: "ecommerce", name: "E-commerce", short: "E-commerce", accent: "success" },
+  { slug: "behavioral", name: "Поведенческая экономика", short: "Поведенческая", accent: "gold" },
+  { slug: "cx", name: "Клиентский опыт", short: "CX", accent: "accent" },
+  { slug: "startups", name: "Стартапы", short: "Стартапы", accent: "success" },
+  { slug: "science", name: "Наука", short: "Наука", accent: "primary" },
 ];
 
 export const NEWS_CATEGORIES: { slug: NewsCategory; name: string }[] = [

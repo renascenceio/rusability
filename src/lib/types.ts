@@ -18,7 +18,10 @@ export type CategorySlug =
   | "ai"
   | "tech"
   | "ecommerce"
-  | "science";
+  | "science"
+  | "behavioral"
+  | "cx"
+  | "startups";
 
 export interface Category {
   slug: CategorySlug;
