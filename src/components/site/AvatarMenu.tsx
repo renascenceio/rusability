@@ -13,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { glyphAvatar } from "@/lib/avatar";
 
 type MenuItem = {
   href: string;
@@ -37,14 +38,18 @@ const SECONDARY: MenuItem[] = [
 export function AvatarMenu({
   name = "Марина Стеблова",
   role = "Автор Rusability",
-  initial = "М",
+  avatar,
+  elite = false,
 }: {
   name?: string;
   role?: string;
-  initial?: string;
+  /** Real uploaded avatar; falls back to a deterministic DiceBear glyph. */
+  avatar?: string;
+  elite?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const avatarUrl = avatar && avatar.trim() ? avatar : glyphAvatar(name, { elite });
 
   useEffect(() => {
     if (!open) return;
@@ -70,9 +75,13 @@ export function AvatarMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Меню профиля"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-[#9aa0ff] text-sm font-bold text-white outline-none ring-offset-2 ring-offset-[var(--surface)] transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+        className={cn(
+          "h-10 w-10 shrink-0 overflow-hidden rounded-full outline-none ring-offset-2 ring-offset-[var(--surface)] transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-[var(--primary)]",
+          elite ? "ring-1 ring-[var(--gold)]" : "border border-[var(--border)]",
+        )}
       >
-        {initial}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={avatarUrl} alt={name} className="h-full w-full object-cover" />
       </button>
 
       {open && (
@@ -82,9 +91,15 @@ export function AvatarMenu({
         >
           {/* Identity */}
           <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3.5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-[#9aa0ff] text-sm font-bold text-white">
-              {initial}
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={avatarUrl}
+              alt={name}
+              className={cn(
+                "h-10 w-10 shrink-0 overflow-hidden rounded-full object-cover",
+                elite ? "ring-1 ring-[var(--gold)]" : "border border-[var(--border)]",
+              )}
+            />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-[var(--foreground)]">{name}</p>
               <p className="truncate text-xs text-[var(--muted-foreground)]">{role}</p>

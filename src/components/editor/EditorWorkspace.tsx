@@ -43,6 +43,7 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
   const [draft, setDraft] = useState<ArticleBlock[] | null>(null);
   const [readingMinutes, setReadingMinutes] = useState(1);
   const [tags, setTags] = useState<string[]>([]);
+  const [scores, setScores] = useState<{ seo: number; aeo: number; geo: number } | null>(null);
 
   const [aiOpen, setAiOpen] = useState(true);
   const [aiTopic, setAiTopic] = useState("");
@@ -91,6 +92,7 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
       setTags(res.draft.tags);
       setReadingMinutes(res.draft.readingMinutes);
       setCategory(res.draft.category);
+      setScores({ seo: res.draft.seoScore, aeo: res.draft.aeoScore, geo: res.draft.geoScore });
       setAiOpen(false);
     });
   }
@@ -106,6 +108,9 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
         tags,
         category,
         readingMinutes: Math.max(1, Math.round(words / 150)),
+        seoScore: scores?.seo ?? null,
+        aeoScore: scores?.aeo ?? null,
+        geoScore: scores?.geo ?? null,
       });
       if (!res.ok) {
         setAiError(res.error ?? "Не удалось опубликовать.");
