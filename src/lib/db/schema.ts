@@ -96,6 +96,12 @@ export const authors = pgTable("authors", {
   joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
   socials: jsonb("socials").notNull().default({}),
   userId: text("user_id"),
+  /* Monthly AI credits (1 credit = 1 generated article OR 1 image).
+     Regular users get a fixed monthly allowance; Elite authors & admins are
+     unlimited. `aiCreditsMonth` is the YYYY-MM the counter belongs to so the
+     usage resets automatically at the start of each month. */
+  aiCreditsUsed: integer("ai_credits_used").notNull().default(0),
+  aiCreditsMonth: text("ai_credits_month").notNull().default(""),
 });
 
 /** Reader → author follows. One row per (user, author). */

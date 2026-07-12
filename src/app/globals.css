@@ -10,7 +10,7 @@
   :root, so the base `body`/`h1` rules fell back to system fonts.
 */
 @theme {
-  --font-sans: var(--font-jakarta), "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
 }
 

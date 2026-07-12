@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { Lora, Plus_Jakarta_Sans } from "next/font/google";
+import { Lora, Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SITE_URL } from "@/lib/site";
 
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin", "latin-ext"],
+// Manrope ships full Cyrillic + Latin, so Russian body/UI text renders in one
+// consistent typeface (Plus Jakarta Sans had NO Cyrillic glyphs, which forced
+// Russian text onto a mismatched system fallback next to Latin words).
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin", "latin-ext", "cyrillic"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
@@ -52,7 +55,7 @@ export default function RootLayout({
     <html
       lang="ru"
       suppressHydrationWarning
-      className={`${jakarta.variable} ${lora.variable} bg-background`}
+      className={`${manrope.variable} ${lora.variable} bg-background`}
     >
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
