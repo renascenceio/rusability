@@ -49,8 +49,8 @@ export function goneHtml(section: Section): string {
     padding: 2.75rem 2.25rem; text-align: center;
     box-shadow: 0 1px 3px rgba(26,20,16,0.06), 0 16px 40px -20px rgba(26,20,16,0.2);
   }
-  .brand { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 1.75rem; }
-  .brand .ru { color: var(--blue); }
+  .brand { margin-bottom: 1.75rem; }
+  .brand img { height: 22px; width: auto; }
   .badge {
     display: inline-block; font-size: 0.72rem; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
@@ -79,7 +79,7 @@ export function goneHtml(section: Section): string {
 <body>
   <div class="wrap">
     <main class="card">
-      <div class="brand">Rusability<span class="ru">.ru</span></div>
+      <div class="brand"><img src="/brand/rusability-logo-black.png" alt="Rusability" width="140" height="22" /></div>
       <span class="badge">Материал перемещён в архив</span>
       <h1>Эта страница больше недоступна</h1>
       <p>Мы полностью обновили Rusability — переосмыслили платформу, чтобы сделать её быстрее, чище и полезнее, и привели её в соответствие с рекомендациями Роскомнадзора.</p>
