@@ -16,7 +16,7 @@ import {
   Megaphone,
   Plug,
   Users,
-  Wallet,
+  Crown,
   Clock,
   ScrollText,
   Menu,
@@ -68,7 +68,7 @@ const NAV: NavGroup[] = [
     title: "Аудитория",
     items: [
       { href: "/admin/users", label: "Пользователи", icon: Users },
-      { href: "/admin/monetization", label: "Монетизация", icon: Wallet },
+      { href: "/admin/authors", label: "Авторы и Elite", icon: Crown },
     ],
   },
 ];

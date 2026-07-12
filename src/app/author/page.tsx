@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { BarChart3, Sparkles, DollarSign, PenLine } from "lucide-react";
+import { BarChart3, Sparkles, PenLine } from "lucide-react";
 import { articlesByAuthor } from "@/lib/data/articles";
 import { formatNumber, formatDate } from "@/lib/utils";
+import { fetchCredits } from "@/app/editor/actions";
 
 export const metadata = { title: "Дашборд — Rusability" };
 
@@ -14,15 +15,16 @@ function seoOf(id: string) {
 }
 
 export default async function AuthorDashboardPage() {
-  const mine = await articlesByAuthor(AUTHOR_ID);
+  const [mine, credits] = await Promise.all([articlesByAuthor(AUTHOR_ID), fetchCredits()]);
   const recent = [...mine]
     .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
     .slice(0, 3);
 
+  const creditValue = credits.unlimited ? "∞" : `${credits.remaining}/${credits.limit}`;
   const kpis = [
     { label: "Прочтений", value: "12.4K", delta: "18% к июню", up: true, tone: "var(--foreground)" },
     { label: "Подписчиков", value: "+234", delta: "12%", up: true, tone: "var(--primary)" },
-    { label: "Выручка", value: "18 400 ₽", delta: "23%", up: true, tone: "var(--accent)" },
+    { label: "ИИ-кредиты", value: creditValue, delta: "обновятся 1-го числа", up: true, tone: "var(--accent)" },
     { label: "Статей", value: String(mine.length || 34), delta: "+ 3 черновика", up: true, tone: "var(--foreground)" },
   ];
 
@@ -73,8 +75,8 @@ export default async function AuthorDashboardPage() {
                     {formatDate(a.publishedAt)} · {formatNumber(a.views)} прочтений · SEO {seoOf(a.id)}
                   </p>
                 </div>
-                <span className="shrink-0 font-semibold text-[var(--success)]">
-                  {(1500 + (a.views % 3000)).toLocaleString("ru-RU")} ₽
+                <span className="shrink-0 text-xs font-semibold text-[var(--muted-foreground)]">
+                  {formatNumber(a.claps)} ♥
                 </span>
               </li>
             ))}
@@ -91,7 +93,6 @@ export default async function AuthorDashboardPage() {
           {[
             { href: "/author/analytics", label: "Аналитика", icon: BarChart3 },
             { href: "/author/personalization", label: "Персонализация", icon: Sparkles, isNew: true },
-            { href: "/author/monetization", label: "Монетизация", icon: DollarSign },
           ].map((q) => {
             const Icon = q.icon;
             return (
