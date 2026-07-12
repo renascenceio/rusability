@@ -17,6 +17,8 @@ import {
   Plug,
   Users,
   Wallet,
+  Clock,
+  ScrollText,
   Menu,
   X,
   Sun,
@@ -54,6 +56,8 @@ const NAV: NavGroup[] = [
     title: "ИИ-система",
     items: [
       { href: "/admin/ai-authors", label: "ИИ-авторы", icon: Bot },
+      { href: "/admin/article-crons", label: "Генерация статей", icon: Clock },
+      { href: "/admin/ai-requirements", label: "ИИ-требования", icon: ScrollText },
       { href: "/admin/ai-filter", label: "РКН-фильтр", icon: ShieldCheck },
       { href: "/admin/newsbot", label: "Newsbot", icon: Sparkles },
       { href: "/admin/ads", label: "Реклама", icon: Megaphone },
