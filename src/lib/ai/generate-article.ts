@@ -3,7 +3,7 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
 import type { aiAuthors } from "@/lib/db/schema";
-import type { ArticleBlock, CategorySlug } from "@/lib/types";
+import type { ArticleBlock, CategorySlug, FaqItem } from "@/lib/types";
 
 type AiAuthorRow = typeof aiAuthors.$inferSelect;
 
@@ -14,6 +14,8 @@ export interface GenerateArticleInput {
   category: string;
   minWords: number;
   tone?: string;
+  /** Elite authors get an FAQ block + surfaced AEO/SEO/GEO scores. */
+  elite?: boolean;
 }
 
 export interface GeneratedArticle {
@@ -23,6 +25,10 @@ export interface GeneratedArticle {
   tags: string[];
   readingMinutes: number;
   geoScore: number;
+  seoScore: number;
+  aeoScore: number;
+  /** Populated only for Elite authors; empty otherwise. */
+  faq: FaqItem[];
 }
 
 /* Flat block schema — every field present + nullable for strict structured
@@ -36,17 +42,33 @@ const blockSchema = z.object({
   cite: z.string().nullable(),
 });
 
+const faqSchema = z.object({
+  q: z.string().describe("Вопрос, который реально задают по теме"),
+  a: z.string().describe("Краткий самодостаточный ответ, 2–4 предложения"),
+});
+
 const articleSchema = z.object({
   title: z.string().describe("Заголовок статьи на русском, до 90 символов, с ключевым запросом"),
   excerpt: z.string().describe("Краткое описание для анонса, 1–2 предложения, прямой ответ на вопрос темы"),
   tags: z.array(z.string()).describe("3–6 тегов на русском в нижнем регистре"),
   geoScore: z
     .number()
-    .describe("Самооценка готовности к ИИ-поиску (GEO/AEO) от 60 до 98"),
+    .describe("Самооценка готовности к ИИ-поиску (GEO — Generative Engine Optimization) от 60 до 98"),
+  seoScore: z
+    .number()
+    .describe("Самооценка классической SEO-оптимизации (структура, ключи, заголовки) от 60 до 98"),
+  aeoScore: z
+    .number()
+    .describe("Самооценка ответной оптимизации (AEO — прямые ответы, определения, FAQ) от 60 до 98"),
+  faq: z
+    .array(faqSchema)
+    .describe(
+      "Блок вопросов и ответов для AEO/GEO. Если попросили — верни 6–8 пунктов; иначе пустой массив.",
+    ),
   body: z
     .array(blockSchema)
     .describe(
-      "Тело статьи блоками. Начни с абзаца-ответа, затем чередуй подзаголовки h2/h3, абзацы p, списки list и при необходимости цитату quote. Заверши блоком-списком практических выводов.",
+      "Тело статьи блоками. Начни с абзаца-ответа, затем чередуй подзаголовки h2/h3, абзацы p, списки list и обязательно 1–2 цитаты quote (яркая мысль или мнение эксперта с атрибуцией в cite). Заверши блоком-списком практических выводов.",
     ),
 });
 

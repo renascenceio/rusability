@@ -79,12 +79,21 @@ export interface Article {
   claps: number;
   comments: number;
   publishedAt: string;
-  /** GEO score for elite articles */
+  /** GEO/AEO/SEO self-assessments — surfaced on Elite articles only */
   geoScore?: number;
+  seoScore?: number;
+  aeoScore?: number;
+  /** Q&A block appended to Elite articles (AEO/GEO). */
+  faq?: FaqItem[];
   featured?: boolean;
   /** Optionally embedded author (populated by data-layer joins) so shared /
    *  client card components can render bylines without a DB lookup. */
   author?: Author;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
 }
 
 export type ArticleBlock =

@@ -115,6 +115,11 @@ export const articles = pgTable("articles", {
   comments: integer("comments").notNull().default(0),
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
   geoScore: integer("geo_score"),
+  /* AEO/SEO self-assessments — shown on Elite articles only. */
+  seoScore: integer("seo_score"),
+  aeoScore: integer("aeo_score"),
+  /* Q&A block appended to Elite articles (AEO/GEO). [{q,a}] */
+  faq: jsonb("faq").notNull().default([]),
   featured: boolean("featured").notNull().default(false),
   /* AI generation provenance + moderation buffer. */
   cronId: text("cron_id"),
@@ -203,6 +208,8 @@ export const aiAuthors = pgTable("ai_authors", {
   approach: text("approach").notNull().default(""),
   stylePrompt: text("style_prompt").notNull().default(""),
   category: text("category").notNull().default("business"),
+  /* Elite authors get the rich layout + FAQ + AEO/SEO/GEO scores. */
+  elite: boolean("elite").notNull().default(false),
 });
 
 export const cronJobs = pgTable("cron_jobs", {
