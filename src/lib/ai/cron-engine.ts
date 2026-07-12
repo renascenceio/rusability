@@ -12,6 +12,7 @@ import {
 import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { generateArticle } from "./generate-article";
+import { generateArticleCover } from "./generate-image";
 import { generateTopic } from "./generate-topic";
 import { slugify } from "@/lib/utils";
 import type { CategorySlug } from "@/lib/types";
@@ -182,7 +183,18 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
       category: cron.category,
       minWords: cron.minWords,
       tone: cron.tone || undefined,
+      elite: author.elite,
     });
+
+    // Cover image in the author's signature style (WebP, alt = article title).
+    // Quality model for fresh articles. Never let an image failure block publish.
+    let cover = "";
+    try {
+      cover =
+        (await generateArticleCover({ authorId: author.id, title: gen.title, category: cron.category })) ?? "";
+    } catch {
+      cover = "";
+    }
 
     const settings = await getSettings();
     // Decide status: approval-gate OR pace-gate → buffer as "review".
@@ -207,11 +219,11 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
       title: gen.title,
       excerpt: gen.excerpt,
       body: gen.body,
-      cover: "",
+      cover,
       category: (cron.category as CategorySlug) ?? "business",
       tags: gen.tags,
       authorId: author.id,
-      tier: gen.geoScore >= 85 ? "elite" : "standard",
+      tier: author.elite ? "elite" : "standard",
       status,
       readingMinutes: gen.readingMinutes,
       views: 0,
@@ -219,6 +231,9 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
       comments: 0,
       publishedAt: now,
       geoScore: gen.geoScore,
+      seoScore: gen.seoScore,
+      aeoScore: gen.aeoScore,
+      faq: gen.faq,
       featured: false,
       cronId: cron.id,
       bufferReason,

@@ -37,12 +37,12 @@ export async function seedAiAuthors(): Promise<{ authors: number; aiAuthors: num
         archetype: a.archetype,
         followers: 0,
         articlesCount: 0,
-        elite: false,
+        elite: a.elite ?? false,
         socials: {},
       })
       .onConflictDoUpdate({
         target: authors.id,
-        set: { name: a.name, bio: a.bio, archetype: a.archetype, role: "ai", username: a.username },
+        set: { name: a.name, bio: a.bio, archetype: a.archetype, role: "ai", username: a.username, elite: a.elite ?? false },
       });
     authorCount++;
 
@@ -61,6 +61,7 @@ export async function seedAiAuthors(): Promise<{ authors: number; aiAuthors: num
         approach: a.approach,
         stylePrompt: a.stylePrompt,
         category: a.category,
+        elite: a.elite ?? false,
       })
       .onConflictDoUpdate({
         target: aiAuthors.id,
@@ -73,6 +74,7 @@ export async function seedAiAuthors(): Promise<{ authors: number; aiAuthors: num
           approach: a.approach,
           stylePrompt: a.stylePrompt,
           category: a.category,
+          elite: a.elite ?? false,
         },
       });
     aiCount++;

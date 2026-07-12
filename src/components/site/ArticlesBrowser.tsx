@@ -6,8 +6,8 @@ import Link from "next/link";
 import { Search, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES, categoryName, categoryAccent } from "@/lib/taxonomy";
+import { CategoryTabs, type TabItem } from "@/components/site/CategoryTabs";
 import { Avatar, formatCount } from "@/components/ui/kit";
-import { cn } from "@/lib/utils";
 
 const ACCENT_VAR: Record<string, string> = {
   primary: "var(--primary)",
@@ -43,6 +43,32 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
 
   const visible = filtered.slice(0, limit);
 
+  // Dynamic tab ordering: categories with the most fresh material (published in
+  // the last 24h) sit closest to the left, with total volume as a tiebreak.
+  // (Per-user personalisation / most-viewed weights can be layered on top of
+  // this same ordering once reader-level signals are tracked.)
+  const orderedTabs = useMemo<TabItem[]>(() => {
+    const now = Date.now();
+    const DAY = 86_400_000;
+    const recent = new Map<string, number>();
+    const total = new Map<string, number>();
+    for (const a of articles) {
+      total.set(a.category, (total.get(a.category) ?? 0) + 1);
+      if (now - +new Date(a.publishedAt) <= DAY) {
+        recent.set(a.category, (recent.get(a.category) ?? 0) + 1);
+      }
+    }
+    const sorted = [...CATEGORIES].sort((x, y) => {
+      const dr = (recent.get(y.slug) ?? 0) - (recent.get(x.slug) ?? 0);
+      if (dr !== 0) return dr;
+      return (total.get(y.slug) ?? 0) - (total.get(x.slug) ?? 0);
+    });
+    return [
+      { slug: "all", label: "Все" },
+      ...sorted.map((c) => ({ slug: c.slug, label: c.name })),
+    ];
+  }, [articles]);
+
   return (
     <div>
       {/* Header */}
@@ -69,24 +95,15 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
         </div>
       </header>
 
-      {/* Filters — plain text tabs */}
-      <div className="mb-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-[var(--border)] pb-3">
-        <FilterTab active={category === "all"} onClick={() => setCategory("all")}>
-          Все
-        </FilterTab>
-        {CATEGORIES.map((c) => (
-          <FilterTab
-            key={c.slug}
-            active={category === c.slug}
-            onClick={() => {
-              setCategory(c.slug);
-              setLimit(PAGE_SIZE);
-            }}
-          >
-            {c.name}
-          </FilterTab>
-        ))}
-      </div>
+      {/* Filters — single line with overflow "Ещё" dropdown */}
+      <CategoryTabs
+        items={orderedTabs}
+        active={category}
+        onSelect={(slug) => {
+          setCategory(slug);
+          setLimit(PAGE_SIZE);
+        }}
+      />
 
       {visible.length === 0 ? (
         <p className="py-16 text-center text-[var(--muted-foreground)]">
@@ -246,29 +263,4 @@ function PlainCard({ article }: { article: Article }) {
   );
 }
 
-function FilterTab({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "relative pb-2 text-sm font-medium transition-colors",
-        active
-          ? "text-[var(--primary)]"
-          : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
-      )}
-    >
-      {children}
-      {active && (
-        <span className="absolute -bottom-[13px] left-0 h-0.5 w-full rounded-full bg-[var(--primary)]" />
-      )}
-    </button>
-  );
-}
+

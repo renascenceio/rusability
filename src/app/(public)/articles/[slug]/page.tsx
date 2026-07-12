@@ -9,7 +9,10 @@ import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { CommentThread } from "@/components/site/CommentThread";
 import { ArticleActions } from "@/components/site/ArticleActions";
+import { SubscribeButton } from "@/components/site/SubscribeButton";
 import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { isSubscribed } from "@/app/actions/subscriptions";
 
 export async function generateStaticParams() {
   return (await publishedArticles()).map((a) => ({ slug: a.slug }));
@@ -21,10 +24,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   if (!article || article.status !== "published") notFound();
 
   const author = article.author;
-  const [related, comments] = await Promise.all([
+  const [related, comments, currentUser, subscribed] = await Promise.all([
     relatedArticles(article),
     commentsForArticle(article.id),
+    getCurrentUser(),
+    author ? isSubscribed(author.id) : Promise.resolve(false),
   ]);
+  const authed = Boolean(currentUser);
   const isElite = article.tier === "elite";
   const accent = categoryAccent(article.category);
 
@@ -44,11 +50,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           readingMinutes: article.readingMinutes,
           claps: article.claps,
           body: article.body,
+          faq: article.faq ?? [],
+          scores: {
+            geo: article.geoScore,
+            seo: article.seoScore,
+            aeo: article.aeoScore,
+          },
           author: {
+            id: author?.id,
             name: author?.name ?? "Автор",
             avatar: author?.avatar ?? "/placeholder.svg",
             role: author?.elite ? "Elite-автор Rusability" : "Автор Rusability",
             articlesCount: author?.articlesCount ?? 0,
+            subscribed,
+            authed,
           },
           related: related.map((a) => ({
             slug: a.slug,
@@ -114,6 +129,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 </div>
               </Link>
             )}
+            {author && (
+              <SubscribeButton
+                authorId={author.id}
+                initialSubscribed={subscribed}
+                authed={authed}
+                size="sm"
+              />
+            )}
             <div className="ml-auto flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -135,7 +158,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {/* Cover */}
         <div className="mb-10 overflow-hidden rounded-3xl bg-[var(--surface-3)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={article.cover || "/placeholder.svg"} alt="" className="w-full object-cover" />
+          <img src={article.cover || "/placeholder.svg"} alt={article.title} className="w-full object-cover" />
         </div>
 
         {/* Body */}

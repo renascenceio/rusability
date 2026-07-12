@@ -10,8 +10,10 @@ export default async function NewsPage() {
   const [news, popular] = await Promise.all([publishedNews(), popularNews(5)]);
 
   return (
-    <div className="container-editorial py-10">
-      <NewsBrowser news={news} popular={popular} />
+    <div className="container-editorial py-9 md:py-12">
+      <div className="mx-auto max-w-5xl">
+        <NewsBrowser news={news} popular={popular} />
+      </div>
     </div>
   );
 }

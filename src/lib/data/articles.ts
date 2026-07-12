@@ -38,6 +38,9 @@ export function mapArticle(r: Row): Article {
     comments: r.comments,
     publishedAt: toISO(r.publishedAt),
     geoScore: r.geoScore ?? undefined,
+    seoScore: r.seoScore ?? undefined,
+    aeoScore: r.aeoScore ?? undefined,
+    faq: (r.faq as Article["faq"]) ?? [],
     featured: r.featured,
   };
 }

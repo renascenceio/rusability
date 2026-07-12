@@ -79,12 +79,21 @@ export interface Article {
   claps: number;
   comments: number;
   publishedAt: string;
-  /** GEO score for elite articles */
+  /** GEO/AEO/SEO self-assessments — surfaced on Elite articles only */
   geoScore?: number;
+  seoScore?: number;
+  aeoScore?: number;
+  /** Q&A block appended to Elite articles (AEO/GEO). */
+  faq?: FaqItem[];
   featured?: boolean;
   /** Optionally embedded author (populated by data-layer joins) so shared /
    *  client card components can render bylines without a DB lookup. */
   author?: Author;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
 }
 
 export type ArticleBlock =
@@ -92,7 +101,7 @@ export type ArticleBlock =
   | { type: "h2"; text: string }
   | { type: "h3"; text: string }
   | { type: "quote"; text: string; cite?: string }
-  | { type: "list"; items: string[] }
+  | { type: "list"; items: string[]; ordered?: boolean }
   | { type: "image"; src: string; caption?: string };
 
 export type NewsCategory = "tech" | "marketing" | "business" | "science";

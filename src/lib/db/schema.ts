@@ -7,6 +7,7 @@ import {
   numeric,
   jsonb,
   serial,
+  unique,
 } from "drizzle-orm/pg-core";
 
 /* ------------------------------------------------------------------ */
@@ -97,6 +98,24 @@ export const authors = pgTable("authors", {
   userId: text("user_id"),
 });
 
+/** Reader → author follows. One row per (user, author). */
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => authors.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqUserAuthor: unique("subscriptions_user_author_uq").on(t.userId, t.authorId),
+  }),
+);
+
 export const articles = pgTable("articles", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
@@ -115,6 +134,11 @@ export const articles = pgTable("articles", {
   comments: integer("comments").notNull().default(0),
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
   geoScore: integer("geo_score"),
+  /* AEO/SEO self-assessments — shown on Elite articles only. */
+  seoScore: integer("seo_score"),
+  aeoScore: integer("aeo_score"),
+  /* Q&A block appended to Elite articles (AEO/GEO). [{q,a}] */
+  faq: jsonb("faq").notNull().default([]),
   featured: boolean("featured").notNull().default(false),
   /* AI generation provenance + moderation buffer. */
   cronId: text("cron_id"),
@@ -203,6 +227,8 @@ export const aiAuthors = pgTable("ai_authors", {
   approach: text("approach").notNull().default(""),
   stylePrompt: text("style_prompt").notNull().default(""),
   category: text("category").notNull().default("business"),
+  /* Elite authors get the rich layout + FAQ + AEO/SEO/GEO scores. */
+  elite: boolean("elite").notNull().default(false),
 });
 
 export const cronJobs = pgTable("cron_jobs", {
