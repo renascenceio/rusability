@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { normalizeList } from "@/lib/article-list";
 import type { aiAuthors } from "@/lib/db/schema";
 import type { ArticleBlock, CategorySlug, FaqItem } from "@/lib/types";
 
@@ -40,6 +41,8 @@ const blockSchema = z.object({
   text: z.string().nullable(),
   items: z.array(z.string()).nullable(),
   cite: z.string().nullable(),
+  /** true = нумерованный список (шаги/рейтинг), false/null = маркированный. */
+  ordered: z.boolean().nullable(),
 });
 
 const faqSchema = z.object({
@@ -106,6 +109,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
       ? "Это материал Elite-автора. В конце верни блок FAQ из 6–8 пунктов: реальные вопросы по теме и краткие самодостаточные ответы (для AEO/ИИ-поиска). Не дублируй ими выводы."
       : "FAQ не нужен — верни для поля faq пустой массив.",
     "Не используй разметку markdown (**, ##, - ) внутри текстовых блоков — только чистый текст; выделение делай отдельными подзаголовками и списками.",
+    "Для списков: НЕ добавляй номера или маркеры в текст пунктов (никаких «1.», «2)», «- » в начале items). Если это последовательность шагов или рейтинг — ставь ordered:true, и платформа сама пронумерует; для обычного перечисления оставляй ordered:false.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -126,8 +130,11 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
   const body: ArticleBlock[] = [];
   for (const b of output.body) {
     if (b.type === "list") {
-      const items = (b.items ?? []).map((x) => x.trim()).filter(Boolean);
-      if (items.length) body.push({ type: "list", items });
+      const raw = (b.items ?? []).map((x) => x.trim()).filter(Boolean);
+      if (raw.length) {
+        const { ordered, items } = normalizeList(raw, b.ordered ?? undefined);
+        body.push({ type: "list", items, ...(ordered ? { ordered: true } : {}) });
+      }
     } else if (b.type === "quote") {
       const text = (b.text ?? "").trim();
       if (text) body.push({ type: "quote", text, ...(b.cite ? { cite: b.cite.trim() } : {}) });
@@ -161,8 +168,11 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
       });
       for (const b of extra.body) {
         if (b.type === "list") {
-          const items = (b.items ?? []).map((x) => x.trim()).filter(Boolean);
-          if (items.length) body.push({ type: "list", items });
+          const raw = (b.items ?? []).map((x) => x.trim()).filter(Boolean);
+          if (raw.length) {
+            const { ordered, items } = normalizeList(raw, b.ordered ?? undefined);
+            body.push({ type: "list", items, ...(ordered ? { ordered: true } : {}) });
+          }
         } else if (b.type === "quote") {
           const text = (b.text ?? "").trim();
           if (text) body.push({ type: "quote", text, ...(b.cite ? { cite: b.cite.trim() } : {}) });

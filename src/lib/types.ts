@@ -101,7 +101,7 @@ export type ArticleBlock =
   | { type: "h2"; text: string }
   | { type: "h3"; text: string }
   | { type: "quote"; text: string; cite?: string }
-  | { type: "list"; items: string[] }
+  | { type: "list"; items: string[]; ordered?: boolean }
   | { type: "image"; src: string; caption?: string };
 
 export type NewsCategory = "tech" | "marketing" | "business" | "science";

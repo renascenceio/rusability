@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { ArticleBlock, FaqItem } from "@/lib/types";
 import { SubscribeButton } from "@/components/site/SubscribeButton";
+import { normalizeList } from "@/lib/article-list";
 
 type SkinKey = "classic" | "night" | "sepia" | "forest" | "blue";
 
@@ -459,17 +460,40 @@ function EliteBlock({ block, skin, first }: { block: ArticleBlock; skin: Skin; f
           )}
         </blockquote>
       );
-    case "list":
+    case "list": {
+      const { ordered, items } = normalizeList(block.items, block.ordered);
       return (
-        <ul style={{ margin: "20px 0", padding: 0, listStyle: "none" }}>
-          {block.items.map((item, j) => (
+        <ol
+          style={{
+            margin: "20px 0",
+            padding: 0,
+            listStyle: "none",
+            counterReset: ordered ? "elite-li" : undefined,
+          }}
+        >
+          {items.map((item, j) => (
             <li key={j} style={{ display: "flex", gap: 12, color: skin.text, lineHeight: 1.8, marginBottom: 8 }}>
-              <span style={{ marginTop: 12, width: 6, height: 6, flexShrink: 0, borderRadius: "50%", background: skin.accent }} />
+              {ordered ? (
+                <span
+                  style={{
+                    flexShrink: 0,
+                    minWidth: 22,
+                    fontWeight: 700,
+                    fontVariantNumeric: "tabular-nums",
+                    color: skin.accent,
+                  }}
+                >
+                  {j + 1}.
+                </span>
+              ) : (
+                <span style={{ marginTop: 12, width: 6, height: 6, flexShrink: 0, borderRadius: "50%", background: skin.accent }} />
+              )}
               <span>{inline(item)}</span>
             </li>
           ))}
-        </ul>
+        </ol>
       );
+    }
     case "image":
       return (
         <figure style={{ margin: "36px 0" }}>

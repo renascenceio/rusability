@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import type { NewsItem } from "@/lib/types";
 import { newsCategoryName } from "@/lib/taxonomy";
-import { cn } from "@/lib/utils";
+import { CategoryTabs, type TabItem } from "@/components/site/CategoryTabs";
 
 const NEWS_ACCENT: Record<string, string> = {
   tech: "var(--accent)",
@@ -55,6 +55,26 @@ export function NewsBrowser({
     return list;
   }, [news, cat, query]);
 
+  // Dynamic ordering: sections with the most fresh material (last 24h) first.
+  const orderedTabs = useMemo<TabItem[]>(() => {
+    const now = Date.now();
+    const DAY = 86_400_000;
+    const recent = new Map<string, number>();
+    const total = new Map<string, number>();
+    for (const n of news) {
+      total.set(n.category, (total.get(n.category) ?? 0) + 1);
+      if (now - +new Date(n.publishedAt) <= DAY) {
+        recent.set(n.category, (recent.get(n.category) ?? 0) + 1);
+      }
+    }
+    const rest = TABS.filter((t) => t.slug !== "all").sort((x, y) => {
+      const dr = (recent.get(y.slug) ?? 0) - (recent.get(x.slug) ?? 0);
+      if (dr !== 0) return dr;
+      return (total.get(y.slug) ?? 0) - (total.get(x.slug) ?? 0);
+    });
+    return [{ slug: "all", label: "Все" }, ...rest.map((t) => ({ slug: t.slug, label: t.label }))];
+  }, [news]);
+
   const lead = filtered[0];
   const alsoImportant = filtered.slice(1, 6);
   const trio = filtered.slice(6, 9);
@@ -81,18 +101,18 @@ export function NewsBrowser({
         </div>
       </header>
 
-      {/* Tabs — matches Articles (sentence case, underline on active) */}
-      <div className="mb-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-[var(--border)] pb-3">
-        {TABS.map((t) => (
-          <FilterTab key={t.slug} active={cat === t.slug} onClick={() => setCat(t.slug)}>
-            {t.label}
-          </FilterTab>
-        ))}
-        <span className="ml-auto flex items-center gap-2 text-xs font-semibold text-[var(--success)]">
-          <span className="h-2 w-2 rounded-full bg-[var(--success)]" />
-          {news.length} новостей сегодня
-        </span>
-      </div>
+      {/* Tabs — single line with overflow "Ещё" dropdown */}
+      <CategoryTabs
+        items={orderedTabs}
+        active={cat}
+        onSelect={setCat}
+        rightSlot={
+          <span className="flex items-center gap-2 text-xs font-semibold text-[var(--success)]">
+            <span className="h-2 w-2 rounded-full bg-[var(--success)]" />
+            {news.length} новостей сегодня
+          </span>
+        }
+      />
 
       {lead && (
         <>
@@ -248,29 +268,4 @@ export function NewsBrowser({
   );
 }
 
-function FilterTab({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "relative pb-2 text-sm font-medium transition-colors",
-        active
-          ? "text-[var(--primary)]"
-          : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
-      )}
-    >
-      {children}
-      {active && (
-        <span className="absolute -bottom-[13px] left-0 h-0.5 w-full rounded-full bg-[var(--primary)]" />
-      )}
-    </button>
-  );
-}
+
