@@ -6,7 +6,7 @@ import {
   buildImagePrompt,
   AUTHOR_IMAGE_STYLES,
   DEFAULT_IMAGE_STYLE,
-  NEGATIVE_CLAUSE,
+  POSITIVE_TAIL,
 } from "./author-image-styles";
 import { storeWebp } from "@/lib/media/to-webp";
 
@@ -41,26 +41,27 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
 
   const system = [
     "You are an award-winning creative-agency art director (think Ogilvy, Leo Burnett) writing a single prompt for an AI image generator to produce an editorial magazine COVER.",
-    "House aesthetic: ARTSY, DREAMY, ABSTRACT — cinematic, painterly, surreal, macro or hyperreal, or a bold flat graphic illustration. Draw on the language of fine-art photography and modern painters. Walk AWAY from the obvious, literal image a person would first expect.",
-    "It must be visually stunning, vibrant and inspiring — never corny, basic or corporate.",
-    "STRICTLY FORBIDDEN: any text/letters/numbers/words; charts, graphs, diagrams, dashboards, infographics, gauges, arrows; business clichés (handshakes, suits at laptops, lightbulbs, gears, rocket ships, brain-circuit imagery); generic stock-photo looks.",
-    "Steer the subject only by the MOOD and METAPHOR of the topic — keep it symbolic and abstract. Do NOT put the article's literal title or any quoted phrase into the image or the prompt.",
-    "Output ONE single English prompt of 60–110 words describing: medium/style, the abstract subject, composition, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
+    "House aesthetic: ARTSY, DREAMY, ABSTRACT — cinematic, painterly, surreal, ultra-macro or hyperreal nature, iridescent textures, dramatic light, or a bold flat graphic illustration in the language of fine-art photography and modern painters.",
+    "Walk AWAY from the obvious, literal image a person would first expect for the topic. Translate the topic into a pure VISUAL METAPHOR from nature, light, material, colour or abstract form.",
+    "Describe ONLY beautiful, gallery-grade imagery. Do NOT mention people in business settings, offices, devices, or any diagram/chart/text — simply don't reference them at all; instead describe an evocative abstract scene.",
+    "Never put the article's literal title or any quoted phrase into the image. Keep it wordless and symbolic.",
+    "Output ONE single English prompt of 55–100 words describing: medium/style, the abstract subject, composition, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
   ].join("\n");
 
   const prompt = [
     `Article topic (Russian): «${input.title}». Theme area: ${input.category}.`,
     `Lean toward this author's visual signature: ${sig.style}.`,
     `Preferred colour direction: ${colour}.`,
-    "Write the image prompt now.",
+    "Give me an abstract, dreamy, artful visual metaphor — surprising, not literal. Write the image prompt now.",
   ].join("\n");
 
   try {
     const { text } = await generateText({ model: CONTENT_MODEL, system, prompt });
     const crafted = text.trim().replace(/^["'\s]+|["'\s]+$/g, "");
     if (crafted.length < 40) return buildImagePrompt(input);
-    // Always re-assert the hard bans regardless of what the model returned.
-    return `${crafted} 16:9 widescreen, single clear focal point, generous negative space. ${NEGATIVE_CLAUSE}`;
+    // Only POSITIVE reinforcement here — hard bans are enforced via the model's
+    // negativePrompt, since naming forbidden objects in the prompt summons them.
+    return `${crafted} 16:9 widescreen. ${POSITIVE_TAIL}`;
   } catch {
     return buildImagePrompt(input);
   }
@@ -82,6 +83,8 @@ export async function generateArticleCover(input: GenerateCoverInput): Promise<s
       prompt,
       aspectRatio: "16:9",
       providerOptions: {
+        // NOTE: Imagen 4 dropped `negativePrompt` support, so bans are enforced
+        // purely by NOT naming forbidden objects in the positive prompt.
         google: { personGeneration: "allow_adult", safetySetting: "block_only_high" },
       },
     });

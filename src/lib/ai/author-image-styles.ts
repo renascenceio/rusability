@@ -226,12 +226,25 @@ function hash(s: string): number {
   return Math.abs(h);
 }
 
-/** The shared "never draw this" clause appended to every prompt. */
-export const NEGATIVE_CLAUSE =
-  "ABSOLUTELY NO text of any kind: no letters, words, numbers, captions, labels, logos, watermarks, signage, UI or typography. " +
-  "NO charts, graphs, diagrams, dashboards, infographics, gauges, grids of data or arrows. " +
-  "NO corny business clichés (no handshakes, no people in suits at laptops, no lightbulbs, gears, cogs, rocket ships, or brain-circuit imagery). " +
-  "Purely visual, symbolic and artful — convey the idea through imagery, colour, texture and metaphor only. A completely text-free, chart-free image.";
+/**
+ * Bare comma-separated terms for the image model's dedicated `negativePrompt`
+ * parameter. IMPORTANT: banned objects must ONLY live here — naming them in the
+ * positive prompt actually makes the model draw them.
+ */
+export const NEGATIVE_TERMS =
+  "text, letters, words, numbers, captions, labels, logos, watermark, signage, typography, UI, " +
+  "chart, graph, diagram, dashboard, infographic, gauge, data grid, arrows, " +
+  "businessman, business people, suit and tie, office worker, handshake, laptop, computer screen, " +
+  "lightbulb, gears, cogs, rocket, rocket ship, spaceship, brain, circuit board, network nodes, " +
+  "corporate stock photo, clip art, stock illustration, cliché, corny, cheesy";
+
+/**
+ * A short POSITIVE reinforcement (safe to include in the prompt) that steers
+ * toward the desired aesthetic without naming any banned object.
+ */
+export const POSITIVE_TAIL =
+  "Purely visual, symbolic and artful — convey the idea through imagery, colour, texture, light and metaphor only. " +
+  "Completely wordless and text-free. A single clear focal point with generous negative space, gallery-grade and inspiring.";
 
 /**
  * Deterministic art-direction prompt for one article. Combines a seeded art
@@ -253,7 +266,7 @@ export function buildImagePrompt(args: {
     `Art lens: ${lens}.`,
     `Author's visual signature: ${s.style}.`,
     `Colour: ${colour}.`,
-    `16:9 widescreen, high detail, tasteful, a single clear focal point with generous negative space, inspiring and gallery-grade.`,
-    NEGATIVE_CLAUSE,
+    `16:9 widescreen, high detail, tasteful.`,
+    POSITIVE_TAIL,
   ].join(" ");
 }

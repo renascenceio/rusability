@@ -55,7 +55,9 @@ export async function POST(req: Request) {
         authorId: a.authorId,
         title: a.title,
         category: a.category,
-        fast: true,
+        // Force regeneration uses the higher-quality model — it honours the
+        // negative prompt far better than the fast model.
+        fast: !force,
       });
       if (cover) {
         await db.update(articles).set({ cover, updatedAt: new Date() }).where(eq(articles.id, a.id));
