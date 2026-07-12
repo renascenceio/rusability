@@ -19,7 +19,9 @@ import { neon } from "@neondatabase/serverless";
 type Section = "articles" | "news";
 
 const SET_TTL_MS = 60_000; // refresh the known-slug set at most once a minute
-const NEG_TTL_MS = 300_000; // remember confirmed-gone slugs for 5 minutes
+const NEG_TTL_MS = 60_000; // remember confirmed-gone slugs for 1 minute
+// Kept short so a newly published article that shares a slug with a probed old
+// link starts serving within a minute rather than staying "gone".
 
 const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 
