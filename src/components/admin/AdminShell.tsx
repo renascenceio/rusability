@@ -13,11 +13,9 @@ import {
   Sparkles,
   Plug,
   Users,
-  Crown,
   Activity,
   Megaphone,
   ListChecks,
-  DollarSign,
   Menu,
   X,
   Sun,
@@ -66,8 +64,6 @@ const NAV: NavGroup[] = [
     title: "Аудитория",
     items: [
       { href: "/admin/users", label: "Пользователи", icon: Users },
-      { href: "/admin/authors", label: "Авторы и Elite", icon: Crown },
-      { href: "/admin/monetization", label: "Монетизация", icon: DollarSign },
     ],
   },
 ];

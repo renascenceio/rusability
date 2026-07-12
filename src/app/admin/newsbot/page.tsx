@@ -63,7 +63,11 @@ export default async function NewsbotPage() {
         }))}
         runs={runs.map((r) => ({ ...r, startedAt: r.startedAt.toISOString() }))}
         queue={queue.map((q) => ({ ...q, publishedAt: q.publishedAt.toISOString() }))}
-        feed={feed.map((f) => ({ ...f, publishedAt: f.publishedAt.toISOString() }))}
+        feed={feed.map((f) => ({
+          ...f,
+          pipeline: f.pipeline ?? "published",
+          publishedAt: f.publishedAt.toISOString(),
+        }))}
         publishedToday={publishedToday}
       />
     </div>

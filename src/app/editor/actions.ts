@@ -1,9 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { articles, authors } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { articles, authors, user } from "@/lib/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth-helpers";
+import { blockReason } from "@/lib/ai/content-filter";
 import { glyphAvatar } from "@/lib/avatar";
 import { getCreditState, consumeCredits, type CreditState } from "@/lib/credits";
 import { generateUserArticle } from "@/lib/ai/generate-user-article";
@@ -63,6 +64,29 @@ async function currentAuthor() {
     })
     .returning();
   return { user: u, author: created[0] };
+}
+
+/**
+ * Record a Roskomnadzor-banned-topic strike for a user. On the 3rd strike the
+ * account is automatically banned. Returns the new strike count.
+ */
+async function addRknStrike(userId: string, reason: string): Promise<number> {
+  const rows = await db
+    .update(user)
+    .set({ rknStrikes: sql`${user.rknStrikes} + 1` })
+    .where(eq(user.id, userId))
+    .returning({ strikes: user.rknStrikes });
+  const strikes = rows[0]?.strikes ?? 0;
+  if (strikes >= 3) {
+    await db
+      .update(user)
+      .set({
+        banned: true,
+        banReason: `Автобан: ${strikes} нарушения по темам РКН (${reason})`,
+      })
+      .where(eq(user.id, userId));
+  }
+  return strikes;
 }
 
 /** Read the current user's credit state for rendering the editor. */
@@ -172,6 +196,27 @@ export async function publishArticle(input: {
   const ctx = await currentAuthor();
   if (!ctx?.author) return { ok: false, error: "Профиль автора не найден." };
   if (!input.title.trim()) return { ok: false, error: "Добавьте заголовок." };
+
+  // РКН safety gate: scan the whole piece for Roskomnadzor-banned topics.
+  // A hit adds a strike to the user's account; 3+ strikes → automatic ban.
+  const bodyText = input.body
+    .map((b) => {
+      if ("text" in b && typeof b.text === "string") return b.text;
+      if ("items" in b && Array.isArray(b.items)) return b.items.join(" ");
+      return "";
+    })
+    .join(" ");
+  const violation = blockReason(`${input.title} ${input.excerpt} ${bodyText}`);
+  if (violation && ctx.user?.id) {
+    const strikes = await addRknStrike(ctx.user.id, violation);
+    return {
+      ok: false,
+      error:
+        strikes >= 3
+          ? "Материал содержит запрещённую в РФ тему. Аккаунт заблокирован (3 нарушения)."
+          : `Материал содержит запрещённую в РФ тему (${violation}). Публикация отклонена. Нарушение ${strikes} из 3.`,
+    };
+  }
 
   const now = new Date();
 
