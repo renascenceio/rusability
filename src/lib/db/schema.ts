@@ -27,6 +27,10 @@ export const user = pgTable("user", {
   banned: boolean("banned"),
   banReason: text("banReason"),
   banExpires: timestamp("banExpires", { withTimezone: true }),
+  /* РКН compliance: number of times the user published (or attempted to
+     publish) material on a Roskomnadzor-banned topic. At 3+ strikes the
+     account is automatically banned. Admins can also ban manually. */
+  rknStrikes: integer("rkn_strikes").notNull().default(0),
 });
 
 export const session = pgTable("session", {

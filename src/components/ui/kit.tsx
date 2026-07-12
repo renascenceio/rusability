@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { glyphAvatar } from "@/lib/avatar";
+import { resolveAvatar } from "@/lib/avatar";
 import type { ComponentProps, ReactNode } from "react";
 
 /* ---------------- Button ---------------- */
@@ -159,7 +159,7 @@ export function Avatar({
 }) {
   // Fall back to a deterministic DiceBear "Glyphs" avatar (gold for Elite) so
   // every author has a distinct, on-brand image even without an uploaded photo.
-  const resolved = src && src.trim() ? src : glyphAvatar(alt, { elite });
+  const resolved = resolveAvatar({ avatar: src, name: alt, elite });
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
