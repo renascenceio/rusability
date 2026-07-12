@@ -123,12 +123,12 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
   const paras = draft ? blocksToPlainParagraphs(draft) : [];
 
   return (
-    <div className="onboarding-dark flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col bg-[var(--background)] text-[var(--foreground)]">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-5 py-4">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/90 px-5 py-4 backdrop-blur">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm font-medium text-[#f0ebe3]/60 transition-colors hover:text-[#f0ebe3]"
+          className="flex items-center gap-2 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
         >
           <ArrowLeft className="h-4 w-4" /> Лента
         </Link>
@@ -140,13 +140,13 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
           <div className="relative">
             <button
               onClick={() => setCatMenu((v) => !v)}
-              className="flex items-center gap-1.5 rounded-full border border-white/12 px-4 py-2 text-sm font-medium text-[#f0ebe3] transition-colors hover:bg-white/5"
+              className="flex items-center gap-1.5 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface-2)]"
             >
               {CATEGORIES.find((c) => c.slug === category)?.name ?? "Рубрика"}
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
             {catMenu && (
-              <div className="absolute right-0 top-full z-40 mt-2 max-h-72 w-52 overflow-y-auto rounded-xl border border-white/12 bg-[#16131f] py-1 shadow-2xl">
+              <div className="absolute right-0 top-full z-40 mt-2 max-h-72 w-52 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] py-1 shadow-2xl">
                 {CATEGORIES.map((c) => (
                   <button
                     key={c.slug}
@@ -155,8 +155,8 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
                       setCatMenu(false);
                     }}
                     className={cn(
-                      "flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/5",
-                      c.slug === category ? "text-[#4d5aff]" : "text-[#f0ebe3]/80",
+                      "flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-[var(--surface-2)]",
+                      c.slug === category ? "text-[var(--primary)]" : "text-[var(--foreground)]",
                     )}
                   >
                     {c.name}
@@ -170,7 +170,7 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
           <button
             onClick={runPublish}
             disabled={publishing || !title.trim()}
-            className="flex items-center gap-2 rounded-full bg-[#4d5aff] px-5 py-2 text-sm font-semibold text-white transition-transform active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2 text-sm font-semibold text-[var(--primary-foreground)] transition-transform active:scale-95 disabled:opacity-50"
           >
             {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Опубликовать →
@@ -186,7 +186,7 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
           onChange={(e) => setTitle(e.target.value)}
           placeholder={TITLE_EXAMPLE}
           rows={2}
-          className="mb-3 w-full resize-none bg-transparent font-serif text-4xl font-bold leading-tight text-[#f0ebe3] outline-none placeholder:text-[#f0ebe3]/25 md:text-5xl"
+          className="mb-3 w-full resize-none bg-transparent font-serif text-4xl font-bold leading-tight text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]/50 md:text-5xl"
         />
         {/* Excerpt */}
         <textarea
@@ -194,15 +194,15 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
           onChange={(e) => setExcerpt(e.target.value)}
           placeholder={EXCERPT_EXAMPLE}
           rows={2}
-          className="mb-8 w-full resize-none bg-transparent font-serif text-xl italic text-[#f0ebe3]/70 outline-none placeholder:text-[#f0ebe3]/20"
+          className="mb-8 w-full resize-none bg-transparent font-serif text-xl italic text-[var(--muted-foreground)] outline-none placeholder:text-[var(--muted-foreground)]/45"
         />
 
         {/* Body */}
         {draft ? (
-          <div className="editor-body space-y-6 text-lg leading-relaxed text-[#f0ebe3]/85">
+          <div className="editor-body space-y-6 text-lg leading-relaxed text-[var(--foreground)]/90">
             {paras.map((p, i) =>
               p.title ? (
-                <h2 key={i} className="font-serif text-2xl font-bold text-[#f0ebe3]">
+                <h2 key={i} className="font-serif text-2xl font-bold text-[var(--foreground)]">
                   {p.title}
                 </h2>
               ) : (
@@ -218,23 +218,23 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
             contentEditable
             suppressContentEditableWarning
             data-placeholder={BODY_EXAMPLE}
-            className="editor-body editor-empty min-h-[240px] space-y-6 whitespace-pre-line text-lg leading-relaxed text-[#f0ebe3]/85 outline-none"
+            className="editor-body editor-empty min-h-[240px] space-y-6 whitespace-pre-line text-lg leading-relaxed text-[var(--foreground)]/90 outline-none"
           />
         )}
       </div>
 
       {/* AI generation panel */}
       {aiOpen ? (
-        <div className="sticky bottom-0 z-20 border-t border-white/8 bg-[#0d0b09]/95 backdrop-blur">
+        <div className="sticky bottom-0 z-20 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur">
           <div className="mx-auto w-full max-w-[820px] px-5 py-4">
             <div className="mb-2 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-sm font-semibold text-[#8f98ff]">
+              <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--primary)]">
                 <Sparkles className="h-4 w-4" /> ИИ-генерация из ваших материалов
               </span>
               <button
                 onClick={() => setAiOpen(false)}
                 aria-label="Скрыть"
-                className="text-[#f0ebe3]/40 hover:text-[#f0ebe3]"
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -243,22 +243,22 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
               value={aiTopic}
               onChange={(e) => setAiTopic(e.target.value)}
               placeholder="Тема статьи — например: Эффект якоря в ценообразовании"
-              className="mb-2 w-full rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-sm text-[#f0ebe3] outline-none placeholder:text-[#f0ebe3]/35 focus:border-[#4d5aff]/60"
+              className="mb-2 w-full rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]/70 focus:border-[var(--primary)]"
             />
             <textarea
               value={aiContext}
               onChange={(e) => setAiContext(e.target.value)}
               placeholder={AI_CONTEXT_EXAMPLE}
               rows={3}
-              className="w-full resize-none rounded-xl border border-white/12 bg-white/5 px-4 py-2.5 text-sm text-[#f0ebe3] outline-none placeholder:text-[#f0ebe3]/35 focus:border-[#4d5aff]/60"
+              className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2.5 text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]/70 focus:border-[var(--primary)]"
             />
-            {aiError && <p className="mt-2 text-sm text-[#e06a5a]">{aiError}</p>}
+            {aiError && <p className="mt-2 text-sm text-[var(--danger)]">{aiError}</p>}
             <div className="mt-3 flex items-center gap-3">
               <div className="relative flex items-center">
                 <button
                   onClick={runGenerate}
                   disabled={generating || noCredits}
-                  className="flex items-center gap-2 rounded-full bg-[#4d5aff] px-5 py-2.5 text-sm font-semibold text-white transition-transform active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition-transform active:scale-95 disabled:opacity-50"
                 >
                   {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {generating ? "Генерирую…" : "Сгенерировать (1 кредит)"}
@@ -270,38 +270,38 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
                   onMouseEnter={() => setCreditTip(true)}
                   onMouseLeave={() => setCreditTip(false)}
                   onClick={() => setCreditTip((v) => !v)}
-                  className="ml-2 text-[#f0ebe3]/40 hover:text-[#f0ebe3]"
+                  className="ml-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 >
                   <Info className="h-4 w-4" />
                 </button>
                 {creditTip && (
-                  <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-xl border border-white/12 bg-[#16131f] p-3 text-xs leading-relaxed text-[#f0ebe3]/80 shadow-2xl">
-                    Каждый месяц у вас есть <b className="text-[#f0ebe3]">{credits.unlimited ? "безлимит" : `${credits.limit} кредитов`}</b> на ИИ.
+                  <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs leading-relaxed text-[var(--muted-foreground)] shadow-2xl">
+                    Каждый месяц у вас есть <b className="text-[var(--foreground)]">{credits.unlimited ? "безлимит" : `${credits.limit} кредитов`}</b> на ИИ.
                     Один кредит — это одна генерация: статья <b>или</b> изображение.
                     {!credits.unlimited && (
                       <>
                         {" "}
-                        Осталось: <b className="text-[#f0ebe3]">{credits.remaining}</b>. Обновляется 1-го числа.
+                        Осталось: <b className="text-[var(--foreground)]">{credits.remaining}</b>. Обновляется 1-го числа.
                       </>
                     )}
                   </div>
                 )}
               </div>
               {noCredits && (
-                <span className="text-xs text-[#e0a95a]">Кредиты закончились — пишите вручную.</span>
+                <span className="text-xs text-[var(--gold)]">Кредиты закончились — пишите вручную.</span>
               )}
             </div>
           </div>
         </div>
       ) : (
-        <footer className="sticky bottom-0 z-30 border-t border-white/8 bg-[#0d0b09]/90 backdrop-blur">
+        <footer className="sticky bottom-0 z-30 border-t border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-5 py-3">
-            <div className="text-xs text-[#f0ebe3]/45">
+            <div className="text-xs text-[var(--muted-foreground)]">
               {words} слов · {Math.max(1, Math.round(words / 150))} мин
             </div>
             <button
               onClick={() => setAiOpen(true)}
-              className="flex items-center gap-1.5 rounded-full border border-[#4d5aff]/40 bg-[#4d5aff]/10 px-3.5 py-1.5 text-xs font-semibold text-[#8f98ff]"
+              className="flex items-center gap-1.5 rounded-full border border-[var(--primary)]/40 bg-[var(--primary)]/10 px-3.5 py-1.5 text-xs font-semibold text-[var(--primary)]"
             >
               <Sparkles className="h-3.5 w-3.5" /> ИИ-помощник
             </button>
@@ -327,13 +327,13 @@ function CreditPill({
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-full border border-white/12 px-3 py-1.5 text-xs font-medium text-[#f0ebe3]/70"
+        className="flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted-foreground)]"
       >
-        <Sparkles className="h-3.5 w-3.5 text-[#d4a24e]" />
+        <Sparkles className="h-3.5 w-3.5 text-[var(--gold)]" />
         {credits.unlimited ? "ИИ: безлимит" : `ИИ: ${credits.remaining}/${credits.limit}`}
       </button>
       {open && (
-        <div className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-xl border border-white/12 bg-[#16131f] p-3 text-xs leading-relaxed text-[#f0ebe3]/80 shadow-2xl">
+        <div className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-xs leading-relaxed text-[var(--muted-foreground)] shadow-2xl">
           {credits.unlimited
             ? "У вас безлимитные ИИ-генерации."
             : `Осталось ${credits.remaining} из ${credits.limit} ИИ-кредитов в этом месяце. 1 кредит = 1 генерация статьи или изображения. Обновляется 1-го числа.`}
