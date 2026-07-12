@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import type { ArticleBlock } from "@/lib/types";
+import type { ArticleBlock, FaqItem } from "@/lib/types";
 
 type SkinKey = "classic" | "night" | "sepia" | "forest" | "blue";
 
@@ -58,6 +58,8 @@ export type EliteArticleData = {
   readingMinutes: number;
   claps: number;
   body: ArticleBlock[];
+  faq: FaqItem[];
+  scores: { geo?: number; seo?: number; aeo?: number };
   author: { name: string; avatar: string; role: string; articlesCount: number };
   related: EliteRelated[];
 };
@@ -65,6 +67,15 @@ export type EliteArticleData = {
 function fmt(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1).replace(".0", "")}K`;
   return String(n);
+}
+
+/** Convert **bold** markdown into <strong>; leaves plain text otherwise. */
+function inline(text: string) {
+  if (!text.includes("**")) return text;
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    const m = part.match(/^\*\*([^*]+)\*\*$/);
+    return m ? <strong key={i} style={{ fontWeight: 700 }}>{m[1]}</strong> : part;
+  });
 }
 
 export function EliteArticle({ data }: { data: EliteArticleData }) {
@@ -172,6 +183,36 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
           >
             ✦ Elite
           </span>
+
+          {/* AEO / SEO / GEO scores — Elite-only */}
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            {([
+              ["AEO", data.scores.aeo],
+              ["SEO", data.scores.seo],
+              ["GEO", data.scores.geo],
+            ] as const)
+              .filter(([, v]) => typeof v === "number")
+              .map(([label, v]) => (
+                <span
+                  key={label}
+                  title={`${label}-оценка: ${v}/100`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "baseline",
+                    gap: 4,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: s.textM,
+                    border: `1px solid ${s.bdr}`,
+                    borderRadius: 20,
+                    padding: "4px 10px",
+                  }}
+                >
+                  <span style={{ fontSize: 9, letterSpacing: "0.1em", color: s.textF }}>{label}</span>
+                  <span style={{ color: s.accent, fontWeight: 700 }}>{v}</span>
+                </span>
+              ))}
+          </div>
         </div>
 
         <h1
@@ -257,7 +298,7 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={data.cover || "/placeholder.svg"}
-            alt=""
+            alt={data.title}
             style={{ width: "100%", height: "clamp(280px,40vw,540px)", objectFit: "cover", display: "block" }}
           />
         </div>
@@ -268,6 +309,62 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
         {data.body.map((block, i) => (
           <EliteBlock key={i} block={block} skin={s} first={i === 0} />
         ))}
+
+        {/* FAQ — Elite-only, AEO/GEO */}
+        {data.faq.length > 0 && (
+          <section style={{ margin: "52px 0 8px" }} aria-labelledby="faq-heading">
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: s.accent,
+                marginBottom: 6,
+              }}
+            >
+              Вопросы и ответы
+            </div>
+            <h2
+              id="faq-heading"
+              className="font-serif"
+              style={{ fontSize: "clamp(22px,3vw,32px)", fontWeight: 700, color: s.text, margin: "0 0 20px", lineHeight: 1.2 }}
+            >
+              Часто задаваемые вопросы
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {data.faq.map((f, i) => (
+                <details
+                  key={i}
+                  style={{ background: s.card, border: `1px solid ${s.bdr}`, borderRadius: 16, padding: "16px 20px" }}
+                >
+                  <summary
+                    style={{ fontSize: 16, fontWeight: 600, color: s.text, cursor: "pointer", listStyle: "none" }}
+                  >
+                    {f.q}
+                  </summary>
+                  <p style={{ margin: "12px 0 0", fontSize: 15, lineHeight: 1.7, color: s.textM }}>{f.a}</p>
+                </details>
+              ))}
+            </div>
+            {/* Structured data for answer engines */}
+            <script
+              type="application/ld+json"
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "FAQPage",
+                  mainEntity: data.faq.map((f) => ({
+                    "@type": "Question",
+                    name: f.q,
+                    acceptedAnswer: { "@type": "Answer", text: f.a },
+                  })),
+                }),
+              }}
+            />
+          </section>
+        )}
 
         {/* Inline related — breaks out */}
         {data.related.length > 0 && (
@@ -344,7 +441,7 @@ function EliteBlock({ block, skin, first }: { block: ArticleBlock; skin: Skin; f
       return (
         <blockquote style={{ margin: "36px 0", borderLeft: `3px solid ${skin.accent}`, paddingLeft: 22 }}>
           <p className="font-serif" style={{ fontSize: 22, fontStyle: "italic", lineHeight: 1.5, color: skin.text, margin: 0 }}>
-            {block.text}
+            {inline(block.text)}
           </p>
           {block.cite && (
             <cite style={{ display: "block", marginTop: 8, fontSize: 14, fontStyle: "normal", color: skin.textM }}>
@@ -359,7 +456,7 @@ function EliteBlock({ block, skin, first }: { block: ArticleBlock; skin: Skin; f
           {block.items.map((item, j) => (
             <li key={j} style={{ display: "flex", gap: 12, color: skin.text, lineHeight: 1.8, marginBottom: 8 }}>
               <span style={{ marginTop: 12, width: 6, height: 6, flexShrink: 0, borderRadius: "50%", background: skin.accent }} />
-              <span>{item}</span>
+              <span>{inline(item)}</span>
             </li>
           ))}
         </ul>
@@ -388,10 +485,10 @@ function EliteBlock({ block, skin, first }: { block: ArticleBlock; skin: Skin; f
             >
               {firstLetter}
             </span>
-            {rest}
+            {inline(rest)}
           </p>
         );
       }
-      return <p style={base}>{block.text}</p>;
+      return <p style={base}>{inline(block.text)}</p>;
   }
 }

@@ -206,12 +206,15 @@ export function buildImagePrompt(args: {
     ? "monochrome black and white, rich tonal range, no colour"
     : s.palette;
 
+  // IMPORTANT: never feed the article title/verbatim strings into the prompt —
+  // Imagen renders quoted text literally (producing garbled captions). We steer
+  // purely by the abstract category motif + the author's visual signature.
   return [
-    `Editorial magazine cover illustration on the theme of ${motif}.`,
-    `Loosely inspired by the idea: "${args.title}" — but interpret it visually and conceptually only.`,
+    `Wordless editorial magazine cover illustration exploring the theme of ${motif}.`,
     `Art direction: ${s.style}.`,
     `Colour: ${colour}.`,
-    `16:9 widescreen, high detail, professional, tasteful, uncluttered composition with clear focal point.`,
-    `ABSOLUTELY NO text, no letters, no numbers, no words, no captions, no logos, no watermarks, no signage anywhere in the image.`,
+    `16:9 widescreen, high detail, professional, tasteful, uncluttered composition with a single clear focal point, generous negative space.`,
+    `Purely visual and symbolic — convey the idea through imagery, shapes and metaphor only.`,
+    `ABSOLUTELY NO text of any kind: no letters, no words, no numbers, no captions, no labels, no logos, no watermarks, no signage, no UI text, no typography anywhere in the image. A completely text-free image.`,
   ].join(" ");
 }

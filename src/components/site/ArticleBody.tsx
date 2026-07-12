@@ -1,4 +1,27 @@
+import type { ReactNode } from "react";
 import type { ArticleBlock } from "@/lib/types";
+
+/**
+ * Render a text run that may contain **bold** markdown (the model sometimes
+ * emits it despite instructions, e.g. "**Знайте свою аудиторию:** ..."). We
+ * convert `**...**` into <strong> and leave everything else as plain text so
+ * these never show up as literal asterisks.
+ */
+function renderInline(text: string): ReactNode {
+  if (!text.includes("**")) return text;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    const m = part.match(/^\*\*([^*]+)\*\*$/);
+    if (m) {
+      return (
+        <strong key={i} className="font-semibold text-[var(--foreground)]">
+          {m[1]}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
 
 export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
   return (
@@ -24,7 +47,7 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
                 className="my-8 border-l-4 border-[var(--accent)] bg-[var(--surface-2)] py-4 pl-6 pr-4 rounded-r-xl"
               >
                 <p className="font-serif text-xl italic leading-relaxed text-[var(--foreground)]">
-                  {block.text}
+                  {renderInline(block.text)}
                 </p>
                 {block.cite && (
                   <cite className="mt-2 block text-sm not-italic text-[var(--muted-foreground)]">
@@ -39,7 +62,7 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
                 {block.items.map((item, j) => (
                   <li key={j} className="flex gap-3 text-[var(--foreground)]/90 leading-relaxed">
                     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
-                    <span>{item}</span>
+                    <span>{renderInline(item)}</span>
                   </li>
                 ))}
               </ul>
@@ -59,7 +82,7 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
           default:
             return (
               <p key={i} className="my-5 text-lg leading-relaxed text-[var(--foreground)]/90">
-                {block.text}
+                {renderInline(block.text)}
               </p>
             );
         }

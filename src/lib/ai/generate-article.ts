@@ -86,7 +86,7 @@ function countWords(body: ArticleBlock[]): number {
  * AI Requirements (global + articles) plus AEO/SEO/GEO structure.
  */
 export async function generateArticle(input: GenerateArticleInput): Promise<GeneratedArticle> {
-  const { author, topic, keywords, category, minWords } = input;
+  const { author, topic, keywords, category, minWords, elite } = input;
   const preamble = await buildRequirementsPreamble("articles");
 
   const system = [
@@ -101,7 +101,11 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
       minWords * 1.2,
     )}). Раскрывай каждый подзаголовок минимум в 3–4 содержательных абзаца, добавляй подтемы, чтобы полностью закрыть тему.`,
     "Обязательно: минимум один разбор кейса или пример с конкретными цифрами.",
-    "Не используй разметку markdown внутри текстовых блоков — только чистый текст.",
+    "Обязательно вставь 1–2 блока-цитаты (quote): ёмкую мысль, вывод или мнение эксперта; по возможности укажи автора в поле cite.",
+    elite
+      ? "Это материал Elite-автора. В конце верни блок FAQ из 6–8 пунктов: реальные вопросы по теме и краткие самодостаточные ответы (для AEO/ИИ-поиска). Не дублируй ими выводы."
+      : "FAQ не нужен — верни для поля faq пустой массив.",
+    "Не используй разметку markdown (**, ##, - ) внутри текстовых блоков — только чистый текст; выделение делай отдельными подзаголовками и списками.",
   ]
     .filter(Boolean)
     .join("\n");
@@ -174,6 +178,15 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
 
   const words = countWords(body);
   const readingMinutes = Math.max(1, Math.round(words / 180));
+  const clampScore = (n: number) => Math.min(98, Math.max(60, Math.round(n)));
+
+  // FAQ is an Elite-only feature; sanitise and cap at 8 (renderer hides if empty).
+  const faq: FaqItem[] = elite
+    ? (output.faq ?? [])
+        .map((f) => ({ q: (f.q ?? "").trim(), a: (f.a ?? "").trim() }))
+        .filter((f) => f.q && f.a)
+        .slice(0, 8)
+    : [];
 
   return {
     title: output.title.trim(),
@@ -181,7 +194,10 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     body,
     tags: output.tags.map((t) => t.toLowerCase().trim()).filter(Boolean).slice(0, 6),
     readingMinutes,
-    geoScore: Math.min(98, Math.max(60, Math.round(output.geoScore))),
+    geoScore: clampScore(output.geoScore),
+    seoScore: clampScore(output.seoScore ?? output.geoScore),
+    aeoScore: clampScore(output.aeoScore ?? output.geoScore),
+    faq,
   };
 }
 

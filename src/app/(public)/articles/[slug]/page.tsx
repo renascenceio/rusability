@@ -44,6 +44,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           readingMinutes: article.readingMinutes,
           claps: article.claps,
           body: article.body,
+          faq: article.faq ?? [],
+          scores: {
+            geo: article.geoScore,
+            seo: article.seoScore,
+            aeo: article.aeoScore,
+          },
           author: {
             name: author?.name ?? "Автор",
             avatar: author?.avatar ?? "/placeholder.svg",
@@ -135,7 +141,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {/* Cover */}
         <div className="mb-10 overflow-hidden rounded-3xl bg-[var(--surface-3)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={article.cover || "/placeholder.svg"} alt="" className="w-full object-cover" />
+          <img src={article.cover || "/placeholder.svg"} alt={article.title} className="w-full object-cover" />
         </div>
 
         {/* Body */}
