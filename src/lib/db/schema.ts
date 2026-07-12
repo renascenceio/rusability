@@ -296,6 +296,19 @@ export const siteCtas = pgTable("site_ctas", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Contact-form submissions, delivered to the superadmin inbox. */
+export const contactMessages = pgTable("contact_messages", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull().default(""),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("new"), // new | read | archived
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const connections = pgTable("connections", {
   id: text("id").primaryKey(),
   platform: text("platform").notNull(),

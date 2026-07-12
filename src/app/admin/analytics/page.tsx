@@ -1,16 +1,22 @@
-import { KPIS, TRAFFIC_SERIES, TRAFFIC_SOURCES, TOP_PAGES } from "@/lib/mock";
+import { adminAnalytics } from "@/lib/data/analytics";
 import { AnalyticsWorkspace } from "./AnalyticsWorkspace";
 
 export const metadata = { title: "Аналитика — Rusability" };
 
-export default function AdminAnalyticsPage() {
+// Refresh the cached aggregates at most once per hour.
+export const revalidate = 3600;
+
+export default async function AdminAnalyticsPage() {
+  const data = await adminAnalytics();
+
   return (
     <div className="mx-auto max-w-[1180px]">
       <AnalyticsWorkspace
-        kpis={KPIS}
-        series={TRAFFIC_SERIES}
-        sources={TRAFFIC_SOURCES}
-        topPages={TOP_PAGES}
+        kpis={data.kpis}
+        seriesByPeriod={data.seriesByPeriod}
+        sources={data.sources}
+        topPages={data.topPages}
+        generatedAt={data.generatedAt}
       />
     </div>
   );

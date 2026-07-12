@@ -28,8 +28,8 @@ export function CookieConsent() {
           </p>
           <p className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]">
             Rusability использует cookie для персонализации, аналитики и улучшения сервиса.{" "}
-            <a href="#" className="font-medium text-[var(--primary)] hover:underline">
-              Политика конфиденциальности →
+            <a href="/cookies" className="font-medium text-[var(--primary)] hover:underline">
+              Политика в отношении cookie →
             </a>
           </p>
         </div>
