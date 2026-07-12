@@ -43,7 +43,7 @@ const STATS: Stat[] = [
 ];
 
 const QUICK_ACTIONS = [
-  { label: "Написать статью", icon: PenLine, href: "/editor" },
+  { label: "Написать статью", icon: PenLine, href: "/admin/editor" },
   { label: "Управление новостями", icon: Newspaper, href: "/admin/news" },
   { label: "Создать рассылку", icon: Mail, href: "/admin/newsletter" },
 ];

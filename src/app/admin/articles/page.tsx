@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus, Eye, Heart, MessageCircle } from "lucide-react";
 import { PageHeader, Panel, Tag, AdminButton, Table, Th, Td, KpiCard } from "@/components/admin/ui";
+import { ArticleTabs } from "@/components/admin/ArticleTabs";
 import { allArticles } from "@/lib/data/articles";
 import { categoryName } from "@/lib/taxonomy";
 import { formatNumber, formatDate } from "@/lib/utils";
@@ -34,11 +35,13 @@ export default async function AdminArticlesPage() {
         title="Статьи"
         subtitle={`${articles.length} материалов · ${published} опубликовано`}
         action={
-          <AdminButton href="/editor" variant="primary">
-            <Plus className="h-4 w-4" /> Новая статья
+          <AdminButton href="/admin/editor" variant="primary">
+            <Plus className="h-4 w-4" /> Написать
           </AdminButton>
         }
       />
+
+      <ArticleTabs />
 
       <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <KpiCard label="Всего статей" value={String(articles.length)} />

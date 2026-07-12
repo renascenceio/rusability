@@ -1,4 +1,5 @@
 import { PageHeader, Panel } from "@/components/admin/ui";
+import { ArticleTabs } from "@/components/admin/ArticleTabs";
 import { db } from "@/lib/db";
 import { aiAuthors, authors as authorsTable } from "@/lib/db/schema";
 import { AiAuthorsGrid } from "./AiAuthorsGrid";
@@ -41,6 +42,7 @@ export default async function AiAuthorsPage() {
         title="ИИ-авторы"
         subtitle={`${active} активных · ${total.toLocaleString("ru-RU")} материалов опубликовано`}
       />
+      <ArticleTabs />
       {authors.length === 0 ? (
         <Panel>
           <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">

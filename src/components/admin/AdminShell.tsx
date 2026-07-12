@@ -10,14 +10,14 @@ import {
   Newspaper,
   Mail,
   BarChart3,
-  Bot,
   Sparkles,
-  ShieldCheck,
   Plug,
   Users,
   Crown,
-  Clock,
-  ScrollText,
+  Activity,
+  Megaphone,
+  ListChecks,
+  DollarSign,
   Menu,
   X,
   Sun,
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
+import { glyphAvatar } from "@/lib/avatar";
 
 export type ShellUser = { name: string; email: string; role: string };
 
@@ -54,12 +55,11 @@ const NAV: NavGroup[] = [
   {
     title: "ИИ-система",
     items: [
-      { href: "/admin/ai-authors", label: "ИИ-авторы", icon: Bot },
-      { href: "/admin/article-crons", label: "Генерация статей", icon: Clock },
-      { href: "/admin/ai-requirements", label: "ИИ-требования", icon: ScrollText },
-      { href: "/admin/ai-filter", label: "РКН-фильтр", icon: ShieldCheck },
+      { href: "/admin/seo", label: "SEO / AEO / GEO", icon: Activity },
+      { href: "/admin/ads", label: "Реклама", icon: Megaphone },
       { href: "/admin/newsbot", label: "Newsbot", icon: Sparkles },
       { href: "/admin/connections", label: "Подключения", icon: Plug },
+      { href: "/admin/recommendations", label: "Рекомендации", icon: ListChecks },
     ],
   },
   {
@@ -67,6 +67,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/admin/users", label: "Пользователи", icon: Users },
       { href: "/admin/authors", label: "Авторы и Elite", icon: Crown },
+      { href: "/admin/monetization", label: "Монетизация", icon: DollarSign },
     ],
   },
 ];
@@ -200,9 +201,12 @@ export function AdminShell({
         <div className="border-t border-[var(--border)]">
           <ThemeControl />
           <div className="flex items-center gap-2.5 border-t border-[var(--border)] px-3.5 py-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4d5aff] to-[#7a8aff] text-xs font-bold text-white">
-              {(user.name || user.email).charAt(0).toUpperCase()}
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={glyphAvatar(user.name || user.email, { elite: true })}
+              alt={user.name || user.email}
+              className="h-8 w-8 shrink-0 overflow-hidden rounded-full object-cover ring-1 ring-[var(--gold)]"
+            />
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-semibold text-[var(--foreground)]">
                 {ROLE_LABELS[user.role] ?? user.role}

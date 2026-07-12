@@ -1,6 +1,7 @@
 import { ShieldCheck, ShieldAlert, Check, X } from "lucide-react";
 import { PageHeader, Panel, Tag, AdminButton, KpiCard } from "@/components/admin/ui";
 import { BLOCKED_TOPICS, MODERATION_QUEUE } from "@/lib/mock";
+import { ArticleTabs } from "@/components/admin/ArticleTabs";
 
 export const metadata = { title: "ИИ-фильтр РКН — Rusability" };
 
@@ -12,6 +13,8 @@ export default function AiFilterPage() {
         subtitle="Автоматическая модерация контента на соответствие законодательству РФ"
         action={<Tag tone="success"><ShieldCheck className="h-3.5 w-3.5" /> Фильтр включён</Tag>}
       />
+
+      <ArticleTabs />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <KpiCard label="Проверено сегодня" value="248" />

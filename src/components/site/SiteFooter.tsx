@@ -34,9 +34,18 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="grid gap-10 md:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
-            <span className="font-serif text-xl font-extrabold text-[var(--foreground)]">
-              Rusability
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/rusability-logo-black.png"
+              alt="Rusability"
+              className="block h-6 w-auto dark:hidden"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/rusability-logo-white.png"
+              alt="Rusability"
+              className="hidden h-6 w-auto dark:block"
+            />
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-[var(--muted-foreground)]">
               Издание о дизайне, маркетинге, технологиях и продуктах. Пишем для тех, кто создаёт
               цифровые продукты.

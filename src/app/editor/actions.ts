@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth-helpers";
 import { glyphAvatar } from "@/lib/avatar";
 import { getCreditState, consumeCredits, type CreditState } from "@/lib/credits";
 import { generateUserArticle } from "@/lib/ai/generate-user-article";
+import { generateArticleMeta, fallbackExcerpt } from "@/lib/ai/generate-meta";
 import { generateArticleCover } from "@/lib/ai/generate-image";
 import { articleScore } from "@/lib/data/articles";
 import type { ArticleBlock, CategorySlug } from "@/lib/types";
@@ -77,11 +78,15 @@ export interface GenerateResult {
   credits: CreditInfo;
   draft?: {
     title: string;
+    subtitle: string;
     excerpt: string;
     body: ArticleBlock[];
     tags: string[];
     category: CategorySlug;
     readingMinutes: number;
+    seoScore: number;
+    aeoScore: number;
+    geoScore: number;
   };
 }
 
@@ -134,11 +139,15 @@ export async function generateDraft(input: {
     credits: serializeCredits(state),
     draft: {
       title: gen.title,
+      subtitle: gen.subtitle,
       excerpt: gen.excerpt,
       body: gen.body,
       tags: gen.tags,
       category: input.category,
       readingMinutes: gen.readingMinutes,
+      seoScore: gen.seoScore,
+      aeoScore: gen.aeoScore,
+      geoScore: gen.geoScore,
     },
   };
 }
@@ -155,12 +164,37 @@ export async function publishArticle(input: {
   tags: string[];
   category: CategorySlug;
   readingMinutes: number;
+  seoScore?: number | null;
+  aeoScore?: number | null;
+  geoScore?: number | null;
 }): Promise<{ ok: boolean; error?: string; slug?: string }> {
   const ctx = await currentAuthor();
   if (!ctx?.author) return { ok: false, error: "Профиль автора не найден." };
   if (!input.title.trim()) return { ok: false, error: "Добавьте заголовок." };
 
   const now = new Date();
+
+  // Meta is ALWAYS AI-assigned: if the editor didn't already carry SEO/AEO/GEO
+  // scores or a meta description, generate them from the finished piece.
+  let excerpt = input.excerpt.trim();
+  let seoScore = input.seoScore ?? null;
+  let aeoScore = input.aeoScore ?? null;
+  let geoScore = input.geoScore ?? null;
+  if (!excerpt || seoScore == null || aeoScore == null || geoScore == null) {
+    try {
+      const meta = await generateArticleMeta({
+        title: input.title.trim(),
+        body: input.body,
+        category: input.category,
+      });
+      if (!excerpt) excerpt = meta.excerpt;
+      if (seoScore == null) seoScore = meta.seoScore;
+      if (aeoScore == null) aeoScore = meta.aeoScore;
+      if (geoScore == null) geoScore = meta.geoScore;
+    } catch {
+      if (!excerpt) excerpt = fallbackExcerpt(input.body);
+    }
+  }
   const id = crypto.randomUUID();
   let slug = slugify(input.title).slice(0, 80) || id.slice(0, 8);
   // Ensure slug uniqueness.
@@ -173,7 +207,7 @@ export async function publishArticle(input: {
     id,
     slug,
     title: input.title.trim(),
-    excerpt: input.excerpt.trim(),
+    excerpt,
     body: input.body,
     cover: "",
     category: input.category,
@@ -186,9 +220,9 @@ export async function publishArticle(input: {
     claps: 0,
     comments: 0,
     publishedAt: now,
-    seoScore: null,
-    aeoScore: null,
-    geoScore: null,
+    seoScore,
+    aeoScore,
+    geoScore,
     faq: [],
     featured: false,
     aiGenerated: false,
