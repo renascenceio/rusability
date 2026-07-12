@@ -1,17 +1,10 @@
-import { Suspense } from "react";
-import type { Metadata } from "next";
-import { getCurrentUser } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
-import { AuthForm } from "@/components/auth/AuthForm";
 
-export const metadata: Metadata = { title: "Регистрация" };
-
-export default async function SignUpPage() {
-  const user = await getCurrentUser();
-  if (user) redirect("/");
-  return (
-    <Suspense>
-      <AuthForm mode="sign-up" />
-    </Suspense>
-  );
+/**
+ * Public self-registration is disabled. The platform is invite/admin-managed,
+ * so any hit to /sign-up is sent to the sign-in form (used by editors/admins).
+ * Accounts are created from the admin console.
+ */
+export default function SignUpPage() {
+  redirect("/sign-in");
 }

@@ -45,7 +45,8 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
     "Walk AWAY from the obvious, literal image a person would first expect for the topic. Translate the topic into a pure VISUAL METAPHOR from nature, light, material, colour or abstract form.",
     "Describe ONLY beautiful, gallery-grade imagery. Do NOT mention people in business settings, offices, devices, or any diagram/chart/text — simply don't reference them at all; instead describe an evocative abstract scene.",
     "Never put the article's literal title or any quoted phrase into the image. Keep it wordless and symbolic.",
-    "Output ONE single English prompt of 55–100 words describing: medium/style, the abstract subject, composition, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
+    "The composition MUST be full-bleed: it fills the entire widescreen frame edge-to-edge and bleeds off all four sides, with absolutely no white borders, margins, frame or letterboxing.",
+    "Output ONE single English prompt of 55–100 words describing: medium/style, the abstract subject, full-bleed composition, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
   ].join("\n");
 
   const prompt = [

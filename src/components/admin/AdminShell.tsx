@@ -10,12 +10,12 @@ import {
   Newspaper,
   Mail,
   BarChart3,
-  Sparkles,
   Plug,
   Users,
   Activity,
   Megaphone,
   ListChecks,
+  Inbox,
   Menu,
   X,
   Sun,
@@ -36,7 +36,7 @@ const ROLE_LABELS: Record<string, string> = {
   reader: "Читатель",
 };
 
-type NavItem = { href: string; label: string; icon: React.ElementType };
+type NavItem = { href: string; label: string; icon: React.ElementType; roles?: string[] };
 type NavGroup = { title: string; items: NavItem[] };
 
 const NAV: NavGroup[] = [
@@ -55,7 +55,6 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/admin/seo", label: "SEO / AEO / GEO", icon: Activity },
       { href: "/admin/ads", label: "Реклама", icon: Megaphone },
-      { href: "/admin/newsbot", label: "Newsbot", icon: Sparkles },
       { href: "/admin/connections", label: "Подключения", icon: Plug },
       { href: "/admin/recommendations", label: "Рекомендации", icon: ListChecks },
     ],
@@ -64,6 +63,7 @@ const NAV: NavGroup[] = [
     title: "Аудитория",
     items: [
       { href: "/admin/users", label: "Пользователи", icon: Users },
+      { href: "/admin/messages", label: "Сообщения", icon: Inbox, roles: ["superadmin"] },
     ],
   },
 ];
@@ -130,7 +130,7 @@ export function AdminShell({
   return (
     <div className="admin-root flex min-h-dvh">
       {/* Mobile top bar */}
-      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--sidebar)] px-4 lg:hidden">
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--sidebar)] px-4 lg:hidden print:hidden">
         <Logo />
         <button onClick={() => setOpen(true)} aria-label="Меню" className="text-[var(--foreground)]">
           <Menu className="h-5 w-5" />
@@ -140,7 +140,7 @@ export function AdminShell({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[240px] flex-col border-r border-[var(--border)] bg-[var(--sidebar)] transition-transform lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[240px] flex-col border-r border-[var(--border)] bg-[var(--sidebar)] transition-transform lg:translate-x-0 print:hidden",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -163,14 +163,21 @@ export function AdminShell({
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-2.5">
-          {NAV.map((group) => (
+          {NAV.map((group) => {
+            const items = group.items.filter(
+              (item) => !item.roles || item.roles.includes(user.role),
+            );
+            if (items.length === 0) return null;
+            return (
             <div key={group.title} className="mb-1.5">
               <div className="px-3 pb-1.5 pt-3 text-[9px] font-bold uppercase tracking-[0.16em] text-[var(--faint)]">
                 {group.title}
               </div>
-              {group.items.map((item) => {
+              {items.map((item) => {
                 const active =
-                  item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+                  item.href === "/admin"
+                    ? pathname === "/admin"
+                    : pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
                 return (
                   <Link
@@ -190,7 +197,8 @@ export function AdminShell({
                 );
               })}
             </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Footer */}
@@ -235,7 +243,7 @@ export function AdminShell({
       )}
 
       {/* Main */}
-      <div className="flex min-w-0 flex-1 flex-col pt-14 lg:pl-[240px] lg:pt-0">
+      <div className="flex min-w-0 flex-1 flex-col pt-14 lg:pl-[240px] lg:pt-0 print:p-0 print:pl-0 print:pt-0">
         <main className="flex-1 px-5 py-6 md:px-9 md:py-8">{children}</main>
       </div>
     </div>

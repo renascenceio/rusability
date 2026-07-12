@@ -14,7 +14,6 @@ const COLS: { title: string; links: { href: string; label: string }[] }[] = [
     title: "Проект",
     links: [
       { href: "/about", label: "О нас" },
-      { href: "/author", label: "Авторам" },
       { href: "/contacts", label: "Контакты" },
     ],
   },

@@ -1,11 +1,9 @@
-import type { Metadata } from "next";
-import { OnboardingFlow } from "@/components/site/OnboardingFlow";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Добро пожаловать в Rusability",
-  description: "Настройте персональную ленту Rusability за несколько шагов.",
-};
-
+/**
+ * Reader onboarding/registration is disabled — the site is read-only for the
+ * public. Any hit is sent to the home feed.
+ */
 export default function OnboardingPage() {
-  return <OnboardingFlow />;
+  redirect("/");
 }

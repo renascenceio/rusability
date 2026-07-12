@@ -13,7 +13,7 @@ import {
   deleteNewsSource,
   publishNews,
   discardNews,
-} from "../ai-content/actions";
+} from "@/app/admin/ai-content/actions";
 
 type Source = {
   id: string;

@@ -236,7 +236,8 @@ export const NEGATIVE_TERMS =
   "chart, graph, diagram, dashboard, infographic, gauge, data grid, arrows, " +
   "businessman, business people, suit and tie, office worker, handshake, laptop, computer screen, " +
   "lightbulb, gears, cogs, rocket, rocket ship, spaceship, brain, circuit board, network nodes, " +
-  "corporate stock photo, clip art, stock illustration, cliché, corny, cheesy";
+  "corporate stock photo, clip art, stock illustration, cliché, corny, cheesy, " +
+  "white border, white margins, frame, framed, letterbox, pillarbox, empty background bars, matte border, passe-partout";
 
 /**
  * A short POSITIVE reinforcement (safe to include in the prompt) that steers
@@ -244,7 +245,8 @@ export const NEGATIVE_TERMS =
  */
 export const POSITIVE_TAIL =
   "Purely visual, symbolic and artful — convey the idea through imagery, colour, texture, light and metaphor only. " +
-  "Completely wordless and text-free. A single clear focal point with generous negative space, gallery-grade and inspiring.";
+  "Completely wordless and text-free. A single clear focal point with generous negative space, gallery-grade and inspiring. " +
+  "Full-bleed edge-to-edge composition that completely fills the entire widescreen frame — the artwork must extend all the way to every edge with NO white borders, NO margins, NO frame, NO letterboxing and NO empty background bars; the scene bleeds off all four sides.";
 
 /**
  * Deterministic art-direction prompt for one article. Combines a seeded art

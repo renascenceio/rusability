@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import type { NewsItem } from "@/lib/types";
+import type { SiteCta } from "@/lib/data/ctas";
 import { newsCategoryName } from "@/lib/taxonomy";
 import { CategoryTabs, type TabItem } from "@/components/site/CategoryTabs";
+import { CtaBand } from "@/components/site/CtaBand";
 
 const NEWS_ACCENT: Record<string, string> = {
   tech: "var(--accent)",
@@ -36,9 +38,11 @@ function CatLabel({ category }: { category: string }) {
 export function NewsBrowser({
   news,
   popular,
+  cta,
 }: {
   news: NewsItem[];
   popular: NewsItem[];
+  cta: SiteCta | null;
 }) {
   const [cat, setCat] = useState("all");
   const [query, setQuery] = useState("");
@@ -138,31 +142,12 @@ export function NewsBrowser({
                 {lead.excerpt}
               </p>
 
-              {/* Newsletter band */}
-              <div className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--primary)]">
-                      Дайджест Rusability
-                    </p>
-                    <p className="mt-1 font-serif text-lg font-bold text-[var(--foreground)]">
-                      Лучшие материалы — каждый понедельник
-                    </p>
-                  </div>
-                  <form className="flex shrink-0 gap-2">
-                    <input
-                      placeholder="Email"
-                      className="w-40 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--primary)]"
-                    />
-                    <button
-                      type="button"
-                      className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)]"
-                    >
-                      Подписаться
-                    </button>
-                  </form>
+              {/* Admin-managed CTA (replaces the old email-collection digest form) */}
+              {cta && (
+                <div className="mt-8">
+                  <CtaBand cta={cta} />
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Также важно */}

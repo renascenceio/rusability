@@ -1,4 +1,5 @@
-import { ShieldCheck, ShieldAlert, Check, X } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, ShieldAlert, Check, X, FileText } from "lucide-react";
 import { PageHeader, Panel, Tag, AdminButton, KpiCard } from "@/components/admin/ui";
 import { BLOCKED_TOPICS, MODERATION_QUEUE } from "@/lib/mock";
 import { ArticleTabs } from "@/components/admin/ArticleTabs";
@@ -11,7 +12,16 @@ export default function AiFilterPage() {
       <PageHeader
         title="ИИ-фильтр РКН"
         subtitle="Автоматическая модерация контента на соответствие законодательству РФ"
-        action={<Tag tone="success"><ShieldCheck className="h-3.5 w-3.5" /> Фильтр включён</Tag>}
+        action={
+          <div className="flex items-center gap-2">
+            <Tag tone="success"><ShieldCheck className="h-3.5 w-3.5" /> Фильтр включён</Tag>
+            <Link href="/admin/ai-filter/rkn-report">
+              <AdminButton variant="primary">
+                <FileText className="h-4 w-4" /> Отчёт РКН (PDF)
+              </AdminButton>
+            </Link>
+          </div>
+        }
       />
 
       <ArticleTabs />

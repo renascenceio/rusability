@@ -1,4 +1,5 @@
 import { publishedNews, popularNews } from "@/lib/data/news";
+import { activeCta } from "@/lib/data/ctas";
 import { NewsBrowser } from "@/components/site/NewsBrowser";
 
 export const metadata = {
@@ -7,12 +8,16 @@ export const metadata = {
 };
 
 export default async function NewsPage() {
-  const [news, popular] = await Promise.all([publishedNews(), popularNews(5)]);
+  const [news, popular, cta] = await Promise.all([
+    publishedNews(),
+    popularNews(5),
+    activeCta("news"),
+  ]);
 
   return (
     <div className="container-editorial py-9 md:py-12">
       <div className="mx-auto max-w-5xl">
-        <NewsBrowser news={news} popular={popular} />
+        <NewsBrowser news={news} popular={popular} cta={cta} />
       </div>
     </div>
   );

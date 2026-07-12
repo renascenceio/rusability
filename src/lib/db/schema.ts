@@ -276,6 +276,39 @@ export const adSlots = pgTable("ad_slots", {
   advertiser: text("advertiser"),
 });
 
+/** Generic key/value store for admin-editable site settings (SEO meta, robots, rec weights, …). */
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull().default({}),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Admin-managed marketing CTAs rendered on the public site (keyed by placement). */
+export const siteCtas = pgTable("site_ctas", {
+  placement: text("placement").primaryKey(),
+  eyebrow: text("eyebrow").notNull().default(""),
+  title: text("title").notNull().default(""),
+  body: text("body").notNull().default(""),
+  buttonLabel: text("button_label").notNull().default(""),
+  buttonHref: text("button_href").notNull().default(""),
+  variant: text("variant").notNull().default("soft"),
+  active: boolean("active").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Contact-form submissions, delivered to the superadmin inbox. */
+export const contactMessages = pgTable("contact_messages", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull().default(""),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("new"), // new | read | archived
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const connections = pgTable("connections", {
   id: text("id").primaryKey(),
   platform: text("platform").notNull(),
