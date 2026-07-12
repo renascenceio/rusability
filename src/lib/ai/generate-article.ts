@@ -25,14 +25,16 @@ export interface GeneratedArticle {
   geoScore: number;
 }
 
-/* Block schema mirrors ArticleBlock (discriminated by `type`). */
-const blockSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("p"), text: z.string() }),
-  z.object({ type: z.literal("h2"), text: z.string() }),
-  z.object({ type: z.literal("h3"), text: z.string() }),
-  z.object({ type: z.literal("quote"), text: z.string(), cite: z.string().nullable() }),
-  z.object({ type: z.literal("list"), items: z.array(z.string()) }),
-]);
+/* Flat block schema — every field present + nullable for strict structured
+ * output (Gemini/OpenAI reject optional fields). Normalised into ArticleBlock
+ * after generation. `text` holds paragraph/heading/quote copy; `items` holds
+ * list bullets; `cite` is the optional quote attribution. */
+const blockSchema = z.object({
+  type: z.enum(["p", "h2", "h3", "quote", "list"]),
+  text: z.string().nullable(),
+  items: z.array(z.string()).nullable(),
+  cite: z.string().nullable(),
+});
 
 const articleSchema = z.object({
   title: z.string().describe("Заголовок статьи на русском, до 90 символов, с ключевым запросом"),
@@ -91,10 +93,20 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
 Соблюдай структуру AEO/SEO/GEO: прямой ответ в начале, содержательные подзаголовки, конкретный кейс, список выводов в конце.`,
   });
 
-  // Normalise quote.cite (schema uses nullable → strip null for our type).
-  const body: ArticleBlock[] = output.body.map((b) =>
-    b.type === "quote" ? { type: "quote", text: b.text, ...(b.cite ? { cite: b.cite } : {}) } : b,
-  );
+  // Normalise flat blocks → ArticleBlock, dropping empty/invalid ones.
+  const body: ArticleBlock[] = [];
+  for (const b of output.body) {
+    if (b.type === "list") {
+      const items = (b.items ?? []).map((x) => x.trim()).filter(Boolean);
+      if (items.length) body.push({ type: "list", items });
+    } else if (b.type === "quote") {
+      const text = (b.text ?? "").trim();
+      if (text) body.push({ type: "quote", text, ...(b.cite ? { cite: b.cite.trim() } : {}) });
+    } else {
+      const text = (b.text ?? "").trim();
+      if (text) body.push({ type: b.type, text });
+    }
+  }
 
   const words = countWords(body);
   const readingMinutes = Math.max(1, Math.round(words / 180));

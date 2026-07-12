@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAuthorized } from "@/lib/cron-auth";
-import { seedAiAuthors, syncAuthorArticleCounts } from "@/lib/ai/seed-authors";
+import { seedAiAuthors, seedNewsAndSettings, syncAuthorArticleCounts } from "@/lib/ai/seed-authors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,6 +10,7 @@ export async function POST() {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const result = await seedAiAuthors();
+  const nb = await seedNewsAndSettings();
   await syncAuthorArticleCounts();
-  return NextResponse.json({ ok: true, ...result });
+  return NextResponse.json({ ok: true, ...result, ...nb });
 }

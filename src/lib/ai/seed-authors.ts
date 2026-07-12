@@ -1,8 +1,9 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { authors, aiAuthors, aiRequirements } from "@/lib/db/schema";
+import { authors, aiAuthors, aiRequirements, newsbotSources, contentSettings } from "@/lib/db/schema";
 import { AUTHOR_ARCHETYPES } from "./author-archetypes";
 import { DEFAULT_REQUIREMENTS } from "./requirements-defaults";
+import { DEFAULT_NEWS_SOURCES } from "./news-sources";
 import { sql } from "drizzle-orm";
 
 /**
@@ -77,6 +78,21 @@ export async function seedAiAuthors(): Promise<{ authors: number; aiAuthors: num
   }
 
   return { authors: authorCount, aiAuthors: aiCount };
+}
+
+/** Seed default Russian news sources + the single content_settings row. */
+export async function seedNewsAndSettings(): Promise<{ sources: number }> {
+  for (const s of DEFAULT_NEWS_SOURCES) {
+    await db
+      .insert(newsbotSources)
+      .values({ id: s.id, name: s.name, url: s.url, active: true, category: s.category, lang: "ru" })
+      .onConflictDoUpdate({ target: newsbotSources.id, set: { name: s.name, url: s.url, category: s.category } });
+  }
+  await db
+    .insert(contentSettings)
+    .values({ id: 1 })
+    .onConflictDoNothing({ target: contentSettings.id });
+  return { sources: DEFAULT_NEWS_SOURCES.length };
 }
 
 /** Sync the public `authors.articles_count` from real published articles. */
