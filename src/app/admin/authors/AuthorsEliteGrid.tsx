@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Crown, Loader2, Bot } from "lucide-react";
 import { Panel, Table, Th, Td, Tag } from "@/components/admin/ui";
-import { glyphAvatar } from "@/lib/avatar";
+import { resolveAvatar } from "@/lib/avatar";
 import { setAuthorElite } from "./actions";
 
 type AuthorRow = {
@@ -70,7 +70,7 @@ export function AuthorsEliteGrid({
         </thead>
         <tbody>
           {filtered.map((a) => {
-            const avatar = a.avatar?.trim() ? a.avatar : glyphAvatar(a.name, { elite: a.elite });
+            const avatar = resolveAvatar({ avatar: a.avatar, name: a.name, elite: a.elite });
             return (
               <tr key={a.id} className="transition-colors hover:bg-[var(--muted)]">
                 <Td>
