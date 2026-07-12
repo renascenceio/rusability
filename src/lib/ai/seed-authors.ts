@@ -1,10 +1,19 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { authors, aiAuthors, aiRequirements, newsbotSources, contentSettings } from "@/lib/db/schema";
+import {
+  authors,
+  aiAuthors,
+  aiRequirements,
+  newsbotSources,
+  contentSettings,
+  articleCrons,
+  articleCronTopics,
+} from "@/lib/db/schema";
 import { AUTHOR_ARCHETYPES } from "./author-archetypes";
 import { DEFAULT_REQUIREMENTS } from "./requirements-defaults";
 import { DEFAULT_NEWS_SOURCES } from "./news-sources";
-import { sql } from "drizzle-orm";
+import { TOPIC_BANK, cronKeywordsFor } from "./topic-bank";
+import { eq, sql } from "drizzle-orm";
 
 /**
  * Seed the 20 Russian AI author archetypes into BOTH `authors` (public byline)
@@ -93,6 +102,83 @@ export async function seedNewsAndSettings(): Promise<{ sources: number }> {
     .values({ id: 1 })
     .onConflictDoNothing({ target: contentSettings.id });
   return { sources: DEFAULT_NEWS_SOURCES.length };
+}
+
+/**
+ * Seed ONE hourly, no-approval cron per AI author, plus its curated topic bank.
+ * - category follows the author's own category automatically;
+ * - min_words = 2400, frequency = hourly, requires_approval = false;
+ * - cron keywords come from the author's assigned topics;
+ * - topics are seeded from TOPIC_BANK, but only when the cron has none yet,
+ *   so re-running never resets the `used` flags of already-consumed topics.
+ * Idempotent via a deterministic cron id (`cron-<authorId>`).
+ * Also relaxes the global pace so 20 authors can each publish hourly.
+ */
+export async function seedAuthorCrons(): Promise<{ crons: number; topics: number }> {
+  // Relax the global publish pace + enable article auto-publish so hourly
+  // output from all authors is not throttled (news moderation is untouched).
+  await db
+    .insert(contentSettings)
+    .values({ id: 1, minHoursBetween: 0, maxPerDay: 1000, autoPublish: true })
+    .onConflictDoUpdate({
+      target: contentSettings.id,
+      set: { minHoursBetween: 0, maxPerDay: 1000, autoPublish: true, updatedAt: new Date() },
+    });
+
+  let cronCount = 0;
+  let topicCount = 0;
+
+  for (const a of AUTHOR_ARCHETYPES) {
+    const cronId = `cron-${a.id}`;
+    const keywords = cronKeywordsFor(a.id, a.topics);
+    const name = `${a.name} — ежечасно`;
+
+    await db
+      .insert(articleCrons)
+      .values({
+        id: cronId,
+        name,
+        authorId: a.id,
+        category: a.category,
+        frequency: "hourly",
+        runTime: "00:00",
+        days: [],
+        minWords: 2400,
+        keywords,
+        requiresApproval: false,
+        status: "active",
+      })
+      .onConflictDoUpdate({
+        target: articleCrons.id,
+        set: {
+          name,
+          authorId: a.id,
+          category: a.category,
+          frequency: "hourly",
+          minWords: 2400,
+          keywords,
+          requiresApproval: false,
+          status: "active",
+        },
+      });
+    cronCount++;
+
+    // Seed topics only when this cron has none (preserve `used` bookkeeping).
+    const existing = await db
+      .select({ id: articleCronTopics.id })
+      .from(articleCronTopics)
+      .where(eq(articleCronTopics.cronId, cronId))
+      .limit(1);
+    if (existing.length === 0) {
+      const bank = TOPIC_BANK[a.id] ?? [];
+      for (const t of bank) {
+        await db.insert(articleCronTopics).values({ cronId, topic: t.topic, keywords: t.keywords });
+        topicCount++;
+      }
+    }
+  }
+
+  return { crons: cronCount, topics: topicCount };
 }
 
 /** Sync the public `authors.articles_count` from real published articles. */

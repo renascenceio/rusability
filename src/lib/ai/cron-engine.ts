@@ -251,18 +251,22 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
   }
 }
 
-/** Run every cron that is due right now. */
+/** How many crons to generate in parallel per batch. With ~20 hourly crons
+ * each producing a long (2400+ word) article, sequential runs would blow past
+ * the 300s function limit, so we fan out in bounded batches. */
+const CRON_CONCURRENCY = 4;
+
+/** Run every cron that is due right now, in bounded-concurrency batches. */
 export async function runDueCrons(): Promise<{ ran: number; created: number }> {
   const crons = await db.select().from(articleCrons).where(eq(articleCrons.status, "active"));
-  let ran = 0;
+  const due = crons.filter((cron) => cronIsDue(cron));
   let created = 0;
-  for (const cron of crons) {
-    if (!cronIsDue(cron)) continue;
-    ran++;
-    const res = await runCron(cron.id);
-    created += res.created;
+  for (let i = 0; i < due.length; i += CRON_CONCURRENCY) {
+    const batch = due.slice(i, i + CRON_CONCURRENCY);
+    const results = await Promise.all(batch.map((cron) => runCron(cron.id)));
+    for (const res of results) created += res.created;
   }
-  return { ran, created };
+  return { ran: due.length, created };
 }
 
 /**

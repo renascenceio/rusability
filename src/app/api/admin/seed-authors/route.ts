@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { isAuthorized } from "@/lib/cron-auth";
-import { seedAiAuthors, seedNewsAndSettings, syncAuthorArticleCounts } from "@/lib/ai/seed-authors";
+import {
+  seedAiAuthors,
+  seedNewsAndSettings,
+  seedAuthorCrons,
+  syncAuthorArticleCounts,
+} from "@/lib/ai/seed-authors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +16,7 @@ export async function POST() {
   }
   const result = await seedAiAuthors();
   const nb = await seedNewsAndSettings();
+  const crons = await seedAuthorCrons();
   await syncAuthorArticleCounts();
-  return NextResponse.json({ ok: true, ...result, ...nb });
+  return NextResponse.json({ ok: true, ...result, ...nb, crons: crons.crons, cronTopics: crons.topics });
 }
