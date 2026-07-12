@@ -10,6 +10,7 @@ import {
   Wallet,
   Bell,
   Settings,
+  Heart,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ type MenuItem = {
 
 const PRIMARY: MenuItem[] = [
   { href: "/author", label: "Личный кабинет", icon: User },
+  { href: "/subscriptions", label: "Мои подписки", icon: Heart },
   { href: "/author/articles", label: "Мои статьи", icon: FileText },
   { href: "/author/drafts", label: "Черновики", icon: PenLine },
   { href: "/author/analytics", label: "Аналитика", icon: BarChart3 },

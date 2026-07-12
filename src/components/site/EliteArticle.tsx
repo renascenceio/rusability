@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { ArticleBlock, FaqItem } from "@/lib/types";
+import { SubscribeButton } from "@/components/site/SubscribeButton";
 
 type SkinKey = "classic" | "night" | "sepia" | "forest" | "blue";
 
@@ -60,7 +61,15 @@ export type EliteArticleData = {
   body: ArticleBlock[];
   faq: FaqItem[];
   scores: { geo?: number; seo?: number; aeo?: number };
-  author: { name: string; avatar: string; role: string; articlesCount: number };
+  author: {
+    id?: string;
+    name: string;
+    avatar: string;
+    role: string;
+    articlesCount: number;
+    subscribed?: boolean;
+    authed?: boolean;
+  };
   related: EliteRelated[];
 };
 
@@ -276,21 +285,21 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
               {data.readingMinutes} мин · {fmt(data.claps)} реакций
             </div>
           </div>
-          <button
-            style={{
-              background: s.accent,
-              border: "none",
-              borderRadius: 22,
-              padding: "9px 20px",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#fff",
-              cursor: "pointer",
-              flexShrink: 0,
-            }}
-          >
-            Подписаться
-          </button>
+          {data.author.id ? (
+            <SubscribeButton
+              authorId={data.author.id}
+              initialSubscribed={Boolean(data.author.subscribed)}
+              authed={Boolean(data.author.authed)}
+              size="sm"
+              style={{ background: s.accent, color: "#fff", flexShrink: 0 }}
+              subscribedStyle={{
+                background: "transparent",
+                color: s.text,
+                border: `1px solid ${s.bdr}`,
+                flexShrink: 0,
+              }}
+            />
+          ) : null}
         </div>
 
         {/* Hero image */}

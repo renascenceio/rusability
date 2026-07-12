@@ -4,8 +4,11 @@ import { MapPin, Send, Globe, Crown, Sparkles, ArrowLeft } from "lucide-react";
 import { allAuthors, getAuthorByUsername } from "@/lib/data/authors";
 import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
-import { Avatar, Badge, Button } from "@/components/ui/kit";
+import { SubscribeButton } from "@/components/site/SubscribeButton";
+import { Avatar, Badge } from "@/components/ui/kit";
 import { formatNumber } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth-helpers";
+import { isSubscribed } from "@/app/actions/subscriptions";
 
 export async function generateStaticParams() {
   return (await allAuthors()).map((a) => ({ username: a.username }));
@@ -26,6 +29,11 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
   const articles = (await articlesByAuthor(author.id)).filter(
     (a) => a.status === "published",
   );
+
+  const [currentUser, subscribed] = await Promise.all([
+    getCurrentUser(),
+    isSubscribed(author.id),
+  ]);
 
   return (
     <div>
@@ -91,7 +99,12 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
               </div>
             </div>
           </div>
-          <Button className="self-start md:self-auto">Подписаться</Button>
+          <SubscribeButton
+            authorId={author.id}
+            initialSubscribed={subscribed}
+            authed={Boolean(currentUser)}
+            className="self-start md:self-auto"
+          />
         </div>
 
         {/* Stats + bio */}

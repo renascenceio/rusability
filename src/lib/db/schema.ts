@@ -7,6 +7,7 @@ import {
   numeric,
   jsonb,
   serial,
+  unique,
 } from "drizzle-orm/pg-core";
 
 /* ------------------------------------------------------------------ */
@@ -96,6 +97,24 @@ export const authors = pgTable("authors", {
   socials: jsonb("socials").notNull().default({}),
   userId: text("user_id"),
 });
+
+/** Reader → author follows. One row per (user, author). */
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => authors.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqUserAuthor: unique("subscriptions_user_author_uq").on(t.userId, t.authorId),
+  }),
+);
 
 export const articles = pgTable("articles", {
   id: text("id").primaryKey(),
