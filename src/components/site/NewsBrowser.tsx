@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Search } from "lucide-react";
 import type { NewsItem } from "@/lib/types";
 import { newsCategoryName } from "@/lib/taxonomy";
+import { cn } from "@/lib/utils";
 
 const NEWS_ACCENT: Record<string, string> = {
   tech: "var(--accent)",
@@ -39,7 +41,19 @@ export function NewsBrowser({
   popular: NewsItem[];
 }) {
   const [cat, setCat] = useState("all");
-  const filtered = cat === "all" ? news : news.filter((n) => n.category === cat);
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    let list = cat === "all" ? news : news.filter((n) => n.category === cat);
+    const q = query.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (n) =>
+          n.title.toLowerCase().includes(q) || n.excerpt.toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [news, cat, query]);
 
   const lead = filtered[0];
   const alsoImportant = filtered.slice(1, 6);
@@ -48,14 +62,37 @@ export function NewsBrowser({
 
   return (
     <div>
-      {/* Header */}
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
+      {/* Header — matches Articles */}
+      <header className="mb-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="font-serif text-5xl font-black text-[var(--foreground)]">Новости</h1>
-          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          <p className="mt-2 text-[var(--muted-foreground)]">
             Живая лента · {news.length} материалов сегодня
           </p>
         </div>
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Поиск новостей…"
+            className="w-full rounded-full border border-[var(--border)] bg-[var(--surface)] py-3 pl-11 pr-4 text-sm outline-none focus:border-[var(--primary)]"
+          />
+        </div>
+      </header>
+
+      {/* Tabs — matches Articles (sentence case, underline on active) */}
+      <div className="mb-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-[var(--border)] pb-3">
+        {TABS.map((t) => (
+          <FilterTab key={t.slug} active={cat === t.slug} onClick={() => setCat(t.slug)}>
+            {t.label}
+          </FilterTab>
+        ))}
+        <span className="ml-auto flex items-center gap-2 text-xs font-semibold text-[var(--success)]">
+          <span className="h-2 w-2 rounded-full bg-[var(--success)]" />
+          {news.length} новостей сегодня
+        </span>
+      </div>
         <div className="relative w-full max-w-xs">
           <input
             placeholder="Поиск новостей…"

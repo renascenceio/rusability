@@ -4,6 +4,17 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
+  Fonts declared in a NON-inline @theme so Tailwind emits real :root custom
+  properties (--font-sans / --font-serif) AND generates the font-sans/font-serif
+  utilities. Using @theme inline here previously left these vars undefined at
+  :root, so the base `body`/`h1` rules fell back to system fonts.
+*/
+@theme {
+  --font-sans: var(--font-jakarta), "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
+}
+
+/*
   Rusability editorial design system
   Warm-neutral base + brand blue + terracotta accent
   Alegreya (serif display) + Plus Jakarta Sans (UI)
@@ -142,9 +153,6 @@
   --color-ink: var(--ink);
   --color-on-ink: var(--on-ink);
   --color-danger: var(--danger);
-
-  --font-sans: var(--font-jakarta), "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
 
   --radius-sm: 10px;
   --radius-md: 14px;

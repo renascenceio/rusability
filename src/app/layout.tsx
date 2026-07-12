@@ -49,10 +49,12 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ru" suppressHydrationWarning className="bg-background">
-      <body
-        className={`${jakarta.variable} ${lora.variable} font-sans antialiased`}
-      >
+    <html
+      lang="ru"
+      suppressHydrationWarning
+      className={`${jakarta.variable} ${lora.variable} bg-background`}
+    >
+      <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>
