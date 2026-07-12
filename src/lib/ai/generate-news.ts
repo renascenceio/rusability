@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { SAFETY_POLICY_RU } from "./content-filter";
 import type { NewsCategory } from "@/lib/types";
 
 export interface RewriteNewsInput {
@@ -17,9 +18,20 @@ export interface RewrittenNews {
   body: string[];
   tags: string[];
   category: NewsCategory;
+  publishable: boolean;
+  blockReason: string | null;
 }
 
 const newsSchema = z.object({
+  publishable: z
+    .boolean()
+    .describe(
+      "true, если материал соответствует редакционной политике (бизнес/маркетинг/технологии/наука и НЕ относится к запрещённым темам). false — если тема запрещена (Украина, война, политика, наркотики, азартные игры, 18+, терроризм).",
+    ),
+  blockReason: z
+    .string()
+    .nullable()
+    .describe("Если publishable=false — короткая причина на русском. Иначе null."),
   title: z.string().describe("Оригинальный заголовок новости на русском, до 90 символов, без кликбейта"),
   excerpt: z.string().describe("Лид-абзац: суть новости в 1–2 предложениях, прямой ответ на вопрос «что произошло»"),
   body: z
@@ -42,6 +54,8 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     "Ты получаешь заголовок и краткое описание из внешнего источника и пишешь СВОЮ оригинальную новостную заметку на русском.",
     "Категорически нельзя копировать текст источника дословно — только переосмысление и пересказ своими словами.",
     "",
+    SAFETY_POLICY_RU,
+    "",
     preamble,
   ].join("\n");
 
@@ -63,5 +77,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     body: output.body.map((p) => p.trim()).filter(Boolean),
     tags: output.tags.map((t) => t.toLowerCase().trim()).filter(Boolean).slice(0, 5),
     category: output.category,
+    publishable: output.publishable,
+    blockReason: output.blockReason?.trim() || null,
   };
 }
