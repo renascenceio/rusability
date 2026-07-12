@@ -3,10 +3,13 @@ import { ArrowRight, Heart, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { heroArticles, publishedArticles } from "@/lib/data/articles";
 import { latestNews } from "@/lib/data/news";
-import { upcomingEvents } from "@/lib/data/events";
+import { activeCta } from "@/lib/data/ctas";
+import { CtaBand } from "@/components/site/CtaBand";
 import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { Avatar } from "@/components/ui/kit";
 import { formatDate } from "@/lib/utils";
+
+export const revalidate = 3600;
 
 const ACCENT_VAR: Record<string, string> = {
   primary: "var(--primary)",
@@ -28,11 +31,12 @@ const HERO_FILTERS = [
 ];
 
 export default async function HomePage() {
-  const [featured, published, allEvents, news] = await Promise.all([
+  const [featured, published, news, digestCta, eventsCta] = await Promise.all([
     heroArticles(6),
     publishedArticles(),
-    upcomingEvents(),
-    latestNews(4),
+    latestNews(6),
+    activeCta("home_digest"),
+    activeCta("home_events"),
   ]);
   const hero = featured[0];
   const heroAuthor = hero?.author;
@@ -81,8 +85,6 @@ export default async function HomePage() {
     .filter((a, i, arr) => arr.findIndex((x) => x.id === a.id) === i)
     .slice(0, 4);
 
-  const events = allEvents.slice(0, 3);
-
   return (
     <div className="container-editorial py-8 md:py-10">
       <div className="mx-auto max-w-5xl">
@@ -122,13 +124,18 @@ export default async function HomePage() {
                 <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/60">
                   Главное сегодня · {hero.readingMinutes} мин чтения
                 </div>
-                <h1 className="max-w-3xl font-serif text-4xl font-black leading-[1.04] text-balance text-white md:text-[3.4rem]">
+                <h1 className="max-w-3xl font-serif text-3xl font-black leading-[1.06] text-balance text-white md:text-[2.55rem]">
                   {hero.title}
                 </h1>
                 <div className="mt-7 flex flex-wrap items-end justify-between gap-4">
                   <div className="flex items-center gap-3">
                     {heroAuthor && (
-                      <Avatar src={heroAuthor.avatar} alt={heroAuthor.name} size={40} />
+                      <Avatar
+                        src={heroAuthor.avatar}
+                        alt={heroAuthor.name}
+                        size={40}
+                        elite={hero.tier === "elite"}
+                      />
                     )}
                     <div>
                       <div className="text-sm font-semibold text-white">
@@ -178,12 +185,17 @@ export default async function HomePage() {
                     {categoryName(featureLead.category)}
                   </span>
                 </div>
-                <h2 className="max-w-lg font-serif text-2xl font-bold leading-snug text-balance text-white md:text-[1.9rem]">
+                <h2 className="max-w-lg font-serif text-xl font-bold leading-snug text-balance text-white md:text-[1.45rem]">
                   {featureLead.title}
                 </h2>
                 <div className="mt-4 flex items-center gap-2.5 text-[13px] text-white/65">
                   {featureLead.author && (
-                    <Avatar src={featureLead.author.avatar} alt={featureLead.author.name} size={28} />
+                    <Avatar
+                      src={featureLead.author.avatar}
+                      alt={featureLead.author.name}
+                      size={28}
+                      elite={featureLead.tier === "elite"}
+                    />
                   )}
                   <span className="font-semibold text-white/90">{featureLead.author?.name}</span>
                   <span className="text-white/30">·</span>
@@ -206,49 +218,43 @@ export default async function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
               <div className="relative">
-                <div className="mb-2 text-[11px] font-bold uppercase tracking-wider text-white/75">
-                  {categoryName(featuredSide.category)}
+                <div className="mb-2 flex items-center gap-2.5">
+                  {featuredSide.tier === "elite" && (
+                    <span className="inline-flex items-center rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
+                      Elite
+                    </span>
+                  )}
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                    {categoryName(featuredSide.category)}
+                  </span>
                 </div>
-                <h3 className="font-serif text-lg font-bold leading-snug text-balance text-white group-hover:text-white/90">
+                <h3 className="font-serif text-xl font-bold leading-snug text-balance text-white group-hover:text-white/90 md:text-[1.45rem]">
                   {featuredSide.title}
                 </h3>
-                <div className="mt-3 text-xs text-white/65">
-                  {featuredSide.author?.name} · {featuredSide.readingMinutes} мин
+                <div className="mt-4 flex items-center gap-2.5 text-[13px] text-white/65">
+                  {featuredSide.author && (
+                    <Avatar
+                      src={featuredSide.author.avatar}
+                      alt={featuredSide.author.name}
+                      size={28}
+                      elite={featuredSide.tier === "elite"}
+                    />
+                  )}
+                  <span className="font-semibold text-white/90">{featuredSide.author?.name}</span>
+                  <span className="text-white/30">·</span>
+                  <span>{featuredSide.readingMinutes} мин</span>
                 </div>
               </div>
             </Link>
           )}
         </section>
 
-        {/* ---------- NEWSLETTER BAND ---------- */}
-        <section className="mb-12 flex flex-col gap-4 rounded-2xl bg-[var(--primary-soft)] p-5 md:flex-row md:items-center md:justify-between md:px-7 md:py-5">
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--primary)]">
-              Дайджест Rusability
-            </div>
-            <div className="mt-1 text-sm font-medium text-[var(--foreground)]">
-              Лучшее за неделю — каждый понедельник
-            </div>
+        {/* ---------- ADMIN-MANAGED CTA (replaces the old email form) ---------- */}
+        {digestCta && (
+          <div className="mb-12">
+            <CtaBand cta={digestCta} />
           </div>
-          <div className="flex items-center gap-3">
-            <form className="flex items-center gap-2">
-              <input
-                type="email"
-                placeholder="Ваш email"
-                className="w-44 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
-              />
-              <button
-                type="submit"
-                className="shrink-0 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
-              >
-                Подписаться
-              </button>
-            </form>
-            <span className="hidden text-xs text-[var(--muted-foreground)] lg:block">
-              24 853 подписчика
-            </span>
-          </div>
-        </section>
+        )}
 
         {/* ---------- ЧИТАТЬ СЕЙЧАС ---------- */}
         <section className="mb-14">
@@ -366,47 +372,17 @@ export default async function HomePage() {
       </section>
 
       <div className="mx-auto max-w-5xl">
-        {/* ---------- СОБЫТИЯ + НОВОСТИ ---------- */}
+        {/* ---------- CTA + НОВОСТИ ---------- */}
         <section className="mb-14 grid gap-10 md:grid-cols-2">
-          {/* События */}
+          {/* Admin-managed CTA (replaces the old События column) */}
           <div>
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-serif text-2xl font-bold text-[var(--foreground)]">
-                События
-              </h2>
-              <span className="text-sm font-medium text-[var(--muted-foreground)]">
-                Все →
-              </span>
-            </div>
-            <div className="flex flex-col">
-              {events.map((ev) => {
-                const d = new Date(ev.date);
-                const day = d.getDate();
-                const month = d
-                  .toLocaleDateString("ru-RU", { month: "short" })
-                  .replace(".", "")
-                  .toUpperCase();
-                return (
-                  <div
-                    key={ev.id}
-                    className="flex items-center gap-4 border-t border-[var(--border)] py-4 first:border-t-0 first:pt-0"
-                  >
-                    <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
-                      <span className="text-lg font-bold leading-none">{day}</span>
-                      <span className="text-[10px] font-semibold uppercase">{month}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-semibold text-[var(--foreground)]">
-                        {ev.title}
-                      </div>
-                      <div className="mt-0.5 text-sm text-[var(--muted-foreground)]">
-                        {ev.city} · {ev.venue}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            {eventsCta ? (
+              <CtaBand cta={eventsCta} />
+            ) : (
+              <div className="flex h-full min-h-[220px] items-center justify-center rounded-[26px] border border-dashed border-[var(--border)] p-8 text-center text-sm text-[var(--muted-foreground)]">
+                Здесь появится CTA-блок. Добавьте его в админке: Реклама → CTA-блоки.
+              </div>
+            )}
           </div>
 
           {/* Новости */}
@@ -426,7 +402,7 @@ export default async function HomePage() {
               {news.map((n) => (
                 <Link
                   key={n.id}
-                  href="/news"
+                  href={`/news/${n.slug}`}
                   className="group flex items-baseline gap-4 border-t border-[var(--border)] py-3.5 first:border-t-0 first:pt-0"
                 >
                   <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">

@@ -276,6 +276,19 @@ export const adSlots = pgTable("ad_slots", {
   advertiser: text("advertiser"),
 });
 
+/** Admin-managed marketing CTAs rendered on the public site (keyed by placement). */
+export const siteCtas = pgTable("site_ctas", {
+  placement: text("placement").primaryKey(),
+  eyebrow: text("eyebrow").notNull().default(""),
+  title: text("title").notNull().default(""),
+  body: text("body").notNull().default(""),
+  buttonLabel: text("button_label").notNull().default(""),
+  buttonHref: text("button_href").notNull().default(""),
+  variant: text("variant").notNull().default("soft"),
+  active: boolean("active").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const connections = pgTable("connections", {
   id: text("id").primaryKey(),
   platform: text("platform").notNull(),

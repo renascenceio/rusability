@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Search, Menu, X, ArrowRight } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { AvatarMenu } from "@/components/site/AvatarMenu";
 
 const NAV = [
   { href: "/", label: "Лента", exact: true },
@@ -78,13 +77,6 @@ export function SiteHeader() {
             <Search className="h-5 w-5" />
           </Link>
           <ThemeToggle />
-          <Link
-            href="/editor"
-            className="hidden items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[0_4px_20px_-4px_rgba(77,90,255,0.5)] transition-all hover:brightness-110 active:scale-[0.97] sm:inline-flex"
-          >
-            Написать <ArrowRight className="h-4 w-4" />
-          </Link>
-          <AvatarMenu />
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--foreground)] md:hidden"
             onClick={() => setOpen((v) => !v)}
@@ -107,13 +99,6 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link
-            href="/editor"
-            onClick={() => setOpen(false)}
-            className="mt-2 flex items-center justify-center gap-1.5 rounded-full bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-[var(--primary-foreground)]"
-          >
-            Написать <ArrowRight className="h-4 w-4" />
-          </Link>
         </nav>
       )}
     </header>

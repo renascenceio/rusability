@@ -98,15 +98,17 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-[13px] text-[var(--muted-foreground)]">
-        {isSignUp ? "Уже есть аккаунт? " : "Нет аккаунта? "}
-        <Link
-          href={isSignUp ? "/sign-in" : "/sign-up"}
-          className="font-semibold text-[var(--primary)] hover:underline"
-        >
-          {isSignUp ? "Войти" : "Зарегистрироваться"}
-        </Link>
-      </p>
+      {/* Public self-registration is disabled — only the sign-in form is
+          reachable (used by editors/admins). Account creation is handled in
+          the admin console. */}
+      {isSignUp && (
+        <p className="mt-6 text-center text-[13px] text-[var(--muted-foreground)]">
+          Уже есть аккаунт?{" "}
+          <Link href="/sign-in" className="font-semibold text-[var(--primary)] hover:underline">
+            Войти
+          </Link>
+        </p>
+      )}
     </div>
   );
 }
