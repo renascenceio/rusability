@@ -22,7 +22,7 @@ export function SiteHeader() {
     item.exact ? pathname === "/" : pathname.startsWith(item.href);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background)]/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center" aria-label="Rusability">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -96,7 +96,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3 md:hidden">
+        <nav className="border-t border-[var(--border)] bg-[var(--background)] px-4 py-3 md:hidden">
           {NAV.map((item) => (
             <Link
               key={item.href}

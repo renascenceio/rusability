@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowRight, Heart, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { heroArticles, publishedArticles } from "@/lib/data/articles";
 import { latestNews } from "@/lib/data/news";
@@ -107,8 +107,13 @@ export default async function HomePage() {
                 2026
               </span>
 
-              <div className="relative">
-                <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
+              <div className="relative flex items-center gap-2.5">
+                {hero.tier === "elite" && (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--gold)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#3a2a10]">
+                    <Crown className="h-3 w-3" /> Elite
+                  </span>
+                )}
+                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/70">
                   {categoryName(hero.category)}
                 </span>
               </div>
@@ -304,8 +309,8 @@ export default async function HomePage() {
         </section>
       </div>
 
-      {/* ---------- ПОПУЛЯРНОЕ (full-bleed light band) ---------- */}
-      <section className="-mx-5 mb-14 bg-[var(--surface-2)] px-5 py-12 md:-mx-8 md:px-8">
+      {/* ---------- ПОПУЛЯРНОЕ ---------- */}
+      <section className="mb-14 py-2">
         <div className="mx-auto max-w-5xl">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-serif text-3xl font-bold text-[var(--foreground)]">
@@ -334,15 +339,20 @@ export default async function HomePage() {
                     className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+                  {a.tier === "elite" && (
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-lg bg-[var(--gold)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#3a2a10]">
+                      <Crown className="h-3 w-3" /> Elite
+                    </span>
+                  )}
                   <div className="relative">
-                    <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
                       {categoryName(a.category)}
                     </span>
-                    <h3 className="mt-3 font-serif text-base font-bold leading-snug text-white">
+                    <h3 className="mt-2 font-serif text-base font-bold leading-snug text-white">
                       {a.title}
                     </h3>
                     <div className="mt-3 flex items-center gap-2 text-xs text-white/70">
-                      {au && <Avatar src={au.avatar} alt={au.name} size={22} />}
+                      {au && <Avatar src={au.avatar} alt={au.name} size={22} elite={a.tier === "elite"} />}
                       <span>{au?.name}</span>
                       <span>·</span>
                       <span>{a.readingMinutes} мин</span>
