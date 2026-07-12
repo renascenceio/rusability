@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { CronsWorkspace } from "./CronsWorkspace";
+import { ArticleTabs } from "@/components/admin/ArticleTabs";
 
 export const metadata = { title: "Генерация статей — Rusability" };
 export const dynamic = "force-dynamic";
@@ -66,6 +67,7 @@ export default async function ArticleCronsPage() {
         title="Генерация статей"
         subtitle="Автоматические кроны: ИИ-авторы пишут статьи по расписанию с учётом ИИ-требований, темпа публикаций и модерации."
       />
+      <ArticleTabs />
       <CronsWorkspace
         crons={crons.map((c) => ({
           ...c,

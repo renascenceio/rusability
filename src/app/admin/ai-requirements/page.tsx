@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { aiRequirements } from "@/lib/db/schema";
 import { DEFAULT_REQUIREMENTS } from "@/lib/ai/requirements-defaults";
 import { RequirementsEditor } from "./RequirementsEditor";
+import { ArticleTabs } from "@/components/admin/ArticleTabs";
 
 export const metadata = { title: "ИИ-требования — Rusability" };
 export const dynamic = "force-dynamic";
@@ -28,6 +29,7 @@ export default async function AiRequirementsPage() {
         title="ИИ-требования"
         subtitle="Единые правила, которые подставляются в каждый запрос к ИИ — статьи, темы, новости. AEO / SEO / GEO и соответствие РКН."
       />
+      <ArticleTabs />
       <RequirementsEditor items={items} />
     </div>
   );
