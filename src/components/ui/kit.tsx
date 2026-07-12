@@ -142,6 +142,18 @@ export function SectionHeading({
 
 /* ---------------- Avatar ---------------- */
 
+const AVATAR_TINTS = [
+  "#b45309", "#0e7490", "#7c2d12", "#4d7c0f", "#9d174d",
+  "#1d4ed8", "#b91c1c", "#0f766e", "#6d28d9", "#a16207",
+];
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export function Avatar({
   src,
   alt,
@@ -153,6 +165,25 @@ export function Avatar({
   size?: number;
   className?: string;
 }) {
+  if (!src) {
+    // Deterministic tint from the name so each author gets a stable colour.
+    let hash = 0;
+    for (let i = 0; i < alt.length; i++) hash = (hash * 31 + alt.charCodeAt(i)) >>> 0;
+    const bg = AVATAR_TINTS[hash % AVATAR_TINTS.length];
+    return (
+      <span
+        aria-label={alt}
+        role="img"
+        className={cn(
+          "inline-flex items-center justify-center rounded-full font-semibold text-white select-none",
+          className,
+        )}
+        style={{ width: size, height: size, backgroundColor: bg, fontSize: Math.round(size * 0.4) }}
+      >
+        {initials(alt)}
+      </span>
+    );
+  }
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img

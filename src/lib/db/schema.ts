@@ -116,6 +116,10 @@ export const articles = pgTable("articles", {
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
   geoScore: integer("geo_score"),
   featured: boolean("featured").notNull().default(false),
+  /* AI generation provenance + moderation buffer. */
+  cronId: text("cron_id"),
+  bufferReason: text("buffer_reason"),
+  aiGenerated: boolean("ai_generated").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -135,6 +139,11 @@ export const news = pgTable("news", {
   views: integer("views").notNull().default(0),
   pipeline: text("pipeline"),
   hot: boolean("hot").notNull().default(false),
+  /* Aggregator provenance + dedupe. originalUrl is unique to prevent re-ingest. */
+  originalUrl: text("original_url"),
+  originalTitle: text("original_title"),
+  sourceId: text("source_id"),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }),
 });
 
 export const events = pgTable("events", {
@@ -188,6 +197,12 @@ export const aiAuthors = pgTable("ai_authors", {
   schedule: text("schedule").notNull().default("daily"),
   published: integer("published").notNull().default(0),
   lastRun: timestamp("last_run", { withTimezone: true }),
+  /* Distinctive voice + method (Russian). Powers generation. */
+  bio: text("bio").notNull().default(""),
+  tone: text("tone").notNull().default(""),
+  approach: text("approach").notNull().default(""),
+  stylePrompt: text("style_prompt").notNull().default(""),
+  category: text("category").notNull().default("business"),
 });
 
 export const cronJobs = pgTable("cron_jobs", {
@@ -246,4 +261,74 @@ export const newsbotSources = pgTable("newsbot_sources", {
   url: text("url").notNull().default(""),
   active: boolean("active").notNull().default(true),
   category: text("category"),
+  lang: text("lang").notNull().default("ru"),
+  lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
+  itemsIngested: integer("items_ingested").notNull().default(0),
+});
+
+/* ------------------------------------------------------------------ */
+/* Content automation engine — pace, requirements, crons, aggregator.  */
+/* ------------------------------------------------------------------ */
+
+/** Single-row (id=1) global publishing pace + engine config. */
+export const contentSettings = pgTable("content_settings", {
+  id: integer("id").primaryKey().default(1),
+  minHoursBetween: integer("min_hours_between").notNull().default(6),
+  maxPerDay: integer("max_per_day").notNull().default(8),
+  autoPublish: boolean("auto_publish").notNull().default(false),
+  newsAutoPublish: boolean("news_auto_publish").notNull().default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Editable governance rules injected into every AI job. keyed by area. */
+export const aiRequirements = pgTable("ai_requirements", {
+  key: text("key").primaryKey(), // 'global' | 'articles' | 'news'
+  title: text("title").notNull().default(""),
+  content: text("content").notNull().default(""),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const articleCrons = pgTable("article_crons", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  authorId: text("author_id"), // null = rotate through active AI authors
+  category: text("category").notNull().default("business"),
+  frequency: text("frequency").notNull().default("daily"), // hourly|daily|weekly
+  runTime: text("run_time").notNull().default("09:00"), // HH:MM (Moscow)
+  days: text("days").array().notNull().default([]), // weekday tokens for weekly
+  minWords: integer("min_words").notNull().default(900),
+  tone: text("tone").notNull().default(""),
+  keywords: text("keywords").array().notNull().default([]),
+  imageBrief: text("image_brief").notNull().default(""),
+  requiresApproval: boolean("requires_approval").notNull().default(true),
+  status: text("status").notNull().default("active"), // active|paused
+  lastRunAt: timestamp("last_run_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const articleCronTopics = pgTable("article_cron_topics", {
+  id: serial("id").primaryKey(),
+  cronId: text("cron_id").notNull(),
+  topic: text("topic").notNull(),
+  keywords: text("keywords").array().notNull().default([]),
+  used: boolean("used").notNull().default(false),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
+
+export const articleCronRuns = pgTable("article_cron_runs", {
+  id: serial("id").primaryKey(),
+  cronId: text("cron_id").notNull(),
+  status: text("status").notNull().default("ok"), // ok|error|skipped
+  articlesCreated: integer("articles_created").notNull().default(0),
+  message: text("message").notNull().default(""),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const newsbotRuns = pgTable("newsbot_runs", {
+  id: serial("id").primaryKey(),
+  status: text("status").notNull().default("ok"),
+  fetched: integer("fetched").notNull().default(0),
+  created: integer("created").notNull().default(0),
+  message: text("message").notNull().default(""),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
 });
