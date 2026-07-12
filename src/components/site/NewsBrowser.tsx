@@ -93,36 +93,6 @@ export function NewsBrowser({
           {news.length} новостей сегодня
         </span>
       </div>
-        <div className="relative w-full max-w-xs">
-          <input
-            placeholder="Поиск новостей…"
-            className="w-full rounded-full border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm outline-none focus:border-[var(--primary)]"
-          />
-        </div>
-      </header>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] py-4">
-        <nav className="flex flex-wrap gap-5">
-          {TABS.map((t) => (
-            <button
-              key={t.slug}
-              onClick={() => setCat(t.slug)}
-              className={`text-xs font-bold uppercase tracking-[0.08em] transition-colors ${
-                cat === t.slug
-                  ? "text-[var(--foreground)]"
-                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
-        <span className="flex items-center gap-2 text-xs font-semibold text-[var(--success)]">
-          <span className="h-2 w-2 rounded-full bg-[var(--success)]" />
-          {news.length} новостей сегодня
-        </span>
-      </div>
 
       {lead && (
         <>
@@ -275,5 +245,32 @@ export function NewsBrowser({
         </>
       )}
     </div>
+  );
+}
+
+function FilterTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "relative pb-2 text-sm font-medium transition-colors",
+        active
+          ? "text-[var(--primary)]"
+          : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+      )}
+    >
+      {children}
+      {active && (
+        <span className="absolute -bottom-[13px] left-0 h-0.5 w-full rounded-full bg-[var(--primary)]" />
+      )}
+    </button>
   );
 }
