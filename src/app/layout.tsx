@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { SITE_URL } from "@/lib/site";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -24,12 +25,16 @@ export const metadata: Metadata = {
   },
   description:
     "Русскоязычная редакционная платформа: статьи, новости, авторская среда и ИИ-редакция. Digital, маркетинг, технологии и UX.",
-  metadataBase: new URL("https://rusability.vercel.app"),
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "Rusability",
     description: "Русскоязычная редакционная платформа нового поколения",
     type: "website",
     locale: "ru_RU",
+    url: SITE_URL,
   },
 };
 
