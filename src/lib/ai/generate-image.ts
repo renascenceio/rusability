@@ -59,9 +59,11 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
     const { text } = await generateText({ model: CONTENT_MODEL, system, prompt });
     const crafted = text.trim().replace(/^["'\s]+|["'\s]+$/g, "");
     if (crafted.length < 40) return buildImagePrompt(input);
-    // Only POSITIVE reinforcement here — hard bans are enforced via the model's
-    // negativePrompt, since naming forbidden objects in the prompt summons them.
-    return `${crafted} 16:9 widescreen. ${POSITIVE_TAIL}`;
+    // Positive reinforcement only. NEVER put "16:9" or any ratio/number/word in
+    // the prompt text — the model bakes it in as literal text. The aspectRatio
+    // param already controls the shape. Bans are enforced by simply not naming
+    // forbidden objects (naming them in the prompt summons them).
+    return `${crafted} ${POSITIVE_TAIL}`;
   } catch {
     return buildImagePrompt(input);
   }

@@ -266,7 +266,7 @@ export function buildImagePrompt(args: {
     `Art lens: ${lens}.`,
     `Author's visual signature: ${s.style}.`,
     `Colour: ${colour}.`,
-    `16:9 widescreen, high detail, tasteful.`,
+    `Widescreen composition, high detail, tasteful.`,
     POSITIVE_TAIL,
   ].join(" ");
 }
