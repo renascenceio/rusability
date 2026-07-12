@@ -15,18 +15,35 @@ export const maxDuration = 300;
  * stays inside the 300s budget; call repeatedly until `remaining` is 0.
  *
  *   POST /api/admin/backfill-covers?limit=6
+ *
+ * force=1 regenerates covers for articles that ALREADY have one (used after a
+ * prompt/art-direction change). Pass since=<epoch_ms> to only regenerate
+ * articles whose cover was last generated before that time, so repeated calls
+ * walk through the whole set without redoing freshly-regenerated ones.
+ *
+ *   POST /api/admin/backfill-covers?force=1&limit=4&since=<updatedAt cutoff ms>
  */
 export async function POST(req: Request) {
   if (!(await isAuthorized())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const url = new URL(req.url);
   const limit = Math.min(12, Math.max(1, parseInt(url.searchParams.get("limit") ?? "6", 10)));
+  const force = url.searchParams.get("force") === "1";
+  const sinceParam = url.searchParams.get("since");
 
   const coverless = or(sql`${articles.cover} is null`, eq(articles.cover, ""));
+  // In force mode, regenerate everything (optionally only rows not updated since
+  // the cutoff, so a repeated caller makes forward progress each pass).
+  const filter = force
+    ? sinceParam
+      ? sql`${articles.updatedAt} < ${new Date(Number(sinceParam))}`
+      : sql`true`
+    : coverless;
+
   const batch = await db
     .select({ id: articles.id, title: articles.title, category: articles.category, authorId: articles.authorId })
     .from(articles)
-    .where(coverless)
+    .where(filter)
     .orderBy(asc(articles.createdAt))
     .limit(limit);
 
@@ -54,7 +71,7 @@ export async function POST(req: Request) {
   const [{ n: remaining }] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(articles)
-    .where(coverless);
+    .where(filter);
 
-  return NextResponse.json({ processed: batch.length, done, remaining, failures });
+  return NextResponse.json({ processed: batch.length, done, remaining, failures, force });
 }

@@ -71,11 +71,9 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
  * failure (e.g. AI Gateway out of credits) so callers degrade gracefully.
  */
 export async function generateArticleCover(input: GenerateCoverInput): Promise<string | null> {
-  const prompt = buildImagePrompt({
-    authorId: input.authorId,
-    title: input.title,
-    category: input.category,
-  });
+  // Craft a bespoke, abstract art-direction prompt from the topic (LLM), with
+  // the deterministic template as a safe fallback inside craftImagePrompt.
+  const prompt = await craftImagePrompt(input);
   const modelId = input.fast ? IMAGE_MODEL_FAST : IMAGE_MODEL_QUALITY;
 
   try {
