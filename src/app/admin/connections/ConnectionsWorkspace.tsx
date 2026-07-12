@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Plug, Check } from "lucide-react";
 import { Tag, AdminButton } from "@/components/admin/ui";
+import {
+  toggleConnected as toggleConnectedAction,
+  toggleAutopost as toggleAutopostAction,
+} from "./actions";
 
 type Connection = {
   id: string;
@@ -16,9 +20,16 @@ type Connection = {
 
 export function ConnectionsWorkspace({ initial }: { initial: Connection[] }) {
   const [items, setItems] = useState<Connection[]>(initial);
+  const [, startTransition] = useTransition();
 
   function toggleAutopost(id: string) {
     setItems((list) => list.map((c) => (c.id === id ? { ...c, autopost: !c.autopost } : c)));
+    startTransition(async () => {
+      const res = await toggleAutopostAction(id);
+      if (res.ok) {
+        setItems((list) => list.map((c) => (c.id === id ? { ...c, autopost: res.autopost } : c)));
+      }
+    });
   }
 
   function toggleConnected(id: string) {
@@ -34,6 +45,23 @@ export function ConnectionsWorkspace({ initial }: { initial: Connection[] }) {
           : c,
       ),
     );
+    startTransition(async () => {
+      const res = await toggleConnectedAction(id);
+      if (res.ok) {
+        setItems((list) =>
+          list.map((c) =>
+            c.id === id
+              ? {
+                  ...c,
+                  connected: res.connected,
+                  autopost: res.connected ? c.autopost : false,
+                  lastSync: res.connected ? "только что" : null,
+                }
+              : c,
+          ),
+        );
+      }
+    });
   }
 
   return (

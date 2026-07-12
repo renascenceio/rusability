@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Panel, KpiCard, AdminButton, Tag } from "@/components/admin/ui";
+import { saveRecommendations, type RecConfig } from "./actions";
 
 type Weight = { key: string; label: string; hint: string; value: number };
 
-const INITIAL_WEIGHTS: Weight[] = [
-  { key: "history", label: "История чтения", hint: "Ранее прочитанные статьи", value: 85 },
-  { key: "categories", label: "Категории интересов", hint: "По тегам и рубрикам", value: 70 },
-  { key: "popularity", label: "Популярность", hint: "Тренды и вирусность", value: 40 },
-  { key: "collab", label: "Коллаборативная фильтрация", hint: "«Похожие читатели»", value: 55 },
+const WEIGHT_META: Omit<Weight, "value">[] = [
+  { key: "history", label: "История чтения", hint: "Ранее прочитанные статьи" },
+  { key: "categories", label: "Категории интересов", hint: "По тегам и рубрикам" },
+  { key: "popularity", label: "Популярность", hint: "Тренды и вирусность" },
+  { key: "collab", label: "Коллаборативная фильтрация", hint: "«Похожие читатели»" },
 ];
 
 const TOP_RECOMMENDED = [
@@ -18,10 +19,13 @@ const TOP_RECOMMENDED = [
   { title: "SEO-тренды 2026…", count: "7 600 рек.", tone: "gold" as const },
 ];
 
-export function RecommendationsWorkspace() {
-  const [weights, setWeights] = useState<Weight[]>(INITIAL_WEIGHTS);
-  const [active, setActive] = useState(true);
+export function RecommendationsWorkspace({ initialConfig }: { initialConfig: RecConfig }) {
+  const [weights, setWeights] = useState<Weight[]>(
+    WEIGHT_META.map((m) => ({ ...m, value: initialConfig.weights[m.key] ?? 50 })),
+  );
+  const [active, setActive] = useState(initialConfig.active);
   const [saved, setSaved] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
   function setWeight(key: string, value: number) {
     setWeights((w) => w.map((x) => (x.key === key ? { ...x, value } : x)));
@@ -29,7 +33,18 @@ export function RecommendationsWorkspace() {
   }
 
   function apply() {
-    setSaved(`Настройки применены в ${new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}`);
+    const config: RecConfig = {
+      active,
+      weights: Object.fromEntries(weights.map((w) => [w.key, w.value])),
+    };
+    startTransition(async () => {
+      const res = await saveRecommendations(config);
+      setSaved(
+        res.ok
+          ? `Настройки применены в ${new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}`
+          : "Не удалось сохранить",
+      );
+    });
   }
 
   return (

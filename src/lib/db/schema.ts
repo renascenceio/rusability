@@ -276,6 +276,13 @@ export const adSlots = pgTable("ad_slots", {
   advertiser: text("advertiser"),
 });
 
+/** Generic key/value store for admin-editable site settings (SEO meta, robots, rec weights, …). */
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull().default({}),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** Admin-managed marketing CTAs rendered on the public site (keyed by placement). */
 export const siteCtas = pgTable("site_ctas", {
   placement: text("placement").primaryKey(),

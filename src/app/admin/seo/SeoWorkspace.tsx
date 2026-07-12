@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Check, Plus, Trash2, RefreshCw, Search, Bot, Globe } from "lucide-react";
 import { Panel, AdminButton, Tag, Table, Th, Td } from "@/components/admin/ui";
+import { saveSeoMeta, saveRobots, type SeoMeta, type RobotsSettings } from "./actions";
 
 type TabKey = "meta" | "sitemap" | "robots" | "redirects" | "geo";
 
@@ -18,21 +19,22 @@ const DEFAULT_REDIRECTS = [
   { id: 3, from: "/news/2024", to: "/news", code: 302 },
 ];
 
-export function SeoWorkspace() {
+export function SeoWorkspace({
+  initialMeta,
+  initialRobots,
+}: {
+  initialMeta: SeoMeta;
+  initialRobots: RobotsSettings;
+}) {
   const [tab, setTab] = useState<TabKey>("meta");
   const [saved, setSaved] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
   // Meta
-  const [meta, setMeta] = useState({
-    title: "Rusability — деловое медиа о маркетинге, бизнесе и технологиях",
-    description:
-      "Аналитика, тренды и практика цифрового маркетинга, бизнеса и технологий. Экспертные статьи и новости для профессионалов.",
-    ogImage: "/brand/og-default.png",
-    keywords: "маркетинг, бизнес, технологии, SEO, аналитика",
-  });
+  const [meta, setMeta] = useState<SeoMeta>(initialMeta);
 
   // robots / sitemap toggles
-  const [robots, setRobots] = useState({ index: true, follow: true, ai: true, sitemap: true });
+  const [robots, setRobots] = useState<RobotsSettings>(initialRobots);
 
   // redirects
   const [redirects, setRedirects] = useState(DEFAULT_REDIRECTS);
@@ -41,6 +43,20 @@ export function SeoWorkspace() {
   function flash(msg: string) {
     setSaved(msg);
     setTimeout(() => setSaved(null), 2500);
+  }
+
+  function persistMeta() {
+    startTransition(async () => {
+      const res = await saveSeoMeta(meta);
+      flash(res.ok ? "Мета-теги сохранены" : "Не удалось сохранить");
+    });
+  }
+
+  function persistRobots() {
+    startTransition(async () => {
+      const res = await saveRobots(robots);
+      flash(res.ok ? "robots.txt обновлён" : "Не удалось сохранить");
+    });
   }
 
   const tabs: { key: TabKey; label: string }[] = [
@@ -129,7 +145,7 @@ export function SeoWorkspace() {
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
               />
             </Field>
-            <AdminButton onClick={() => flash("Мета-теги сохранены")}>
+            <AdminButton onClick={persistMeta}>
               <Check size={15} /> Сохранить
             </AdminButton>
           </div>
@@ -208,7 +224,7 @@ ${robots.index ? "Allow: /" : "Disallow: /"}
 ${robots.ai ? "# ИИ-краулеры разрешены" : "User-agent: GPTBot\nDisallow: /"}
 ${robots.sitemap ? "Sitemap: https://rusability.ru/sitemap.xml" : ""}`}
           </pre>
-          <AdminButton className="mt-4" onClick={() => flash("robots.txt обновлён")}>
+          <AdminButton className="mt-4" onClick={persistRobots}>
             <Check size={15} /> Применить
           </AdminButton>
         </Panel>
@@ -288,7 +304,7 @@ ${robots.sitemap ? "Sitemap: https://rusability.ru/sitemap.xml" : ""}`}
             <div className="flex items-start gap-3 rounded-xl border border-[var(--border)] p-4">
               <Bot className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
               <div>
-                <div className="font-semibold text-[var(--foreground)]">FAQ-блоки на статьях Elite</div>
+                <div className="font-semibold text-[var(--foreground)]">FAQ-бло��и на статьях Elite</div>
                 <p>Structured Q&amp;A повышает шанс цитирования в ответах ИИ-движков.</p>
               </div>
             </div>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
-import { PageHeader, Panel, Tag, AdminButton, Table, Th, Td, KpiCard } from "@/components/admin/ui";
+import { PageHeader, Panel, Tag, Table, Th, Td, KpiCard } from "@/components/admin/ui";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { CtaManager } from "@/components/admin/CtaManager";
 import type { SiteCta } from "@/lib/data/ctas";
@@ -24,7 +23,7 @@ type Slot = {
 const TONE = { active: "success", paused: "warn", empty: "neutral" } as const;
 const LABEL = { active: "Активен", paused: "На паузе", empty: "Свободен" } as const;
 
-export function AdsWorkspace({ slots }: { slots: Slot[] }) {
+export function AdsWorkspace({ slots, ctas }: { slots: Slot[]; ctas: SiteCta[] }) {
   const [list, setList] = useState<Slot[]>(slots);
 
   const impressions = list.reduce((s, a) => s + a.impressions, 0);
@@ -103,18 +102,19 @@ export function AdsWorkspace({ slots }: { slots: Slot[] }) {
   return (
     <>
       <PageHeader
-        title="Реклама"
-        subtitle="Рекламные слоты и нативные интеграции"
-        action={
-          <AdminButton variant="primary">
-            <Plus className="h-4 w-4" /> Новый слот
-          </AdminButton>
-        }
+        title="Реклама и CTA"
+        subtitle="Управляйте призывами к действию на сайте и рекламными слотами"
       />
 
       <AdminTabs
         tabs={[
-          { id: "slots", label: "Все слоты", content: <div>{kpis}{renderTable(list)}</div> },
+          {
+            id: "cta",
+            label: "CTA-блоки",
+            badge: ctas.filter((c) => c.active).length,
+            content: <CtaManager ctas={ctas} />,
+          },
+          { id: "slots", label: "Рекламные слоты", content: <div>{kpis}{renderTable(list)}</div> },
           {
             id: "active",
             label: "Активные",
