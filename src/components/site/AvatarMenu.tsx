@@ -7,7 +7,6 @@ import {
   FileText,
   PenLine,
   BarChart3,
-  Wallet,
   Bell,
   Settings,
   Heart,
@@ -27,7 +26,7 @@ const PRIMARY: MenuItem[] = [
   { href: "/author/articles", label: "Мои статьи", icon: FileText },
   { href: "/author/drafts", label: "Черновики", icon: PenLine },
   { href: "/author/analytics", label: "Аналитика", icon: BarChart3 },
-  { href: "/author/monetization", label: "Монетизация", icon: Wallet },
+  { href: "/editor", label: "Написать статью", icon: PenLine },
 ];
 
 const SECONDARY: MenuItem[] = [

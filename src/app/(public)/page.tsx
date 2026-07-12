@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowRight, Heart, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
-import { featuredArticles, publishedArticles } from "@/lib/data/articles";
+import { heroArticles, publishedArticles } from "@/lib/data/articles";
 import { latestNews } from "@/lib/data/news";
 import { upcomingEvents } from "@/lib/data/events";
 import { categoryName, categoryAccent } from "@/lib/taxonomy";
@@ -29,7 +29,7 @@ const HERO_FILTERS = [
 
 export default async function HomePage() {
   const [featured, published, allEvents, news] = await Promise.all([
-    featuredArticles(),
+    heroArticles(6),
     publishedArticles(),
     upcomingEvents(),
     latestNews(4),
@@ -40,9 +40,16 @@ export default async function HomePage() {
   const used = new Set<string>();
   if (hero) used.add(hero.id);
 
-  // 1/3 featured card next to the Premium CTA
-  const featuredSide = published.find((a) => !used.has(a.id)) ?? featured[1];
-  if (featuredSide) used.add(featuredSide.id);
+  // Two more top-scoring pieces fill the split feature row below the hero.
+  const featureRow = featured.filter((a) => !used.has(a.id)).slice(0, 2);
+  if (featureRow.length < 2) {
+    for (const a of published) {
+      if (featureRow.length >= 2) break;
+      if (!used.has(a.id) && !featureRow.some((f) => f.id === a.id)) featureRow.push(a);
+    }
+  }
+  featureRow.forEach((a) => used.add(a.id));
+  const [featureLead, featuredSide] = featureRow;
 
   // "Читать сейчас" — three category columns
   const pick = (cats: string[], n: number): Article[] => {
@@ -100,8 +107,13 @@ export default async function HomePage() {
                 2026
               </span>
 
-              <div className="relative">
-                <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white">
+              <div className="relative flex items-center gap-2.5">
+                {hero.tier === "elite" && (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--gold)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#3a2a10]">
+                    <Crown className="h-3 w-3" /> Elite
+                  </span>
+                )}
+                <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/70">
                   {categoryName(hero.category)}
                 </span>
               </div>
@@ -141,36 +153,45 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ---------- PREMIUM CTA (2/3) + FEATURED (1/3) ---------- */}
+        {/* ---------- SPLIT FEATURE ROW (2/3 + 1/3) ---------- */}
         <section className="mb-6 grid gap-5 lg:grid-cols-[2fr_1fr]">
-          <div
-            className="relative flex flex-col justify-between overflow-hidden rounded-[26px] p-8 text-white md:p-9"
-            style={{
-              background:
-                "linear-gradient(135deg, #06083a 0%, #1a1e6a 55%, #4d5aff 130%)",
-            }}
-          >
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
-                Rusability Premium
+          {featureLead && (
+            <Link
+              href={`/articles/${featureLead.slug}`}
+              className="group relative flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[26px] bg-[var(--ink)] p-8 text-white md:p-9"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={featureLead.cover || "/placeholder.svg"}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+              <div className="relative">
+                <div className="mb-2 flex items-center gap-2.5">
+                  {featureLead.tier === "elite" && (
+                    <span className="inline-flex items-center rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
+                      Elite
+                    </span>
+                  )}
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                    {categoryName(featureLead.category)}
+                  </span>
+                </div>
+                <h2 className="max-w-lg font-serif text-2xl font-bold leading-snug text-balance text-white md:text-[1.9rem]">
+                  {featureLead.title}
+                </h2>
+                <div className="mt-4 flex items-center gap-2.5 text-[13px] text-white/65">
+                  {featureLead.author && (
+                    <Avatar src={featureLead.author.avatar} alt={featureLead.author.name} size={28} />
+                  )}
+                  <span className="font-semibold text-white/90">{featureLead.author?.name}</span>
+                  <span className="text-white/30">·</span>
+                  <span>{featureLead.readingMinutes} мин</span>
+                </div>
               </div>
-              <h2 className="mt-3 max-w-sm font-serif text-3xl font-bold leading-[1.1] text-balance md:text-[2rem]">
-                Читайте глубже. Пишите лучше. Растите быстрее.
-              </h2>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
-                Полный доступ к статьям, Elite-материалам и аналитике. Без рекламы.
-              </p>
-            </div>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link
-                href="/onboarding"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#1a1e6a] transition-transform hover:scale-[1.03]"
-              >
-                Попробовать бесплатно <ArrowRight className="h-4 w-4" />
-              </Link>
-              <span className="text-xs text-white/55">14 дней · без карты</span>
-            </div>
-          </div>
+            </Link>
+          )}
 
           {featuredSide && (
             <Link
@@ -288,8 +309,8 @@ export default async function HomePage() {
         </section>
       </div>
 
-      {/* ---------- ПОПУЛЯРНОЕ (full-bleed light band) ---------- */}
-      <section className="-mx-5 mb-14 bg-[var(--surface-2)] px-5 py-12 md:-mx-8 md:px-8">
+      {/* ---------- ПОПУЛЯРНОЕ ---------- */}
+      <section className="mb-14 py-2">
         <div className="mx-auto max-w-5xl">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-serif text-3xl font-bold text-[var(--foreground)]">
@@ -318,15 +339,20 @@ export default async function HomePage() {
                     className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+                  {a.tier === "elite" && (
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-lg bg-[var(--gold)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#3a2a10]">
+                      <Crown className="h-3 w-3" /> Elite
+                    </span>
+                  )}
                   <div className="relative">
-                    <span className="inline-flex items-center rounded-full bg-[var(--primary)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/55">
                       {categoryName(a.category)}
                     </span>
-                    <h3 className="mt-3 font-serif text-base font-bold leading-snug text-white">
+                    <h3 className="mt-2 font-serif text-base font-bold leading-snug text-white">
                       {a.title}
                     </h3>
                     <div className="mt-3 flex items-center gap-2 text-xs text-white/70">
-                      {au && <Avatar src={au.avatar} alt={au.name} size={22} />}
+                      {au && <Avatar src={au.avatar} alt={au.name} size={22} elite={a.tier === "elite"} />}
                       <span>{au?.name}</span>
                       <span>·</span>
                       <span>{a.readingMinutes} мин</span>
@@ -430,17 +456,16 @@ export default async function HomePage() {
               Ваши идеи заслуживают аудитории. Начните писать на Rusability.
             </h2>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/70">
-              Монетизация с первой статьи, Elite-статус для лучших авторов, встроенные
-              SEO/AEO инструменты.
+              ИИ-помощник для черновиков, Elite-статус для лучших авторов и встроенные
+              SEO/AEO/GEO инструменты — всё, чтобы ваш материал нашли и люди, и нейросети.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-4">
               <Link
-                href="/onboarding"
+                href="/editor"
                 className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#7a2f1c] transition-transform hover:scale-[1.03]"
               >
                 Стать автором <ArrowRight className="h-4 w-4" />
               </Link>
-              <span className="text-xs text-white/55">Бесплатно · без одобрения</span>
             </div>
           </div>
         </section>

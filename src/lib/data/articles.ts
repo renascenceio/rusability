@@ -83,6 +83,29 @@ export async function articlesByAuthor(authorId: string): Promise<Article[]> {
   return withAuthors(rows.map(mapArticle));
 }
 
+/**
+ * Composite "trend + effort" score. Combines reader engagement (views, claps,
+ * comments), authoring effort (length + structure), AEO/SEO/GEO quality, an
+ * Elite bonus and a recency boost. Used to auto-pick the homepage hero and to
+ * decide which pieces get auto-featured — no manual curation required.
+ */
+export function articleScore(a: Article, now = Date.now()): number {
+  const quality = (a.seoScore ?? 0) + (a.aeoScore ?? 0) + (a.geoScore ?? 0); // 0..294
+  const engagement = a.views + a.claps * 5 + a.comments * 8;
+  const effort = a.readingMinutes * 12 + (a.body?.length ?? 0) * 4;
+  const eliteBonus = a.tier === "elite" ? 120 : 0;
+  const ageDays = a.publishedAt ? (now - +new Date(a.publishedAt)) / 86_400_000 : 999;
+  const recency = Math.max(0, 60 - ageDays) * 3;
+  return quality + engagement * 0.1 + effort + eliteBonus + recency;
+}
+
+/** Top published articles by trend/effort score — always returns something. */
+export async function heroArticles(limit = 5): Promise<Article[]> {
+  const list = await publishedArticles();
+  const now = Date.now();
+  return [...list].sort((a, b) => articleScore(b, now) - articleScore(a, now)).slice(0, limit);
+}
+
 export async function featuredArticles(): Promise<Article[]> {
   const rows = await db
     .select()

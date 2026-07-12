@@ -15,7 +15,6 @@ const COLS: { title: string; links: { href: string; label: string }[] }[] = [
     links: [
       { href: "/about", label: "О нас" },
       { href: "/author", label: "Авторам" },
-      { href: "/advertise", label: "Реклама" },
       { href: "/contacts", label: "Контакты" },
     ],
   },
@@ -31,7 +30,7 @@ const COLS: { title: string; links: { href: string; label: string }[] }[] = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-[var(--border)] bg-[var(--surface)]">
+    <footer className="mt-24 border-t border-[var(--border)] bg-[var(--background)]">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="grid gap-10 md:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>

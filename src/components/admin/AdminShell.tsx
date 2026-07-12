@@ -13,10 +13,9 @@ import {
   Bot,
   Sparkles,
   ShieldCheck,
-  Megaphone,
   Plug,
   Users,
-  Wallet,
+  Crown,
   Clock,
   ScrollText,
   Menu,
@@ -60,7 +59,6 @@ const NAV: NavGroup[] = [
       { href: "/admin/ai-requirements", label: "ИИ-требования", icon: ScrollText },
       { href: "/admin/ai-filter", label: "РКН-фильтр", icon: ShieldCheck },
       { href: "/admin/newsbot", label: "Newsbot", icon: Sparkles },
-      { href: "/admin/ads", label: "Реклама", icon: Megaphone },
       { href: "/admin/connections", label: "Подключения", icon: Plug },
     ],
   },
@@ -68,7 +66,7 @@ const NAV: NavGroup[] = [
     title: "Аудитория",
     items: [
       { href: "/admin/users", label: "Пользователи", icon: Users },
-      { href: "/admin/monetization", label: "Монетизация", icon: Wallet },
+      { href: "/admin/authors", label: "Авторы и Elite", icon: Crown },
     ],
   },
 ];
