@@ -1,9 +1,28 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, Sparkles, X, Info, Loader2, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Sparkles,
+  X,
+  Info,
+  Loader2,
+  Check,
+  Sun,
+  Moon,
+  Bold,
+  Italic,
+  Heading2,
+  Heading3,
+  Quote,
+  List,
+  Link2,
+  ImagePlus,
+  Upload,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ArticleBlock, CategorySlug } from "@/lib/types";
 import { CATEGORIES } from "@/lib/taxonomy";
@@ -23,27 +42,70 @@ const BODY_EXAMPLE = `Начните писать здесь или сгенер
 const AI_CONTEXT_EXAMPLE =
   "Опишите, о чём статья, и вставьте материалы: тезисы, ссылки, цитаты, данные, выдержки из исследований. Чем больше фактуры — тем точнее и достовернее текст. Например: «Разбор эффекта якоря в ценообразовании. Данные: эксперимент Ариели (2003), пример меню ресторана, статистика по среднему чеку…»";
 
-function blocksToPlainParagraphs(body: ArticleBlock[]): { title?: string; text: string }[] {
-  const out: { title?: string; text: string }[] = [];
-  for (const b of body) {
-    if (b.type === "h2" || b.type === "h3") out.push({ title: b.text, text: "" });
-    else if (b.type === "p") out.push({ text: b.text });
-    else if (b.type === "quote") out.push({ text: `«${b.text}»` });
-    else if (b.type === "list") out.push({ text: b.items.map((i) => `• ${i}`).join("\n") });
-  }
+/** Escape user text before injecting as HTML into the contentEditable body. */
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** AI blocks → HTML for the contentEditable body. */
+function blocksToHtml(body: ArticleBlock[]): string {
+  return body
+    .map((b) => {
+      if (b.type === "h2") return `<h2>${esc(b.text)}</h2>`;
+      if (b.type === "h3") return `<h3>${esc(b.text)}</h3>`;
+      if (b.type === "quote") return `<blockquote>${esc(b.text)}</blockquote>`;
+      if (b.type === "list") return `<ul>${b.items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+      if (b.type === "p") return `<p>${esc(b.text)}</p>`;
+      return "";
+    })
+    .join("");
+}
+
+/** Parse the contentEditable DOM back into article blocks (toolbar-aware). */
+function readBodyFromDom(el: HTMLElement | null): ArticleBlock[] {
+  if (!el) return [];
+  const out: ArticleBlock[] = [];
+  el.childNodes.forEach((node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const t = (node.textContent || "").trim();
+      if (t) out.push({ type: "p", text: t });
+      return;
+    }
+    if (!(node instanceof HTMLElement)) return;
+    const tag = node.tagName.toLowerCase();
+    const text = (node.innerText || "").trim();
+    if (!text && tag !== "ul") return;
+    if (tag === "h1" || tag === "h2") out.push({ type: "h2", text });
+    else if (tag === "h3") out.push({ type: "h3", text });
+    else if (tag === "blockquote") out.push({ type: "quote", text });
+    else if (tag === "ul" || tag === "ol") {
+      const items = Array.from(node.querySelectorAll("li"))
+        .map((li) => (li.textContent || "").trim())
+        .filter(Boolean);
+      if (items.length) out.push({ type: "list", items });
+    } else out.push({ type: "p", text });
+  });
   return out;
+}
+
+function countWords(el: HTMLElement | null): number {
+  const t = (el?.innerText || "").trim();
+  return t ? t.split(/\s+/).length : 0;
 }
 
 export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo }) {
   const router = useRouter();
   const [credits, setCredits] = useState<CreditInfo>(initialCredits);
+  const [editorTheme, setEditorTheme] = useState<"light" | "dark">("light");
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [category, setCategory] = useState<CategorySlug>("business");
-  const [draft, setDraft] = useState<ArticleBlock[] | null>(null);
-  const [readingMinutes, setReadingMinutes] = useState(1);
+  const [cover, setCover] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [scores, setScores] = useState<{ seo: number; aeo: number; geo: number } | null>(null);
+  const [words, setWords] = useState(0);
 
   const [aiOpen, setAiOpen] = useState(true);
   const [aiTopic, setAiTopic] = useState("");
@@ -55,23 +117,37 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
   const [generating, startGenerate] = useTransition();
   const [publishing, startPublish] = useTransition();
   const bodyRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const noCredits = !credits.unlimited && credits.remaining <= 0;
 
-  const bodyText = useMemo(() => {
-    if (!draft) return "";
-    return draft
-      .map((b) =>
-        b.type === "p" || b.type === "h2" || b.type === "h3" || b.type === "quote"
-          ? b.text
-          : b.type === "list"
-            ? b.items.join(" ")
-            : "",
-      )
-      .join(" ");
-  }, [draft]);
+  /* Rich-text toolbar — operates on the focused contentEditable body. */
+  function exec(command: string, value?: string) {
+    bodyRef.current?.focus();
+    document.execCommand(command, false, value);
+    setWords(countWords(bodyRef.current));
+  }
+  function addLink() {
+    const url = window.prompt("Ссылка (URL):", "https://");
+    if (url) exec("createLink", url);
+  }
 
-  const words = bodyText.trim() ? bodyText.trim().split(/\s+/).length : 0;
+  async function uploadCover(file: File) {
+    setAiError(null);
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) setAiError(data.error ?? "Не удалось загрузить изображение.");
+      else setCover(data.url as string);
+    } catch {
+      setAiError("Не удалось загрузить изображение.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function runGenerate() {
     setAiError(null);
@@ -88,18 +164,24 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
       }
       setTitle(res.draft.title);
       setExcerpt(res.draft.excerpt);
-      setDraft(res.draft.body);
       setTags(res.draft.tags);
-      setReadingMinutes(res.draft.readingMinutes);
       setCategory(res.draft.category);
       setScores({ seo: res.draft.seoScore, aeo: res.draft.aeoScore, geo: res.draft.geoScore });
+      if (bodyRef.current) {
+        bodyRef.current.innerHTML = blocksToHtml(res.draft.body);
+        setWords(countWords(bodyRef.current));
+      }
       setAiOpen(false);
     });
   }
 
   function runPublish() {
     setAiError(null);
-    const body: ArticleBlock[] = draft ?? readBodyFromDom(bodyRef.current);
+    const body = readBodyFromDom(bodyRef.current);
+    if (!title.trim()) {
+      setAiError("Добавьте заголовок.");
+      return;
+    }
     startPublish(async () => {
       const res = await publishArticle({
         title,
@@ -107,6 +189,7 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
         body,
         tags,
         category,
+        cover: cover || undefined,
         readingMinutes: Math.max(1, Math.round(words / 150)),
         seoScore: scores?.seo ?? null,
         aeoScore: scores?.aeo ?? null,
@@ -120,12 +203,13 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
     });
   }
 
-  const paras = draft ? blocksToPlainParagraphs(draft) : [];
-
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--background)] text-[var(--foreground)]">
+    <div
+      className="editor-scope flex min-h-dvh flex-col bg-[var(--background)] text-[var(--foreground)]"
+      data-theme={editorTheme}
+    >
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/90 px-5 py-4 backdrop-blur">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--background)]/90 px-5 py-3 backdrop-blur">
         <Link
           href="/"
           className="flex items-center gap-2 text-sm font-medium text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
@@ -135,7 +219,17 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
 
         <CreditPill credits={credits} open={creditTip} setOpen={setCreditTip} />
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Light/dark editor toggle */}
+          <button
+            onClick={() => setEditorTheme((t) => (t === "light" ? "dark" : "light"))}
+            aria-label="Тема редактора"
+            title={editorTheme === "light" ? "Тёмная тема" : "Светлая тема"}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-[var(--muted-foreground)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--foreground)]"
+          >
+            {editorTheme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </button>
+
           {/* Category selector */}
           <div className="relative">
             <button
@@ -178,8 +272,93 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
         </div>
       </header>
 
+      {/* Formatting toolbar */}
+      <div className="sticky top-[57px] z-20 flex flex-wrap items-center gap-1 border-b border-[var(--border)] bg-[var(--background)]/95 px-5 py-2 backdrop-blur">
+        <ToolbarBtn label="Жирный" onClick={() => exec("bold")}><Bold className="h-4 w-4" /></ToolbarBtn>
+        <ToolbarBtn label="Курсив" onClick={() => exec("italic")}><Italic className="h-4 w-4" /></ToolbarBtn>
+        <span className="mx-1 h-5 w-px bg-[var(--border)]" />
+        <ToolbarBtn label="Заголовок 2" onClick={() => exec("formatBlock", "h2")}><Heading2 className="h-4 w-4" /></ToolbarBtn>
+        <ToolbarBtn label="Заголовок 3" onClick={() => exec("formatBlock", "h3")}><Heading3 className="h-4 w-4" /></ToolbarBtn>
+        <ToolbarBtn label="Цитата" onClick={() => exec("formatBlock", "blockquote")}><Quote className="h-4 w-4" /></ToolbarBtn>
+        <ToolbarBtn label="Список" onClick={() => exec("insertUnorderedList")}><List className="h-4 w-4" /></ToolbarBtn>
+        <ToolbarBtn label="Ссылка" onClick={addLink}><Link2 className="h-4 w-4" /></ToolbarBtn>
+        <span className="mx-1 h-5 w-px bg-[var(--border)]" />
+        <ToolbarBtn label="Обычный текст" onClick={() => exec("formatBlock", "p")}>
+          <span className="text-xs font-semibold">¶</span>
+        </ToolbarBtn>
+      </div>
+
       {/* Writing surface */}
-      <div className="mx-auto w-full max-w-[780px] flex-1 px-5 py-10">
+      <div className="mx-auto w-full max-w-[780px] flex-1 px-5 py-8">
+        {/* Hero image field */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/avif"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) uploadCover(f);
+            e.target.value = "";
+          }}
+        />
+        {cover ? (
+          <div className="group relative mb-8 aspect-[16/9] overflow-hidden rounded-2xl bg-[var(--surface-3)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={cover} alt="Обложка статьи" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-x-0 bottom-0 flex justify-end gap-2 bg-gradient-to-t from-black/50 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-900 hover:bg-white"
+              >
+                Заменить
+              </button>
+              <button
+                onClick={() => setCover("")}
+                className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-neutral-900 hover:bg-white"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) uploadCover(f);
+            }}
+            className={cn(
+              "mb-8 flex aspect-[16/9] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm transition-colors",
+              dragOver
+                ? "border-[var(--primary)] bg-[var(--primary)]/5 text-[var(--primary)]"
+                : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted-foreground)] hover:border-[var(--primary)]/50",
+            )}
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-6 w-6 animate-spin" />
+                Загрузка…
+              </>
+            ) : (
+              <>
+                <ImagePlus className="h-7 w-7" />
+                <span className="font-medium">Перетащите обложку 16:9 сюда или нажмите, чтобы загрузить</span>
+                <span className="flex items-center gap-1 text-xs opacity-70">
+                  <Upload className="h-3 w-3" /> JPG, PNG, WebP · если не добавить, ИИ создаст обложку автоматически
+                </span>
+              </>
+            )}
+          </button>
+        )}
+
         {/* Title */}
         <textarea
           value={title}
@@ -197,30 +376,15 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
           className="mb-8 w-full resize-none bg-transparent font-serif text-xl italic text-[var(--muted-foreground)] outline-none placeholder:text-[var(--muted-foreground)]/45"
         />
 
-        {/* Body */}
-        {draft ? (
-          <div className="editor-body space-y-6 text-lg leading-relaxed text-[var(--foreground)]/90">
-            {paras.map((p, i) =>
-              p.title ? (
-                <h2 key={i} className="font-serif text-2xl font-bold text-[var(--foreground)]">
-                  {p.title}
-                </h2>
-              ) : (
-                <p key={i} className="whitespace-pre-line">
-                  {p.text}
-                </p>
-              ),
-            )}
-          </div>
-        ) : (
-          <div
-            ref={bodyRef}
-            contentEditable
-            suppressContentEditableWarning
-            data-placeholder={BODY_EXAMPLE}
-            className="editor-body editor-empty min-h-[240px] space-y-6 whitespace-pre-line text-lg leading-relaxed text-[var(--foreground)]/90 outline-none"
-          />
-        )}
+        {/* Body — always editable so the toolbar works */}
+        <div
+          ref={bodyRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={() => setWords(countWords(bodyRef.current))}
+          data-placeholder={BODY_EXAMPLE}
+          className="editor-body editor-empty min-h-[240px] space-y-5 whitespace-pre-line text-lg leading-relaxed text-[var(--foreground)]/90 outline-none"
+        />
       </div>
 
       {/* AI generation panel */}
@@ -263,7 +427,6 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
                   {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {generating ? "Генерирую…" : "Сгенерировать (1 кредит)"}
                 </button>
-                {/* Tooltip explaining credits */}
                 <button
                   type="button"
                   aria-label="Как работают кредиты"
@@ -312,6 +475,29 @@ export function EditorWorkspace({ initialCredits }: { initialCredits: CreditInfo
   );
 }
 
+function ToolbarBtn({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={label}
+      aria-label={label}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--muted-foreground)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--foreground)]"
+    >
+      {children}
+    </button>
+  );
+}
+
 function CreditPill({
   credits,
   open,
@@ -341,16 +527,4 @@ function CreditPill({
       )}
     </div>
   );
-}
-
-/** Read contentEditable body into simple paragraph blocks. */
-function readBodyFromDom(el: HTMLDivElement | null): ArticleBlock[] {
-  if (!el) return [];
-  const text = el.innerText.trim();
-  if (!text) return [];
-  return text
-    .split(/\n{2,}/)
-    .map((t) => t.trim())
-    .filter(Boolean)
-    .map((t) => ({ type: "p" as const, text: t }));
 }

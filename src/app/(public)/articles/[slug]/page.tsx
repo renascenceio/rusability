@@ -155,10 +155,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
         </header>
 
-        {/* Cover */}
-        <div className="mb-10 overflow-hidden rounded-3xl bg-[var(--surface-3)]">
+        {/* Cover — always 16:9, cropped to fill (never letterboxed) */}
+        <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-3xl bg-[var(--surface-3)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={article.cover || "/placeholder.svg"} alt={article.title} className="w-full object-cover" />
+          <img
+            src={article.cover || "/placeholder.svg"}
+            alt={article.title}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         </div>
 
         {/* Body */}

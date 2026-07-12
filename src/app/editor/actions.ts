@@ -164,6 +164,7 @@ export async function publishArticle(input: {
   tags: string[];
   category: CategorySlug;
   readingMinutes: number;
+  cover?: string;
   seoScore?: number | null;
   aeoScore?: number | null;
   geoScore?: number | null;
@@ -209,7 +210,7 @@ export async function publishArticle(input: {
     title: input.title.trim(),
     excerpt,
     body: input.body,
-    cover: "",
+    cover: input.cover?.trim() || "",
     category: input.category,
     tags: input.tags,
     authorId: ctx.author.id,
@@ -245,8 +246,9 @@ export async function publishArticle(input: {
 
   await db.insert(articles).values({ ...draft, featured });
 
-  // Best-effort cover generation — never blocks publishing.
+  // Best-effort cover generation — only when the author didn't supply one.
   try {
+    if (input.cover?.trim()) throw new Error("cover-supplied");
     const cover = await generateArticleCover({
       title: draft.title,
       category: draft.category,

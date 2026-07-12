@@ -8,7 +8,7 @@ export const metadata = { title: "Newsbot — Rusability" };
 export const dynamic = "force-dynamic";
 
 export default async function NewsbotPage() {
-  const [sources, runs, queue] = await Promise.all([
+  const [sources, runs, queue, feed] = await Promise.all([
     db.select().from(newsbotSources).orderBy(newsbotSources.name),
     db.select().from(newsbotRuns).orderBy(desc(newsbotRuns.startedAt)).limit(15),
     db
@@ -26,7 +26,24 @@ export default async function NewsbotPage() {
       .where(eq(news.pipeline, "review"))
       .orderBy(desc(news.publishedAt))
       .limit(50),
+    db
+      .select({
+        id: news.id,
+        slug: news.slug,
+        title: news.title,
+        category: news.category,
+        source: news.source,
+        pipeline: news.pipeline,
+        publishedAt: news.publishedAt,
+      })
+      .from(news)
+      .orderBy(desc(news.publishedAt))
+      .limit(24),
   ]);
+
+  const publishedToday = feed.filter(
+    (f) => f.pipeline !== "review" && Date.now() - f.publishedAt.getTime() < 86_400_000,
+  ).length;
 
   return (
     <div className="mx-auto max-w-[1180px]">
@@ -46,6 +63,8 @@ export default async function NewsbotPage() {
         }))}
         runs={runs.map((r) => ({ ...r, startedAt: r.startedAt.toISOString() }))}
         queue={queue.map((q) => ({ ...q, publishedAt: q.publishedAt.toISOString() }))}
+        feed={feed.map((f) => ({ ...f, publishedAt: f.publishedAt.toISOString() }))}
+        publishedToday={publishedToday}
       />
     </div>
   );
