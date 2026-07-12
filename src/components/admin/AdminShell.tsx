@@ -10,7 +10,6 @@ import {
   Newspaper,
   Mail,
   BarChart3,
-  Sparkles,
   Plug,
   Users,
   Activity,
@@ -55,7 +54,6 @@ const NAV: NavGroup[] = [
     items: [
       { href: "/admin/seo", label: "SEO / AEO / GEO", icon: Activity },
       { href: "/admin/ads", label: "Реклама", icon: Megaphone },
-      { href: "/admin/newsbot", label: "Newsbot", icon: Sparkles },
       { href: "/admin/connections", label: "Подключения", icon: Plug },
       { href: "/admin/recommendations", label: "Рекомендации", icon: ListChecks },
     ],
@@ -170,7 +168,9 @@ export function AdminShell({
               </div>
               {group.items.map((item) => {
                 const active =
-                  item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+                  item.href === "/admin"
+                    ? pathname === "/admin"
+                    : pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
                 return (
                   <Link

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { PageHeader, Panel, Tag, AdminButton, Table, Th, Td, KpiCard } from "@/components/admin/ui";
 import { AdminTabs } from "@/components/admin/AdminTabs";
+import { CtaManager } from "@/components/admin/CtaManager";
+import type { SiteCta } from "@/lib/data/ctas";
 import { formatNumber } from "@/lib/utils";
 
 type Status = "active" | "paused" | "empty";

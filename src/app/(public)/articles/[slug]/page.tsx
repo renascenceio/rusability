@@ -11,6 +11,7 @@ import { CommentThread } from "@/components/site/CommentThread";
 import { ArticleActions } from "@/components/site/ArticleActions";
 import { SubscribeButton } from "@/components/site/SubscribeButton";
 import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
+import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
 
@@ -59,7 +60,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           author: {
             id: author?.id,
             name: author?.name ?? "Автор",
-            avatar: author?.avatar ?? "/placeholder.svg",
+            avatar: resolveAvatar({
+              avatar: author?.avatar,
+              name: author?.name ?? "Автор",
+              elite: Boolean(author?.elite),
+            }),
             role: author?.elite ? "Elite-автор Rusability" : "Автор Rusability",
             articlesCount: author?.articlesCount ?? 0,
             subscribed,
@@ -117,7 +122,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="mt-6 flex flex-wrap items-center gap-4 border-y border-[var(--border)] py-4">
             {author && (
               <Link href={`/authors/${author.username}`} className="flex items-center gap-3">
-                <Avatar src={author.avatar} alt={author.name} size={44} />
+                <Avatar src={author.avatar} alt={author.name} size={44} elite={author.elite} />
                 <div>
                   <div className="flex items-center gap-1.5 text-sm font-semibold text-[var(--foreground)]">
                     {author.name}
@@ -187,7 +192,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {author && (
           <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
             <div className="flex items-start gap-4">
-              <Avatar src={author.avatar} alt={author.name} size={64} />
+              <Avatar src={author.avatar} alt={author.name} size={64} elite={author.elite} />
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-serif text-lg font-bold text-[var(--foreground)]">
