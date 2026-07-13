@@ -24,9 +24,34 @@ const CANONICAL_HOSTS = new Set(["rusability.ru", "www.rusability.ru"]);
  */
 const GONE_PATH = /^\/(articles|news)\/([^/]+)\/?$/;
 
+/**
+ * The old MongoDB-backed site used /articles/<slug>/<objectId> and
+ * /news/<slug>/<objectId> — a slug followed by a trailing 24-char hex id (and
+ * occasionally other nested segments). The NEW site only ever has
+ * single-segment /articles/<slug> and /news/<slug> pages, so ANY article/news
+ * URL that carries an extra path segment is unambiguously an old link. We can
+ * send those straight to the branded archive page without a DB lookup.
+ */
+const OLD_NESTED_PATH = /^\/(articles|news)\/[^/]+\/.+/;
+
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
   const { pathname } = request.nextUrl;
+
+  // Old nested link (slug + trailing MongoDB id / extra segment) → always the
+  // branded archive page. These URLs only ever existed on the old site, so no
+  // DB check is needed to tell them apart from new content.
+  const nested = pathname.match(OLD_NESTED_PATH);
+  if (nested) {
+    return new NextResponse(goneHtml(nested[1] as "articles" | "news"), {
+      status: 410,
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "x-robots-tag": "noindex, nofollow",
+        "cache-control": "public, max-age=0, s-maxage=86400",
+      },
+    });
+  }
 
   // Old-link → 410 Gone (only for single-segment article/news detail paths).
   const match = pathname.match(GONE_PATH);
