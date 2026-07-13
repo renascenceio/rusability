@@ -18,6 +18,7 @@ import { runCron, runDueCrons } from "@/lib/ai/cron-engine";
 import { runNewsbot, writeQueuedNews } from "@/lib/ai/news-engine";
 import { matchesBlockedTerm } from "@/lib/ai/content-filter";
 import { addBlockedTerm, removeBlockedTerm } from "@/lib/data/news-blocklist";
+import { addGoodExample, addBadExample } from "@/lib/data/news-examples";
 
 const rid = () => Math.random().toString(36).slice(2, 10);
 const guard = () => requireRole(ADMIN_ROLES);
@@ -231,6 +232,15 @@ export async function blockNewsTopic(id: string, term: string) {
   const t = term.trim();
   if (t) await addBlockedTerm(t);
 
+  // Learn from the rejection: record the item's title as a negative example so
+  // the classifier drops similar material next time (works even with no term).
+  const [item] = await db
+    .select({ title: news.title, originalTitle: news.originalTitle })
+    .from(news)
+    .where(eq(news.id, id))
+    .limit(1);
+  if (item) await addBadExample(item.originalTitle || item.title);
+
   // Drop the flagged item regardless of its current pipeline stage.
   await db.delete(news).where(eq(news.id, id));
 
@@ -259,6 +269,43 @@ export async function unblockNewsTopic(term: string) {
   const terms = await removeBlockedTerm(term);
   revalidatePath("/admin/news");
   return { ok: true, terms, message: `Тема «${term.trim()}» разблокирована` };
+}
+
+/**
+ * Release a «Спорные» (borderline) item as news. Publishes it and records its
+ * title as a POSITIVE example so the classifier treats similar material as news.
+ */
+export async function releaseDisputedNews(id: string) {
+  await guard();
+  const [item] = await db
+    .select({ title: news.title, originalTitle: news.originalTitle })
+    .from(news)
+    .where(eq(news.id, id))
+    .limit(1);
+  if (item) await addGoodExample(item.originalTitle || item.title);
+  await db
+    .update(news)
+    .set({ pipeline: "published", publishedAt: new Date() })
+    .where(eq(news.id, id));
+  revalidatePath("/admin/news");
+  return { ok: true };
+}
+
+/**
+ * Reject a «Спорные» item. Records its title as a NEGATIVE example (so the
+ * classifier learns it wasn't news we want) and removes it.
+ */
+export async function rejectDisputedNews(id: string) {
+  await guard();
+  const [item] = await db
+    .select({ title: news.title, originalTitle: news.originalTitle })
+    .from(news)
+    .where(eq(news.id, id))
+    .limit(1);
+  if (item) await addBadExample(item.originalTitle || item.title);
+  await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, id));
+  revalidatePath("/admin/news");
+  return { ok: true };
 }
 
 /** Add a term to the stop-list directly (manual entry). */

@@ -2,14 +2,24 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
-import { SAFETY_POLICY_RU, RELEVANCE_POLICY_RU } from "./content-filter";
+import {
+  SAFETY_POLICY_RU,
+  RELEVANCE_POLICY_RU,
+  FORMAT_GEO_POLICY_RU,
+  buildClassExamplesBlock,
+} from "./content-filter";
 import type { NewsCategory } from "@/lib/types";
+
+export type NewsFormat = "news" | "article" | "borderline";
+export type GeoScope = "in_scope" | "out_of_scope" | "unclear";
 
 export interface RewriteNewsInput {
   sourceTitle: string;
   sourceSummary: string;
   sourceName: string;
   category: NewsCategory;
+  /** Recent editorial decisions used as few-shot guidance for the classifier. */
+  examples?: { good: string[]; bad: string[] };
 }
 
 export interface RewrittenNews {
@@ -20,6 +30,8 @@ export interface RewrittenNews {
   category: NewsCategory;
   publishable: boolean;
   blockReason: string | null;
+  format: NewsFormat;
+  geoScope: GeoScope;
 }
 
 const newsSchema = z.object({
@@ -43,6 +55,21 @@ const newsSchema = z.object({
     .describe(
       "Наиболее точная рубрика: ai — нейросети/ИИ; fintech — финтех, платежи, банки; biotech — биотех/медтех/фарма; startups — стартапы и инвестиции; ecommerce — онлайн-торговля; tech — прочие технологии; marketing; business; science.",
     ),
+  format: z
+    .enum(["news", "article"])
+    .describe(
+      'Формат материала: "news" — это событие с привязкой ко времени (что произошло). "article" — вечнозелёный/аналитический материал без конкретного события (подборки, рейтинги, обзоры трендов, гайды, мнения).',
+    ),
+  formatConfidence: z
+    .enum(["high", "low"])
+    .describe(
+      '"high" — уверен в определении формата. "low" — пограничный случай: аналитика/комментарий, привязанные к свежему поводу, которые можно опубликовать как новость (тогда решает редактор).',
+    ),
+  geoScope: z
+    .enum(["in_scope", "out_of_scope", "unclear"])
+    .describe(
+      '"in_scope" — про Россию/Казахстан/Узбекистан/Беларусь/Киргизию/Таджикистан ИЛИ глобально релевантная бизнес/тех-новость. "out_of_scope" — привязано к конкретному зарубежному рынку вне этого списка (напр. «топ маркетплейсов США»). "unclear" — не уверен.',
+    ),
 });
 
 /**
@@ -53,6 +80,8 @@ const newsSchema = z.object({
 export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNews> {
   const preamble = await buildRequirementsPreamble("news");
 
+  const examplesBlock = buildClassExamplesBlock(input.examples ?? { good: [], bad: [] });
+
   const system = [
     "Ты — новостной редактор русскоязычного делового медиа Rusability.",
     "Ты получаешь заголовок и краткое описание из внешнего источника и пишешь СВОЮ оригинальную новостную заметку на русском.",
@@ -62,6 +91,9 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     SAFETY_POLICY_RU,
     "",
     RELEVANCE_POLICY_RU,
+    "",
+    FORMAT_GEO_POLICY_RU,
+    ...(examplesBlock ? ["", examplesBlock] : []),
     "",
     preamble,
   ].join("\n");
@@ -78,6 +110,9 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
 Напиши оригинальную новостную заметку на русском по этому событию: заголовок, лид и 2–4 абзаца. Если данных мало — не выдумывай факты, опиши только то, что известно.`,
   });
 
+  // A low-confidence format call is a borderline item → editor decides.
+  const format: NewsFormat = output.formatConfidence === "low" ? "borderline" : output.format;
+
   return {
     title: output.title.trim(),
     excerpt: output.excerpt.trim(),
@@ -86,5 +121,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     category: output.category,
     publishable: output.publishable,
     blockReason: output.blockReason?.trim() || null,
+    format,
+    geoScope: output.geoScope,
   };
 }

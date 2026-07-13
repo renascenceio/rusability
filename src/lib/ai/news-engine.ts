@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { rewriteNews } from "./generate-news";
 import { isBlockedItem, matchesBlockedTerm } from "./content-filter";
 import { getBlockedTerms } from "@/lib/data/news-blocklist";
+import { getClassExamples } from "@/lib/data/news-examples";
 import { slugify } from "@/lib/utils";
 import type { NewsCategory } from "@/lib/types";
 
@@ -216,6 +217,7 @@ export async function writeQueuedNews(opts?: {
   written: number;
   published: number;
   rejected: number;
+  disputed: number;
   remaining: number;
   message: string;
 }> {
@@ -234,13 +236,17 @@ export async function writeQueuedNews(opts?: {
     .limit(max);
 
   if (batch.length === 0) {
-    return { written: 0, published: 0, rejected: 0, remaining: 0, message: "очередь пуста" };
+    return { written: 0, published: 0, rejected: 0, disputed: 0, remaining: 0, message: "очередь пуста" };
   }
+
+  // Few-shot guidance from the editor's past decisions (loaded once per batch).
+  const examples = await getClassExamples();
 
   const startedAt = Date.now();
   let published = 0;
   let rejected = 0;
   let written = 0;
+  let disputed = 0;
   let skippedForTime = 0;
   const errors: string[] = [];
 
@@ -257,27 +263,53 @@ export async function writeQueuedNews(opts?: {
         sourceSummary: row.excerpt || "",
         sourceName: row.source,
         category: normCategory(row.category),
+        examples,
       });
 
+      // 1) Safety / relevance gate — hard reject.
       if (!rewritten.publishable) {
         await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, row.id));
         rejected++;
         return;
       }
 
-      // Written → publish instantly (or route to review when auto-publish is off).
+      // 2) Out of the Russian-speaking segment (confident) — reject.
+      if (rewritten.geoScope === "out_of_scope") {
+        await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, row.id));
+        rejected++;
+        return;
+      }
+
+      // 3) Confident evergreen article (not a news event) — reject.
+      if (rewritten.format === "article") {
+        await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, row.id));
+        rejected++;
+        return;
+      }
+
+      // Everything below keeps the freshly-written note (so the editor can
+      // release borderline items as-is without re-writing).
+      const writtenFields = {
+        title: rewritten.title,
+        excerpt: rewritten.excerpt,
+        body: rewritten.body,
+        tags: rewritten.tags,
+        category: rewritten.category,
+        slug: await uniqueSlug(slugify(rewritten.title)),
+        publishedAt: new Date(),
+      };
+
+      // 4) Borderline format or unclear geo — hold for the editor («Спорные»).
+      if (rewritten.format === "borderline" || rewritten.geoScope === "unclear") {
+        await db.update(news).set({ ...writtenFields, pipeline: "disputed" }).where(eq(news.id, row.id));
+        disputed++;
+        return;
+      }
+
+      // 5) Confident in-scope news → publish instantly (or review when auto-publish off).
       await db
         .update(news)
-        .set({
-          title: rewritten.title,
-          excerpt: rewritten.excerpt,
-          body: rewritten.body,
-          tags: rewritten.tags,
-          category: rewritten.category,
-          slug: await uniqueSlug(slugify(rewritten.title)),
-          pipeline: autoPublish ? "published" : "review",
-          publishedAt: new Date(),
-        })
+        .set({ ...writtenFields, pipeline: autoPublish ? "published" : "review" })
         .where(eq(news.id, row.id));
       written++;
       if (autoPublish) published++;
@@ -293,6 +325,7 @@ export async function writeQueuedNews(opts?: {
 
   const verb = autoPublish ? "опубликовано" : "в модерацию";
   const parts = [`написано ${written} (${verb})`, `отклонено ИИ ${rejected}`];
+  if (disputed) parts.push(`спорных ${disputed}`);
   if (skippedForTime) parts.push(`перенесено ${skippedForTime}`);
   const base = `Готово: ${parts.join(", ")}`;
   const message = errors.length ? `${base}; замечания: ${errors.slice(0, 3).join("; ")}` : base;
@@ -302,7 +335,7 @@ export async function writeQueuedNews(opts?: {
     created: written,
     message,
   });
-  return { written, published, rejected, remaining, message };
+  return { written, published, rejected, disputed, remaining, message };
 }
 
 /* ============================================================================

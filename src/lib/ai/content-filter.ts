@@ -372,3 +372,57 @@ export const RELEVANCE_POLICY_RU = `РЕЛЕВАНТНОСТЬ (обязател
 - НЕ публикуй (ставь publishable=false, blockReason="нерелевантная тема"): спорт и результаты матчей; знаменитостей, шоу-бизнес, кино и сериалы; расписания рейсов, транспорт, аэропорты, автобусы, электрички; погоду; советы о здоровье, диетах, «полезных продуктах», рецепты; гороскопы; туризм и отдых; бытовые происшествия и повседневные городские новости без делового значения.
 - Материал может быть на английском или китайском — перепиши его суть на русском. Если тема нерелевантна нашим рубрикам — отклони.
 - Если сомневаешься, относится ли материал к нашим темам, — отклоняй (publishable=false).`;
+
+/** Regions whose market-specific content is in scope (Russian-speaking segment). */
+export const IN_SCOPE_REGIONS = [
+  "Россия",
+  "Казахстан",
+  "Узбекистан",
+  "Беларусь",
+  "Киргизия",
+  "Таджикистан",
+] as const;
+
+/**
+ * Classification framework injected into the news rewrite prompt. Teaches the
+ * model to separate a NEWS event from an evergreen ARTICLE, and to judge
+ * whether the material belongs to the Russian-speaking segment. The model
+ * returns `format` (news | article | borderline) + `geoScope`
+ * (in_scope | out_of_scope | unclear); the engine routes borderline/unclear
+ * items to the "Спорные" tab for the editor and auto-rejects confident
+ * articles and out-of-region material.
+ */
+export const FORMAT_GEO_POLICY_RU = `КЛАССИФИКАЦИЯ ФОРМАТА И ГЕОГРАФИИ (обязательно, помимо релевантности):
+
+1) ФОРМАТ — новость или статья:
+- НОВОСТЬ (format="news") — это СОБЫТИЕ с привязкой ко времени: запуск продукта, сделка, инвестиции/раунд, назначение, регуляторное решение, официальное заявление или анонс, действие компании, опубликованные цифры/отчёт, происшествие с деловым значением. Отвечает на вопрос «что ПРОИЗОШЛО».
+- СТАТЬЯ (format="article") — вечнозелёный/аналитический материал без конкретного события: подборки и рейтинги («Топ-50 нейросетей для SMM», «10 маркетплейсов»), обзоры трендов («тренды 2026»), инструкции/гайды, колонки и мнения, объяснения «как что-то работает». Такие материалы мы НЕ публикуем в новостях.
+- ПОГРАНИЧНЫЙ СЛУЧАЙ (format="borderline") — аналитика или комментарий, но привязанные к свежему поводу и пригодные к публикации как новость (например, чиновник или эксперт публично высказался о развитии цифровых технологий). Ставь borderline, когда сам сомневаешься между news и article.
+
+2) ГЕОГРАФИЯ — русскоязычный сегмент:
+- В ФОКУСЕ (geoScope="in_scope"): материалы про Россию, Казахстан, Узбекистан, Беларусь, Киргизию, Таджикистан; А ТАКЖЕ мировые/зарубежные новости бизнеса и технологий, релевантные этой аудитории (глобальные продукты, крупные международные компании, общие тренды рынка).
+- ВНЕ ФОКУСА (geoScope="out_of_scope"): материалы, привязанные к КОНКРЕТНОМУ зарубежному рынку вне этого списка (например «Топ-10 маркетплейсов США», локальные новости отдельной страны Запада/Азии без глобального значения). Украина — всегда вне фокуса (и запрещена политикой безопасности).
+- geoScope="unclear" — если не можешь уверенно определить.
+
+ВАЖНО: поля format и geoScope заполняй ВСЕГДА, даже если publishable=false.`;
+
+/**
+ * Build a compact few-shot block from the editor's past decisions (titles the
+ * editor released as news vs. marked as wrong). Injected into the classifier
+ * prompt so it learns from real editorial choices. Returns "" when empty.
+ */
+export function buildClassExamplesBlock(examples: { good: string[]; bad: string[] }): string {
+  const good = (examples.good ?? []).slice(-12);
+  const bad = (examples.bad ?? []).slice(-12);
+  if (good.length === 0 && bad.length === 0) return "";
+  const lines = ["ПРИМЕРЫ РЕШЕНИЙ РЕДАКТОРА (учись на них):"];
+  if (good.length) {
+    lines.push("Это ХОРОШИЕ новости для нас (format=news, публикуем):");
+    for (const t of good) lines.push(`  + ${t}`);
+  }
+  if (bad.length) {
+    lines.push("Это НЕ подходит (статья, не тот регион или не та тема — отклоняем):");
+    for (const t of bad) lines.push(`  − ${t}`);
+  }
+  return lines.join("\n");
+}

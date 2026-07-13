@@ -15,8 +15,19 @@ export default async function AdminNewsPage() {
   const dayAgo = new Date(Date.now() - 86_400_000);
   // Most-recently-touched first (queued items carry fetchedAt; fall back to publishedAt).
   const recency = sql`coalesce(${news.fetchedAt}, ${news.publishedAt})`;
-  const [sources, runs, pipeline, feed, totalRow, todayRow, reviewRow, writeQueueRow, rejectedRow, blockedTerms] =
-    await Promise.all([
+  const [
+    sources,
+    runs,
+    pipeline,
+    feed,
+    totalRow,
+    todayRow,
+    reviewRow,
+    writeQueueRow,
+    rejectedRow,
+    disputedRow,
+    blockedTerms,
+  ] = await Promise.all([
       db.select().from(newsbotSources).orderBy(newsbotSources.name),
       db.select().from(newsbotRuns).orderBy(desc(newsbotRuns.startedAt)).limit(15),
       // Full pipeline monitor — items across every stage (queued/review/published/rejected).
@@ -63,6 +74,8 @@ export default async function AdminNewsPage() {
       db.select({ n: count() }).from(news).where(eq(news.pipeline, "queued")),
       // Items the AI rejected as unpublishable / off-topic.
       db.select({ n: count() }).from(news).where(eq(news.pipeline, "rejected")),
+      // Borderline items awaiting the editor's news/article decision.
+      db.select({ n: count() }).from(news).where(eq(news.pipeline, "disputed")),
       getBlockedTerms(),
     ]);
 
@@ -71,6 +84,7 @@ export default async function AdminNewsPage() {
   const reviewCount = reviewRow[0]?.n ?? 0;
   const writeQueueCount = writeQueueRow[0]?.n ?? 0;
   const rejectedCount = rejectedRow[0]?.n ?? 0;
+  const disputedCount = disputedRow[0]?.n ?? 0;
 
   return (
     <div className="mx-auto max-w-[1180px]">
@@ -112,6 +126,7 @@ export default async function AdminNewsPage() {
         reviewCount={reviewCount}
         writeQueueCount={writeQueueCount}
         rejectedCount={rejectedCount}
+        disputedCount={disputedCount}
       />
     </div>
   );
