@@ -252,7 +252,7 @@ export function ArticleEngagement({
         <CommentBtn compact />
         <div className="h-px w-8 bg-[var(--border)]" />
         <div className="relative w-full">
-          <ShareBtn share={railShare} compact align="center" />
+          <ShareBtn share={railShare} compact align="left" />
         </div>
       </div>
 

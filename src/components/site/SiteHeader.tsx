@@ -36,7 +36,7 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center" aria-label="Rusability">
+        <Link href="/" className="flex shrink-0 cursor-pointer items-center" aria-label="Rusability">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/rusability-logo-black.png"

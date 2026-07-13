@@ -8,6 +8,7 @@ import { ArticleBody } from "@/components/site/ArticleBody";
 import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
+import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
 import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
@@ -98,6 +99,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       )}
 
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <Breadcrumbs
+          items={[
+            { label: "Главная", href: "/" },
+            { label: "Статьи", href: "/articles" },
+            { label: categoryName(article.category), href: `/articles?category=${article.category}` },
+            { label: article.title },
+          ]}
+        />
+
         {/* Header */}
         <header className="mb-8">
           <div className="mb-4 flex items-center gap-2">

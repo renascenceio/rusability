@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getNews, latestNews } from "@/lib/data/news";
 import { commentsForArticle } from "@/lib/data/comments";
 import { newsCategoryName } from "@/lib/taxonomy";
@@ -55,48 +54,53 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
-      <Link
-        href="/news"
-        className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+      <Breadcrumbs
+        items={[
+          { label: "Главная", href: "/" },
+          { label: "Новости", href: "/news" },
+          { label: categoryLabel, href: `/news?category=${news.category}` },
+          { label: news.title },
+        ]}
+      />
+
+      <ArticleEngagement
+        kind="news"
+        contentId={news.id}
+        title={news.title}
+        initialLikes={news.likes ?? 0}
+        comments={comments}
       >
-        <ArrowLeft size={16} /> Новости
-      </Link>
+        <article>
+          {/* meta line: | КАТЕГОРИЯ · дата · время чтения */}
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px]">
+            <span
+              className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]"
+              style={{ color: bar }}
+            >
+              <span className="inline-block h-3 w-[3px] rounded-full" style={{ backgroundColor: bar }} />
+              {categoryLabel}
+            </span>
+            <span className="text-muted-foreground">
+              {formatDate(news.publishedAt)} · {minutes} мин
+            </span>
+          </div>
 
-      <article>
-        {/* meta line: | КАТЕГОРИЯ · дата · время чтения */}
-        <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px]">
-          <span
-            className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]"
-            style={{ color: bar }}
-          >
-            <span className="inline-block h-3 w-[3px] rounded-full" style={{ backgroundColor: bar }} />
-            {categoryLabel}
-          </span>
-          <span className="text-muted-foreground">
-            {formatDate(news.publishedAt)} · {minutes} мин
-          </span>
-        </div>
+          <h1 className="font-serif text-[2rem] font-bold leading-[1.12] text-foreground text-balance md:text-[2.7rem]">
+            {news.title}
+          </h1>
 
-        <h1 className="font-serif text-[2rem] font-bold leading-[1.12] text-foreground text-balance md:text-[2.7rem]">
-          {news.title}
-        </h1>
+          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{news.excerpt}</p>
 
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{news.excerpt}</p>
+          <div className="article-prose mt-8 space-y-5 text-[1.05rem] leading-[1.75] text-foreground">
+            {news.body.map((p, i) => (
+              <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
+            ))}
+          </div>
 
-        <div className="article-prose mt-8 space-y-5 text-[1.05rem] leading-[1.75] text-foreground">
-          {news.body.map((p, i) => (
-            <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
-          ))}
-        </div>
-
-        {/* source + share row */}
-        <NewsShareRow
-          slug={news.slug}
-          title={news.title}
-          source={news.source}
-          sourceUrl={news.sourceUrl}
-        />
-      </article>
+          {/* source attribution (nofollow) */}
+          <NewsSource source={news.source} sourceUrl={news.sourceUrl} />
+        </article>
+      </ArticleEngagement>
 
       {more.length > 0 && (
         <section className="mt-10">
