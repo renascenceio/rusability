@@ -30,15 +30,19 @@ export async function POST(req: Request) {
   const limit = Math.min(12, Math.max(1, parseInt(url.searchParams.get("limit") ?? "6", 10)));
   const force = url.searchParams.get("force") === "1";
   const sinceParam = url.searchParams.get("since");
+  const slug = url.searchParams.get("slug");
 
   const coverless = or(sql`${articles.cover} is null`, eq(articles.cover, ""));
-  // In force mode, regenerate everything (optionally only rows not updated since
-  // the cutoff, so a repeated caller makes forward progress each pass).
-  const filter = force
-    ? sinceParam
-      ? sql`${articles.updatedAt} < ${new Date(Number(sinceParam))}`
-      : sql`true`
-    : coverless;
+  // A single `slug` always regenerates just that article (targeted fix for a
+  // bad/legacy cover). Otherwise: force mode regenerates everything (optionally
+  // only rows not updated since the cutoff), plain mode fills coverless rows.
+  const filter = slug
+    ? eq(articles.slug, slug)
+    : force
+      ? sinceParam
+        ? sql`${articles.updatedAt} < ${new Date(Number(sinceParam))}`
+        : sql`true`
+      : coverless;
 
   const batch = await db
     .select({ id: articles.id, title: articles.title, category: articles.category, authorId: articles.authorId })
@@ -55,9 +59,9 @@ export async function POST(req: Request) {
         authorId: a.authorId,
         title: a.title,
         category: a.category,
-        // Force regeneration uses the higher-quality model — it honours the
-        // negative prompt far better than the fast model.
-        fast: !force,
+        // Force regeneration and targeted single-slug fixes use the
+        // higher-quality model; only bulk coverless backfill uses fast.
+        fast: !force && !slug,
       });
       if (cover) {
         await db.update(articles).set({ cover, updatedAt: new Date() }).where(eq(articles.id, a.id));

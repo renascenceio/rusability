@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { ArticleBlock, FaqItem } from "@/lib/types";
-import { SubscribeButton } from "@/components/site/SubscribeButton";
 import { normalizeList } from "@/lib/article-list";
 
 type SkinKey = "classic" | "night" | "sepia" | "forest" | "blue";
@@ -286,21 +285,6 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
               {data.readingMinutes} мин · {fmt(data.claps)} реакций
             </div>
           </div>
-          {data.author.id ? (
-            <SubscribeButton
-              authorId={data.author.id}
-              initialSubscribed={Boolean(data.author.subscribed)}
-              authed={Boolean(data.author.authed)}
-              size="sm"
-              style={{ background: s.accent, color: "#fff", flexShrink: 0 }}
-              subscribedStyle={{
-                background: "transparent",
-                color: s.text,
-                border: `1px solid ${s.bdr}`,
-                flexShrink: 0,
-              }}
-            />
-          ) : null}
         </div>
 
         {/* Hero image */}

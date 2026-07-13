@@ -168,6 +168,10 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Safety net: nothing should ever force the page wider than the viewport
+     (long URLs, wide media, etc.). `clip` doesn't create a scroll container,
+     so sticky headers keep working. */
+  overflow-x: clip;
 }
 
 body {
@@ -182,6 +186,8 @@ h1, h2, h3, h4, h5 {
   font-family: var(--font-serif);
   line-height: 1.15;
   letter-spacing: -0.01em;
+  /* Long unbroken words in titles must wrap, not overflow on narrow screens. */
+  overflow-wrap: break-word;
 }
 
 ::selection {
@@ -210,6 +216,28 @@ h1, h2, h3, h4, h5 {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* Article / news body: long tokens (URLs, hashes) wrap instead of forcing a
+   horizontal scroll on mobile; wide media, tables and code stay within width. */
+.article-prose {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.article-prose img,
+.article-prose video,
+.article-prose iframe {
+  max-width: 100%;
+  height: auto;
+}
+.article-prose pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.article-prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* Onboarding — self-contained dark surface (theme-independent) */
