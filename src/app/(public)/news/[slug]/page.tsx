@@ -84,6 +84,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             <span className="text-muted-foreground">
               {formatDate(news.publishedAt)} · {minutes} мин
             </span>
+            <ViewCounter kind="news" contentId={news.id} initialViews={news.views ?? 0} />
           </div>
 
           <h1 className="font-serif text-[2rem] font-bold leading-[1.12] text-foreground text-balance md:text-[2.7rem]">
