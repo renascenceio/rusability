@@ -11,16 +11,26 @@ import { CtaBand } from "@/components/site/CtaBand";
 
 const NEWS_ACCENT: Record<string, string> = {
   tech: "var(--accent)",
+  ai: "var(--primary)",
   marketing: "var(--primary)",
   business: "var(--success)",
+  fintech: "var(--success)",
+  biotech: "var(--gold)",
+  startups: "var(--gold)",
+  ecommerce: "var(--success)",
   science: "var(--gold)",
 };
 
 const TABS: { slug: string; label: string }[] = [
   { slug: "all", label: "Все" },
   { slug: "tech", label: "Технологии" },
-  { slug: "marketing", label: "Маркетинг" },
+  { slug: "ai", label: "Нейросети" },
   { slug: "business", label: "Бизнес" },
+  { slug: "marketing", label: "Маркетинг" },
+  { slug: "fintech", label: "Финтех" },
+  { slug: "biotech", label: "Биотех" },
+  { slug: "startups", label: "Стартапы" },
+  { slug: "ecommerce", label: "E-commerce" },
   { slug: "science", label: "Наука" },
 ];
 
@@ -79,10 +89,25 @@ export function NewsBrowser({
     return [{ slug: "all", label: "Все" }, ...rest.map((t) => ({ slug: t.slug, label: t.label }))];
   }, [news]);
 
+  // Real count of items published today (the header used to label the TOTAL as
+  // "сегодня", which was misleading — e.g. "66 материалов сегодня").
+  const todayCount = useMemo(() => {
+    const now = new Date();
+    return news.filter((n) => {
+      const d = new Date(n.publishedAt);
+      return (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate()
+      );
+    }).length;
+  }, [news]);
+
   const lead = filtered[0];
   const alsoImportant = filtered.slice(1, 6);
-  const trio = filtered.slice(6, 9);
-  const fresh = filtered.slice(9, 14);
+  const keyLines = filtered.slice(6, 11); // one-liner "Коротко" strip
+  const trio = filtered.slice(11, 14);
+  const fresh = filtered.slice(14, 19);
 
   return (
     <div>
@@ -91,7 +116,7 @@ export function NewsBrowser({
         <div>
           <h1 className="font-serif text-5xl font-black text-[var(--foreground)]">Новости</h1>
           <p className="mt-2 text-[var(--muted-foreground)]">
-            Живая лента · {news.length} материалов сегодня
+            Живая лента · {news.length.toLocaleString("ru-RU")} материалов
           </p>
         </div>
         <div className="relative w-full md:w-72">
@@ -113,7 +138,7 @@ export function NewsBrowser({
         rightSlot={
           <span className="flex items-center gap-2 text-xs font-semibold text-[var(--success)]">
             <span className="h-2 w-2 rounded-full bg-[var(--success)]" />
-            {news.length} новостей сегодня
+            {todayCount > 0 ? `${todayCount} за сегодня` : "лента активна"}
           </span>
         }
       />
@@ -176,6 +201,39 @@ export function NewsBrowser({
               </div>
             </aside>
           </section>
+
+          {/* Коротко — up to 5 key one-liners, smaller than "Также важно" */}
+          {keyLines.length > 0 && (
+            <section className="border-t border-[var(--border)] py-6">
+              <p className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+                <span className="h-px w-6 bg-[var(--muted-foreground)]" />
+                Коротко
+              </p>
+              <ul className="divide-y divide-[var(--border)]">
+                {keyLines.map((n) => (
+                  <li key={n.id}>
+                    <Link
+                      href={`/news/${n.slug}`}
+                      className="group flex items-baseline gap-3 py-2.5"
+                    >
+                      <span
+                        className="shrink-0 text-[10px] font-bold uppercase tracking-[0.08em]"
+                        style={{ color: NEWS_ACCENT[n.category] ?? "var(--primary)" }}
+                      >
+                        {newsCategoryName(n.category)}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
+                        {n.title}
+                      </span>
+                      <span className="shrink-0 text-[11px] text-[var(--muted-foreground)]">
+                        {n.timeLabel.replace(" назад", "")}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* 3-column row */}
           {trio.length > 0 && (

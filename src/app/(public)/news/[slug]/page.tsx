@@ -23,6 +23,11 @@ const NEWS_BAR: Record<string, string> = {
   marketing: "#c2703d",
   business: "#4d5aff",
   science: "#4d8f6b",
+  ai: "#7a5cff",
+  fintech: "#2f9e7d",
+  biotech: "#c74d7a",
+  startups: "#d08a2c",
+  ecommerce: "#4d8f6b",
 };
 
 /** ~180 wpm reading estimate from the body word count. */

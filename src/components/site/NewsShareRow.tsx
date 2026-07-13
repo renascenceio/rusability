@@ -60,7 +60,7 @@ export function NewsShareRow({
           <a
             href={sourceUrl}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="nofollow noopener noreferrer"
             className="font-medium text-foreground hover:underline"
           >
             {source}

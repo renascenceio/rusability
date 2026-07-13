@@ -13,7 +13,17 @@ const parser = new Parser({ timeout: 15000, headers: { "User-Agent": "Mozilla/5.
 
 const MAX_PER_SOURCE = 3; // cap new items ingested per source per run
 const MAX_CREATED_PER_RUN = 24; // global cap so one run stays within time/cost budget
-const CATS: NewsCategory[] = ["tech", "marketing", "business", "science"];
+const CATS: NewsCategory[] = [
+  "tech",
+  "marketing",
+  "business",
+  "science",
+  "fintech",
+  "biotech",
+  "ai",
+  "startups",
+  "ecommerce",
+];
 
 function normCategory(c: string | null): NewsCategory {
   return CATS.includes(c as NewsCategory) ? (c as NewsCategory) : "business";
