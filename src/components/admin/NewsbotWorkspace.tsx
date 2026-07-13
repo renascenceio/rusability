@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil, PenLine, Ban } from "lucide-react";
+import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil, PenLine, Ban, Newspaper, Scale } from "lucide-react";
 import { Panel, AdminButton, Tag } from "@/components/admin/ui";
 import { NEWS_CATEGORIES, newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
@@ -18,6 +18,8 @@ import {
   blockNewsTopic,
   unblockNewsTopic,
   addNewsBlockedTerm,
+  releaseDisputedNews,
+  rejectDisputedNews,
 } from "@/app/admin/ai-content/actions";
 
 type Source = {
@@ -52,13 +54,14 @@ type FeedItem = {
   publishedAt: string;
 };
 
-type TabKey = "feed" | "sources" | "pipeline" | "log";
+type TabKey = "feed" | "sources" | "pipeline" | "disputed" | "log";
 
 const STATUS: Record<string, { label: string; tone: "neutral" | "primary" | "success" | "warn" | "danger" | "gold" }> = {
   queued: { label: "В очереди", tone: "gold" },
   review: { label: "На проверке", tone: "primary" },
   published: { label: "Опубликовано", tone: "success" },
   rejected: { label: "Отклонено ИИ", tone: "danger" },
+  disputed: { label: "Спорное", tone: "warn" },
 };
 
 function initials(name: string) {
@@ -96,6 +99,7 @@ export function NewsbotWorkspace({
   reviewCount,
   writeQueueCount,
   rejectedCount,
+  disputedCount,
 }: {
   sources: Source[];
   runs: Run[];
@@ -107,6 +111,7 @@ export function NewsbotWorkspace({
   reviewCount: number;
   writeQueueCount: number;
   rejectedCount: number;
+  disputedCount: number;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -114,7 +119,9 @@ export function NewsbotWorkspace({
   const [tab, setTab] = useState<TabKey>("feed");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: "", url: "", category: "business" });
-  const [statusFilter, setStatusFilter] = useState<"all" | "queued" | "review" | "published" | "rejected">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "queued" | "review" | "published" | "rejected" | "disputed"
+  >("all");
   const [blockingId, setBlockingId] = useState<string | null>(null);
   const [blockTerm, setBlockTerm] = useState("");
   const [newTerm, setNewTerm] = useState("");
@@ -133,10 +140,13 @@ export function NewsbotWorkspace({
     [pipeline, statusFilter],
   );
 
+  const disputedItems = useMemo(() => pipeline.filter((p) => p.pipeline === "disputed"), [pipeline]);
+
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
     { key: "feed", label: "Лента" },
     { key: "sources", label: "Источники" },
     { key: "pipeline", label: "Конвейер", badge: writeQueueCount },
+    { key: "disputed", label: "Спорные", badge: disputedCount },
     { key: "log", label: "Журнал" },
   ];
 
@@ -144,6 +154,7 @@ export function NewsbotWorkspace({
     { key: "all", label: "Все", n: pipeline.length },
     { key: "queued", label: "В очереди", n: writeQueueCount },
     { key: "review", label: "На проверке", n: reviewCount },
+    { key: "disputed", label: "Спорные", n: disputedCount },
     { key: "published", label: "Опубликовано", n: totalPublished },
     { key: "rejected", label: "Отклонено", n: rejectedCount },
   ];
@@ -494,14 +505,22 @@ export function NewsbotWorkspace({
                           <AdminButton
                             variant="ghost"
                             disabled={pending}
-                            title="Сообщить боту, что такие новости собирать не нужно"
+                            title="Убрать материал и научить бота: это не та новость"
+                            onClick={() => act(() => blockNewsTopic(it.id, ""))}
+                          >
+                            <Ban size={14} /> Неверная тема
+                          </AdminButton>
+                          <button
+                            title="Заблокировать по стоп-слову"
+                            disabled={pending}
+                            className="rounded-md border border-[var(--border)] p-1.5 text-[var(--muted-foreground)] hover:bg-[var(--surface-2)] hover:text-[var(--danger)]"
                             onClick={() => {
                               setBlockingId(blocking ? null : it.id);
                               setBlockTerm(suggestTerm(it.originalTitle || it.title));
                             }}
                           >
-                            <Ban size={14} /> Неверная тема
-                          </AdminButton>
+                            <Plus size={14} />
+                          </button>
                           <button
                             title="Убрать"
                             disabled={pending}
@@ -546,6 +565,78 @@ export function NewsbotWorkspace({
             )}
           </Panel>
         </div>
+      )}
+
+      {/* ---- DISPUTED (borderline: news or article?) ---- */}
+      {tab === "disputed" && (
+        <Panel title={`Спорные материалы (${disputedItems.length})`}>
+          <p className="mb-4 flex items-start gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3 text-sm text-[var(--muted-foreground)]">
+            <Scale size={16} className="mt-0.5 shrink-0 text-[var(--warn)]" />
+            <span>
+              ИИ засомневался: это новость или статья (либо неясен регион). Опубликуйте как новость или отклоните —
+              бот учится на ваших решениях и в следующий раз классифицирует такие материалы точнее.
+            </span>
+          </p>
+          {disputedItems.length === 0 ? (
+            <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
+              Спорных материалов нет. Пограничные случаи (например, аналитический комментарий по свежему поводу)
+              появятся здесь.
+            </p>
+          ) : (
+            <ul className="divide-y divide-[var(--border)]">
+              {disputedItems.map((it) => (
+                <li key={it.id} className="py-4">
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-3)] text-[11px] font-bold text-[var(--muted-foreground)]">
+                      {initials(it.source)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold text-[var(--foreground)]">{it.title}</div>
+                      {it.excerpt && (
+                        <div className="mt-1 line-clamp-2 text-sm text-[var(--muted-foreground)]">{it.excerpt}</div>
+                      )}
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                        <span>{it.source}</span>
+                        <span>·</span>
+                        <span>{newsCategoryName(it.category)}</span>
+                        <span>·</span>
+                        <span>{timeAgo(it.at)}</span>
+                        {it.sourceUrl && (
+                          <a
+                            href={it.sourceUrl}
+                            target="_blank"
+                            rel="nofollow noopener noreferrer"
+                            className="inline-flex items-center gap-0.5 text-[var(--primary)] hover:underline"
+                          >
+                            источник <ExternalLink size={11} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 pl-14">
+                    <AdminButton
+                      variant="primary"
+                      disabled={pending}
+                      title="Опубликовать этот материал как новость (и научить бота)"
+                      onClick={() => act(() => releaseDisputedNews(it.id))}
+                    >
+                      <Newspaper size={14} /> Опубликовать как новость
+                    </AdminButton>
+                    <AdminButton
+                      variant="ghost"
+                      disabled={pending}
+                      title="Это не новость — отклонить (и научить бота)"
+                      onClick={() => act(() => rejectDisputedNews(it.id))}
+                    >
+                      <X size={14} /> Это не новость
+                    </AdminButton>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
       )}
 
       {/* ---- LOG ---- */}
