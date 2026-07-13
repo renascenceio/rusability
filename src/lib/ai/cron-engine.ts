@@ -20,12 +20,27 @@ import type { CategorySlug } from "@/lib/types";
 
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000; // Europe/Moscow = UTC+3, no DST
 
+/**
+ * Daily publishing window in Moscow time. Publishing begins at START (the agreed
+ * 09:00 MSK) and no new publish is started after END. The per-article drip
+ * interval is derived from this window / maxPerDay, so raising the daily limit
+ * automatically tightens the spacing (and vice-versa) — the drip always spreads
+ * the day's quota evenly across the window.
+ */
+const PUBLISH_START_HOUR_MSK = 9;
+const PUBLISH_END_HOUR_MSK = 23;
+
 /** Current wall clock in Moscow, read via getUTC* on a shifted Date. */
 function mskNow(now = new Date()): Date {
   return new Date(now.getTime() + MSK_OFFSET_MS);
 }
 function mskDayKey(d: Date): string {
   return `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
+}
+/** Start of the current Moscow calendar day, expressed as a UTC Date. */
+function startOfMskDayUtc(now = new Date()): Date {
+  const w = mskNow(now);
+  return new Date(Date.UTC(w.getUTCFullYear(), w.getUTCMonth(), w.getUTCDate()) - MSK_OFFSET_MS);
 }
 const WEEKDAY_TOKENS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -51,15 +66,26 @@ async function getSettings() {
 async function paceAllowsPublish(): Promise<boolean> {
   const s = await getSettings();
 
-  // Max per calendar day (Moscow).
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  // Only publish inside the daily Moscow window (starts at the agreed hour).
+  const mskHour = mskNow().getUTCHours();
+  if (mskHour < PUBLISH_START_HOUR_MSK || mskHour >= PUBLISH_END_HOUR_MSK) return false;
+
+  // Hard ceiling: max publishes per Moscow calendar day (resets at 00:00 MSK,
+  // so yesterday's manual bulk runs never freeze today's auto-publishing).
+  const dayStart = startOfMskDayUtc();
   const [{ n: publishedToday }] = await db
     .select({ n: sql<number>`count(*)::int` })
     .from(articles)
-    .where(and(eq(articles.status, "published"), gte(articles.publishedAt, since)));
+    .where(and(eq(articles.status, "published"), gte(articles.publishedAt, dayStart)));
   if (publishedToday >= s.maxPerDay) return false;
 
-  // Min hours between publishes.
+  // Even drip: spacing is auto-derived from the daily quota spread across the
+  // publishing window, so raising maxPerDay tightens the interval automatically.
+  // An explicit minHoursBetween (admin) acts as a floor if it's larger.
+  const windowH = PUBLISH_END_HOUR_MSK - PUBLISH_START_HOUR_MSK;
+  const derivedGapH = s.maxPerDay > 0 ? windowH / s.maxPerDay : windowH;
+  const minGapH = Math.max(s.minHoursBetween ?? 0, derivedGapH);
+
   const last = await db
     .select({ publishedAt: articles.publishedAt })
     .from(articles)
@@ -68,7 +94,7 @@ async function paceAllowsPublish(): Promise<boolean> {
     .limit(1);
   if (last[0]?.publishedAt) {
     const elapsedH = (Date.now() - new Date(last[0].publishedAt).getTime()) / 36e5;
-    if (elapsedH < s.minHoursBetween) return false;
+    if (elapsedH < minGapH) return false;
   }
   return true;
 }

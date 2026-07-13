@@ -5,7 +5,8 @@ import { news, newsbotSources, newsbotRuns, contentSettings } from "@/lib/db/sch
 import { asc, count, eq, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { rewriteNews } from "./generate-news";
-import { isBlockedItem } from "./content-filter";
+import { isBlockedItem, matchesBlockedTerm } from "./content-filter";
+import { getBlockedTerms } from "@/lib/data/news-blocklist";
 import { slugify } from "@/lib/utils";
 import type { NewsCategory } from "@/lib/types";
 
@@ -105,6 +106,9 @@ export async function collectNews(): Promise<{
   const sources = await db.select().from(newsbotSources).where(eq(newsbotSources.active, true));
   if (sources.length === 0) return { fetched: 0, queued: 0, blocked: 0, message: "нет активных источников" };
 
+  // Admin "wrong topic" stop-list — dropped in addition to the static filter.
+  const blockedTerms = await getBlockedTerms();
+
   let fetched = 0;
   let queued = 0;
   let blocked = 0;
@@ -142,6 +146,13 @@ export async function collectNews(): Promise<{
       // Cheap keyword pre-filter — drop banned/off-topic before it ever costs AI.
       const gate = isBlockedItem({ title: sourceTitle, summary: sourceSummary });
       if (gate.blocked) {
+        blocked++;
+        seen.add(link);
+        continue;
+      }
+
+      // Admin "wrong topic" stop-list — editorial feedback from the pipeline.
+      if (matchesBlockedTerm(`${sourceTitle} ${sourceSummary}`, blockedTerms)) {
         blocked++;
         seen.add(link);
         continue;

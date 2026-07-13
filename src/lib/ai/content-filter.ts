@@ -317,6 +317,37 @@ export function isBlockedItem(input: { title?: string | null; summary?: string |
   return { blocked: reason !== null, reason };
 }
 
+/** Normalise text for admin stop-term matching (lowercase, ё→е, collapse spaces). */
+function normForTerms(s: string): string {
+  return s.toLowerCase().replace(/ё/g, "е").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Match text against an admin-managed blocklist of stop-terms (the "неверная
+ * тема" feedback the editor gives from the admin). Returns the first matching
+ * term or null. A multi-word term matches as a normalised substring (phrase);
+ * a single word matches as a whole token OR as a ≥4-char prefix stem, so
+ * inflected forms are caught (e.g. blocking "аэрофлот" also drops "аэрофлота").
+ */
+export function matchesBlockedTerm(text: string, terms: string[]): string | null {
+  if (!text || !terms?.length) return null;
+  const norm = normForTerms(text);
+  const tokens = new Set(tokenize(text));
+  for (const raw of terms) {
+    const term = normForTerms(raw);
+    if (!term) continue;
+    if (term.includes(" ")) {
+      if (norm.includes(term)) return raw;
+    } else {
+      if (tokens.has(term)) return raw;
+      if (term.length >= 4) {
+        for (const t of tokens) if (t.startsWith(term)) return raw;
+      }
+    }
+  }
+  return null;
+}
+
 /**
  * Human-readable editorial safety policy, injected into AI news/article
  * prompts as a hard second-layer gate (in addition to the keyword pre-filter).

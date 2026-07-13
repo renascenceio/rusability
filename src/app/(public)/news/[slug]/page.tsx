@@ -6,6 +6,7 @@ import { newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
 import { NewsSource } from "@/components/site/NewsShareRow";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
+import { ViewCounter } from "@/components/site/ViewCounter";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 
 export async function generateStaticParams() {
@@ -83,6 +84,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             <span className="text-muted-foreground">
               {formatDate(news.publishedAt)} · {minutes} мин
             </span>
+            <ViewCounter kind="news" contentId={news.id} initialViews={news.views ?? 0} />
           </div>
 
           <h1 className="font-serif text-[2rem] font-bold leading-[1.12] text-foreground text-balance md:text-[2.7rem]">

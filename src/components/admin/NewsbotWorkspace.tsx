@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil, PenLine } from "lucide-react";
+import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil, PenLine, Ban } from "lucide-react";
 import { Panel, AdminButton, Tag } from "@/components/admin/ui";
 import { NEWS_CATEGORIES, newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
@@ -14,6 +14,10 @@ import {
   deleteNewsSource,
   publishNews,
   discardNews,
+  removeNewsItem,
+  blockNewsTopic,
+  unblockNewsTopic,
+  addNewsBlockedTerm,
 } from "@/app/admin/ai-content/actions";
 
 type Source = {
@@ -26,15 +30,17 @@ type Source = {
   lastFetchedAt: string | null;
 };
 type Run = { id: number; status: string; fetched: number; created: number; message: string; startedAt: string };
-type QueueItem = {
+type PipelineItem = {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   category: string;
   source: string;
   sourceUrl: string | null;
   originalTitle: string | null;
-  publishedAt: string;
+  pipeline: string;
+  at: string;
 };
 type FeedItem = {
   id: string;
@@ -46,7 +52,14 @@ type FeedItem = {
   publishedAt: string;
 };
 
-type TabKey = "feed" | "sources" | "queue" | "log";
+type TabKey = "feed" | "sources" | "pipeline" | "log";
+
+const STATUS: Record<string, { label: string; tone: "neutral" | "primary" | "success" | "warn" | "danger" | "gold" }> = {
+  queued: { label: "В очереди", tone: "gold" },
+  review: { label: "На проверке", tone: "primary" },
+  published: { label: "Опубликовано", tone: "success" },
+  rejected: { label: "Отклонено ИИ", tone: "danger" },
+};
 
 function initials(name: string) {
   return name.replace(/[^A-Za-zА-Яа-я0-9]/g, "").slice(0, 3).toUpperCase() || "SRC";
@@ -62,24 +75,38 @@ function timeAgo(iso: string) {
   return formatDate(iso);
 }
 
+/** Suggest a stop-term from a headline: prefer a capitalised proper noun. */
+function suggestTerm(title: string): string {
+  const words = title
+    .split(/\s+/)
+    .map((w) => w.replace(/[^0-9A-Za-zА-Яа-яЁё-]/g, ""))
+    .filter((w) => w.length > 3);
+  const proper = words.find((w) => /^[А-ЯA-ZЁ]/.test(w));
+  return (proper || words[0] || "").toLowerCase();
+}
+
 export function NewsbotWorkspace({
   sources,
   runs,
-  queue,
+  pipeline,
   feed,
+  blockedTerms,
   totalPublished,
   publishedToday,
-  queueCount,
+  reviewCount,
   writeQueueCount,
+  rejectedCount,
 }: {
   sources: Source[];
   runs: Run[];
-  queue: QueueItem[];
+  pipeline: PipelineItem[];
   feed: FeedItem[];
+  blockedTerms: string[];
   totalPublished: number;
   publishedToday: number;
-  queueCount: number;
+  reviewCount: number;
   writeQueueCount: number;
+  rejectedCount: number;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -87,6 +114,10 @@ export function NewsbotWorkspace({
   const [tab, setTab] = useState<TabKey>("feed");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: "", url: "", category: "business" });
+  const [statusFilter, setStatusFilter] = useState<"all" | "queued" | "review" | "published" | "rejected">("all");
+  const [blockingId, setBlockingId] = useState<string | null>(null);
+  const [blockTerm, setBlockTerm] = useState("");
+  const [newTerm, setNewTerm] = useState("");
 
   function act(fn: () => Promise<unknown>) {
     setMsg(null);
@@ -97,16 +128,29 @@ export function NewsbotWorkspace({
     });
   }
 
+  const filteredPipeline = useMemo(
+    () => (statusFilter === "all" ? pipeline : pipeline.filter((p) => p.pipeline === statusFilter)),
+    [pipeline, statusFilter],
+  );
+
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
     { key: "feed", label: "Лента" },
     { key: "sources", label: "Источники" },
-    { key: "queue", label: "Очередь", badge: queueCount },
+    { key: "pipeline", label: "Конвейер", badge: writeQueueCount },
     { key: "log", label: "Журнал" },
+  ];
+
+  const statusFilters: { key: typeof statusFilter; label: string; n: number }[] = [
+    { key: "all", label: "Все", n: pipeline.length },
+    { key: "queued", label: "В очереди", n: writeQueueCount },
+    { key: "review", label: "На проверке", n: reviewCount },
+    { key: "published", label: "Опубликовано", n: totalPublished },
+    { key: "rejected", label: "Отклонено", n: rejectedCount },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header row: status + add */}
+      {/* Header row: status + actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Tag tone="success">
@@ -144,12 +188,12 @@ export function NewsbotWorkspace({
         </div>
       </div>
 
-      {/* KPI row */}
+      {/* KPI row — real pipeline statuses */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard value={totalPublished} label="Опубликовано всего" tone="var(--primary)" />
         <StatCard value={publishedToday} label="Опубликовано за 24 часа" tone="var(--success)" />
         <StatCard value={writeQueueCount} label="В очереди на написание" tone="var(--gold)" />
-        <StatCard value={queueCount} label="В очереди на модерацию" tone="var(--gold)" />
+        <StatCard value={rejectedCount} label="Отклонено ИИ" tone="var(--danger)" />
       </div>
 
       {/* Tabs */}
@@ -199,11 +243,7 @@ export function NewsbotWorkspace({
                     <span className="hidden shrink-0 text-sm text-[var(--muted-foreground)] sm:block">
                       {newsCategoryName(f.category)}
                     </span>
-                    {inReview ? (
-                      <Tag tone="gold">Пишу</Tag>
-                    ) : (
-                      <Tag tone="success">Опубл.</Tag>
-                    )}
+                    {inReview ? <Tag tone="gold">Пишу</Tag> : <Tag tone="success">Опубл.</Tag>}
                     {inReview ? (
                       <AdminButton variant="ghost" disabled={pending} onClick={() => act(() => discardNews(f.id))}>
                         Пропустить
@@ -329,46 +369,183 @@ export function NewsbotWorkspace({
         </Panel>
       )}
 
-      {/* ---- QUEUE ---- */}
-      {tab === "queue" && (
-        <Panel title={`Очередь модерации (${queue.length})`}>
-          {queue.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
-              Очередь пуста. Запустите сбор — переписанные новости появятся здесь для одобрения.
+      {/* ---- PIPELINE (conveyor: what's gathered + statuses + wrong-topic) ---- */}
+      {tab === "pipeline" && (
+        <div className="space-y-4">
+          {/* Blocked topics manager */}
+          <Panel title="Заблокированные темы">
+            <p className="mb-3 text-sm text-[var(--muted-foreground)]">
+              Темы, которые бот больше не собирает. Отметьте «Неверная тема» у любого материала ниже — его ключевое
+              слово попадёт сюда, и такие новости перестанут появляться.
             </p>
-          ) : (
-            <div className="space-y-3">
-              {queue.map((q) => (
-                <div key={q.id} className="rounded-xl border border-[var(--border)] p-4">
-                  <div className="flex items-center gap-2">
-                    <Tag tone="primary">{newsCategoryName(q.category)}</Tag>
-                    <span className="text-xs text-[var(--muted-foreground)]">{q.source}</span>
-                    {q.sourceUrl && (
-                      <a
-                        href={q.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-0.5 text-xs text-[var(--primary)] hover:underline"
-                      >
-                        источник <ExternalLink size={11} />
-                      </a>
-                    )}
-                  </div>
-                  <h3 className="mt-1.5 font-serif text-lg font-bold text-[var(--foreground)]">{q.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-[var(--muted-foreground)]">{q.excerpt}</p>
-                  <div className="mt-3 flex gap-2">
-                    <AdminButton disabled={pending} onClick={() => act(() => publishNews(q.id))}>
-                      <Check size={15} /> Опубликовать
-                    </AdminButton>
-                    <AdminButton variant="ghost" disabled={pending} onClick={() => act(() => discardNews(q.id))}>
-                      <X size={15} /> Отклонить
-                    </AdminButton>
-                  </div>
-                </div>
+            {blockedTerms.length > 0 ? (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {blockedTerms.map((t) => (
+                  <span
+                    key={t}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-sm text-[var(--foreground)]"
+                  >
+                    {t}
+                    <button
+                      title="Разблокировать"
+                      disabled={pending}
+                      onClick={() => act(() => unblockNewsTopic(t))}
+                      className="text-[var(--muted-foreground)] hover:text-[var(--danger)]"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mb-3 text-sm text-[var(--muted-foreground)]">Пока нет заблокированных тем.</p>
+            )}
+            <div className="flex gap-2">
+              <input
+                value={newTerm}
+                onChange={(e) => setNewTerm(e.target.value)}
+                placeholder="Добавить стоп-слово или тему вручную…"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+              />
+              <AdminButton
+                variant="ghost"
+                disabled={pending || !newTerm.trim()}
+                onClick={() =>
+                  act(async () => {
+                    const r = await addNewsBlockedTerm(newTerm.trim());
+                    setNewTerm("");
+                    return r;
+                  })
+                }
+              >
+                <Ban size={15} /> Заблокировать
+              </AdminButton>
+            </div>
+          </Panel>
+
+          <Panel title={`Конвейер новостей (${filteredPipeline.length})`}>
+            {/* Status filter chips */}
+            <div className="mb-4 flex flex-wrap gap-2">
+              {statusFilters.map((s) => (
+                <button
+                  key={s.key}
+                  onClick={() => setStatusFilter(s.key)}
+                  className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${
+                    statusFilter === s.key
+                      ? "bg-[var(--primary)] text-white"
+                      : "border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {s.label} <span className="opacity-70">{s.n}</span>
+                </button>
               ))}
             </div>
-          )}
-        </Panel>
+
+            {filteredPipeline.length === 0 ? (
+              <p className="py-8 text-center text-sm text-[var(--muted-foreground)]">
+                Нет материалов в этом статусе. Запустите сбор — собранные новости появятся здесь.
+              </p>
+            ) : (
+              <ul className="divide-y divide-[var(--border)]">
+                {filteredPipeline.map((it) => {
+                  const st = STATUS[it.pipeline] ?? STATUS.published;
+                  const isPublished = it.pipeline === "published";
+                  const isReview = it.pipeline === "review";
+                  const displayTitle = it.pipeline === "queued" ? it.originalTitle || it.title : it.title;
+                  const blocking = blockingId === it.id;
+                  return (
+                    <li key={it.id} className="py-3.5">
+                      <div className="flex items-center gap-4">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-3)] text-[11px] font-bold text-[var(--muted-foreground)]">
+                          {initials(it.source)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-semibold text-[var(--foreground)]">{displayTitle}</div>
+                          <div className="flex items-center gap-2 truncate text-xs text-[var(--muted-foreground)]">
+                            <span>{it.source}</span>
+                            <span>·</span>
+                            <span>{newsCategoryName(it.category)}</span>
+                            <span>·</span>
+                            <span>{timeAgo(it.at)}</span>
+                            {it.sourceUrl && (
+                              <a
+                                href={it.sourceUrl}
+                                target="_blank"
+                                rel="nofollow noopener noreferrer"
+                                className="inline-flex items-center gap-0.5 text-[var(--primary)] hover:underline"
+                              >
+                                источник <ExternalLink size={11} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <Tag tone={st.tone}>{st.label}</Tag>
+                        <div className="flex shrink-0 items-center gap-1">
+                          {isPublished && (
+                            <AdminButton variant="ghost" href={`/news/${it.slug}`}>
+                              <ExternalLink size={14} /> Открыть
+                            </AdminButton>
+                          )}
+                          {isReview && (
+                            <AdminButton variant="ghost" disabled={pending} onClick={() => act(() => publishNews(it.id))}>
+                              <Check size={14} /> Опубликовать
+                            </AdminButton>
+                          )}
+                          <AdminButton
+                            variant="ghost"
+                            disabled={pending}
+                            title="Сообщить боту, что такие новости собирать не нужно"
+                            onClick={() => {
+                              setBlockingId(blocking ? null : it.id);
+                              setBlockTerm(suggestTerm(it.originalTitle || it.title));
+                            }}
+                          >
+                            <Ban size={14} /> Неверная тема
+                          </AdminButton>
+                          <button
+                            title="Убрать"
+                            disabled={pending}
+                            className="rounded-md border border-[var(--border)] p-1.5 text-[var(--danger)] hover:bg-[var(--surface-2)]"
+                            onClick={() => act(() => removeNewsItem(it.id))}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Inline "wrong topic" editor */}
+                      {blocking && (
+                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+                          <span className="text-sm text-[var(--muted-foreground)]">Не собирать новости про:</span>
+                          <input
+                            value={blockTerm}
+                            onChange={(e) => setBlockTerm(e.target.value)}
+                            className="min-w-[180px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-sm"
+                          />
+                          <AdminButton
+                            disabled={pending || !blockTerm.trim()}
+                            onClick={() =>
+                              act(async () => {
+                                const r = await blockNewsTopic(it.id, blockTerm.trim());
+                                setBlockingId(null);
+                                return r;
+                              })
+                            }
+                          >
+                            <Ban size={14} /> Заблокировать тему
+                          </AdminButton>
+                          <AdminButton variant="ghost" onClick={() => setBlockingId(null)}>
+                            Отмена
+                          </AdminButton>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Panel>
+        </div>
       )}
 
       {/* ---- LOG ---- */}

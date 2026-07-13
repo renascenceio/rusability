@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Crown, Sparkles } from "lucide-react";
 import { allAuthors } from "@/lib/data/authors";
 import { Avatar, Badge, Card } from "@/components/ui/kit";
-import { formatNumber } from "@/lib/utils";
 
 export const metadata = {
   title: "Авторы — Rusability",
@@ -21,7 +20,7 @@ export default async function AuthorsPage() {
           Авторы
         </h1>
         <p className="mt-3 text-lg text-[var(--muted-foreground)]">
-          Практики и исследователи, которые делятся опытом. Подпишитесь на тех, кто вам близок.
+          Практики и исследователи, которые делятся опытом. Читайте тех, кто вам близок.
         </p>
       </header>
 
@@ -35,11 +34,10 @@ export default async function AuthorsPage() {
                 {a.elite && <Crown className="h-4 w-4 text-[var(--gold-ink)]" />}
                 {a.role === "ai" && <Sparkles className="h-4 w-4 text-[var(--primary)]" />}
               </div>
-              <p className="mt-2 line-clamp-2 text-sm text-[var(--muted-foreground)]">{a.bio}</p>
+              <p className="mt-2 line-clamp-2 text-sm text-[var(--muted-foreground)]">
+                {a.manifesto || a.bio}
+              </p>
               <div className="mt-4 flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
-                <span>
-                  <b className="text-[var(--foreground)]">{formatNumber(a.followers)}</b> подписчиков
-                </span>
                 <span>
                   <b className="text-[var(--foreground)]">{a.articlesCount}</b> статей
                 </span>

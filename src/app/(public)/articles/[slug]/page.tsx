@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Clock, Eye, Crown, Sparkles, Calendar } from "lucide-react";
+import { Clock, Crown, Sparkles, Calendar } from "lucide-react";
 import { getArticle, relatedArticles, publishedArticles } from "@/lib/data/articles";
 import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { commentsForArticle } from "@/lib/data/comments";
@@ -8,8 +8,9 @@ import { ArticleBody } from "@/components/site/ArticleBody";
 import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
+import { ViewCounter } from "@/components/site/ViewCounter";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
+import { Avatar, Badge, ButtonLink } from "@/components/ui/kit";
 import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
@@ -136,9 +137,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                     {author.name}
                     {author.elite && <Crown className="h-3.5 w-3.5 text-[var(--gold)]" />}
                   </div>
-                  <div className="text-xs text-[var(--muted-foreground)]">
-                    {formatCount(author.followers)} подписчиков
-                  </div>
+                  {author.manifesto && (
+                    <div className="text-xs text-[var(--muted-foreground)] line-clamp-1">
+                      {author.manifesto}
+                    </div>
+                  )}
                 </div>
               </Link>
             )}
@@ -153,9 +156,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <span className="inline-flex items-center gap-1">
                 <Clock className="h-4 w-4" /> {article.readingMinutes} мин
               </span>
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-4 w-4" /> {formatCount(article.views)}
-              </span>
+              <ViewCounter kind="article" contentId={article.id} initialViews={article.views} />
             </div>
           </div>
         </header>

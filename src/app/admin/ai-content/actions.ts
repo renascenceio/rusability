@@ -12,10 +12,12 @@ import {
   news,
   newsbotSources,
 } from "@/lib/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { requireRole, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { runCron, runDueCrons } from "@/lib/ai/cron-engine";
 import { runNewsbot, writeQueuedNews } from "@/lib/ai/news-engine";
+import { matchesBlockedTerm } from "@/lib/ai/content-filter";
+import { addBlockedTerm, removeBlockedTerm } from "@/lib/data/news-blocklist";
 
 const rid = () => Math.random().toString(36).slice(2, 10);
 const guard = () => requireRole(ADMIN_ROLES);
@@ -209,6 +211,62 @@ export async function discardNews(id: string) {
   await db.delete(news).where(and(eq(news.id, id), eq(news.pipeline, "review")));
   revalidatePath("/admin/newsbot");
   return { ok: true };
+}
+
+/** Remove a single gathered item, whatever pipeline stage it's in. */
+export async function removeNewsItem(id: string) {
+  await guard();
+  await db.delete(news).where(eq(news.id, id));
+  revalidatePath("/admin/news");
+  return { ok: true };
+}
+
+/**
+ * "Неверная тема": teach the collector to stop gathering this kind of news.
+ * Adds `term` to the admin stop-list, removes the flagged item, and purges any
+ * still-queued items matching the term so they never get written.
+ */
+export async function blockNewsTopic(id: string, term: string) {
+  await guard();
+  const t = term.trim();
+  if (t) await addBlockedTerm(t);
+
+  // Drop the flagged item regardless of its current pipeline stage.
+  await db.delete(news).where(eq(news.id, id));
+
+  // Purge other still-queued items matching the new term (haven't cost AI yet).
+  let purged = 0;
+  if (t) {
+    const queued = await db
+      .select({ id: news.id, title: news.title, excerpt: news.excerpt, originalTitle: news.originalTitle })
+      .from(news)
+      .where(eq(news.pipeline, "queued"));
+    const hitIds = queued
+      .filter((r) => matchesBlockedTerm(`${r.originalTitle ?? r.title} ${r.excerpt ?? ""}`, [t]))
+      .map((r) => r.id);
+    if (hitIds.length) {
+      await db.delete(news).where(inArray(news.id, hitIds));
+      purged = hitIds.length;
+    }
+  }
+  revalidatePath("/admin/news");
+  return { ok: true, purged, term: t, message: `Тема «${t}» заблокирована${purged ? `, удалено из очереди: ${purged}` : ""}` };
+}
+
+/** Remove a term from the "wrong topic" stop-list. */
+export async function unblockNewsTopic(term: string) {
+  await guard();
+  const terms = await removeBlockedTerm(term);
+  revalidatePath("/admin/news");
+  return { ok: true, terms, message: `Тема «${term.trim()}» разблокирована` };
+}
+
+/** Add a term to the stop-list directly (manual entry). */
+export async function addNewsBlockedTerm(term: string) {
+  await guard();
+  const terms = await addBlockedTerm(term);
+  revalidatePath("/admin/news");
+  return { ok: true, terms };
 }
 
 /* ---------------- Manual "run all due" ---------------- */

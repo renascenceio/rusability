@@ -21,6 +21,7 @@ export function mapAuthor(r: Row): Author {
     bio: r.bio,
     archetype: r.archetype ?? undefined,
     location: r.location ?? undefined,
+    manifesto: r.manifesto ?? undefined,
     followers: r.followers,
     articlesCount: r.articlesCount,
     elite: r.elite,
