@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil } from "lucide-react";
+import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil, PenLine } from "lucide-react";
 import { Panel, AdminButton, Tag } from "@/components/admin/ui";
 import { NEWS_CATEGORIES, newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
 import {
   runNewsNow,
+  runNewsWriteNow,
   toggleNewsSource,
   addNewsSource,
   deleteNewsSource,
@@ -69,6 +70,7 @@ export function NewsbotWorkspace({
   totalPublished,
   publishedToday,
   queueCount,
+  writeQueueCount,
 }: {
   sources: Source[];
   runs: Run[];
@@ -77,6 +79,7 @@ export function NewsbotWorkspace({
   totalPublished: number;
   publishedToday: number;
   queueCount: number;
+  writeQueueCount: number;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -117,6 +120,19 @@ export function NewsbotWorkspace({
             <Play size={16} /> Запустить сбор
           </AdminButton>
           <AdminButton
+            variant="ghost"
+            disabled={pending || writeQueueCount === 0}
+            onClick={() => act(() => runNewsWriteNow())}
+            title="Переписать и опубликовать собранные новости из очереди"
+          >
+            <PenLine size={16} /> Написать из очереди
+            {writeQueueCount > 0 && (
+              <span className="ml-1 rounded-full bg-[var(--gold)]/20 px-1.5 py-0.5 text-[11px] font-semibold text-[var(--gold)]">
+                {writeQueueCount}
+              </span>
+            )}
+          </AdminButton>
+          <AdminButton
             variant="primary"
             onClick={() => {
               setTab("sources");
@@ -129,9 +145,10 @@ export function NewsbotWorkspace({
       </div>
 
       {/* KPI row */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard value={totalPublished} label="Опубликовано всего" tone="var(--primary)" />
         <StatCard value={publishedToday} label="Опубликовано за 24 часа" tone="var(--success)" />
+        <StatCard value={writeQueueCount} label="В очереди на написание" tone="var(--gold)" />
         <StatCard value={queueCount} label="В очереди на модерацию" tone="var(--gold)" />
       </div>
 

@@ -2,7 +2,7 @@ import "server-only";
 import Parser from "rss-parser";
 import { db } from "@/lib/db";
 import { news, newsbotSources, newsbotRuns, contentSettings } from "@/lib/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { asc, count, eq, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { rewriteNews } from "./generate-news";
 import { isBlockedItem } from "./content-filter";
@@ -11,8 +11,19 @@ import type { NewsCategory } from "@/lib/types";
 
 const parser = new Parser({ timeout: 15000, headers: { "User-Agent": "Mozilla/5.0 (compatible; RusabilityBot/1.0)" } });
 
-const MAX_PER_SOURCE = 3; // cap new items ingested per source per run
-const MAX_CREATED_PER_RUN = 24; // global cap so one run stays within time/cost budget
+const MAX_PER_SOURCE = 3; // cap new items ingested per source per collection run
+const MAX_QUEUED_PER_RUN = 60; // global cap per collection run (queuing is cheap — no AI)
+
+/**
+ * Writing concurrency — the number of articles the engine writes SIMULTANEOUSLY.
+ * This is the hard ceiling that keeps us within the model/gateway rate limit:
+ * we never fire more than this many AI writes at once, no matter how deep the
+ * queue is. Tune conservatively — raising it risks 429s from the provider.
+ */
+const WRITE_CONCURRENCY = 3;
+const MAX_WRITE_PER_RUN = 15; // cap writes per invocation to stay within the function time budget
+const WRITE_TIME_BUDGET_MS = 250_000; // stop picking up new items past this (maxDuration is 300s)
+
 const CATS: NewsCategory[] = [
   "tech",
   "marketing",
@@ -45,7 +56,7 @@ function cleanTitle(t: string): string {
 }
 
 async function uniqueSlug(base: string): Promise<string> {
-  let slug = base;
+  let slug = base || "news";
   for (let i = 0; i < 6; i++) {
     const hit = await db.select({ id: news.id }).from(news).where(eq(news.slug, slug)).limit(1);
     if (hit.length === 0) return slug;
@@ -55,32 +66,52 @@ async function uniqueSlug(base: string): Promise<string> {
 }
 
 /**
- * Fetch active sources, pull recent items, skip anything already ingested
- * (dedupe by originalUrl), AI-rewrite into original Russian notes, and queue
- * them for moderation (pipeline='review'). If newsAutoPublish is on, publish.
+ * Run async work over `items` with a hard cap of `concurrency` promises
+ * in flight at any moment. A fixed pool of workers pulls from a shared cursor,
+ * so we never exceed the ceiling regardless of how many items are queued.
  */
-export async function runNewsbot(): Promise<{
+async function mapPool<T, R>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
+  async function worker() {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      results[i] = await fn(items[i], i);
+    }
+  }
+  const size = Math.max(1, Math.min(concurrency, items.length));
+  await Promise.all(Array.from({ length: size }, () => worker()));
+  return results;
+}
+
+/* ============================================================================
+ * PHASE 1 — COLLECT
+ * Fetch active sources, dedupe, keyword pre-filter, and QUEUE items for later
+ * writing. No AI is called here, so this stays fast and cheap and can run
+ * frequently. Queued rows carry the source title/summary (summary parked in
+ * `excerpt`) and are invisible to the public site (pipeline='queued').
+ * ==========================================================================*/
+export async function collectNews(): Promise<{
   fetched: number;
-  created: number;
+  queued: number;
   blocked: number;
-  rejected: number;
   message: string;
 }> {
-  const settings = (await db.select().from(contentSettings).where(eq(contentSettings.id, 1)).limit(1))[0];
-  const autoPublish = settings?.newsAutoPublish ?? false;
-
   const sources = await db.select().from(newsbotSources).where(eq(newsbotSources.active, true));
-  if (sources.length === 0)
-    return { fetched: 0, created: 0, blocked: 0, rejected: 0, message: "нет активных источников" };
+  if (sources.length === 0) return { fetched: 0, queued: 0, blocked: 0, message: "нет активных источников" };
 
   let fetched = 0;
-  let created = 0;
-  let blocked = 0; // dropped by the editorial safety filter (no AI spend)
-  let rejected = 0; // dropped by the AI moderation gate (publishable=false)
+  let queued = 0;
+  let blocked = 0;
   const errors: string[] = [];
 
   for (const src of sources) {
-    if (created >= MAX_CREATED_PER_RUN) break;
+    if (queued >= MAX_QUEUED_PER_RUN) break;
     let items: Parser.Item[] = [];
     try {
       const feed = await parser.parseURL(src.url);
@@ -91,7 +122,7 @@ export async function runNewsbot(): Promise<{
       continue;
     }
 
-    // Dedupe: which of these URLs already exist?
+    // Dedupe against everything already ingested (queued/review/published).
     const urls = items.map((i) => i.link).filter(Boolean) as string[];
     const existing = urls.length
       ? await db.select({ u: news.originalUrl }).from(news).where(inArray(news.originalUrl, urls))
@@ -100,14 +131,15 @@ export async function runNewsbot(): Promise<{
 
     let perSource = 0;
     for (const item of items) {
-      if (perSource >= MAX_PER_SOURCE || created >= MAX_CREATED_PER_RUN) break;
+      if (perSource >= MAX_PER_SOURCE || queued >= MAX_QUEUED_PER_RUN) break;
       const link = item.link;
       if (!link || seen.has(link)) continue;
 
       const sourceTitle = cleanTitle(item.title ?? "");
       const sourceSummary = stripHtml((item.contentSnippet || item.content || "").slice(0, 1200)).slice(0, 600);
+      if (!sourceTitle) continue;
 
-      // Layer 1 — cheap keyword pre-filter. Drop banned topics before AI spend.
+      // Cheap keyword pre-filter — drop banned/off-topic before it ever costs AI.
       const gate = isBlockedItem({ title: sourceTitle, summary: sourceSummary });
       if (gate.blocked) {
         blocked++;
@@ -115,49 +147,31 @@ export async function runNewsbot(): Promise<{
         continue;
       }
 
-      try {
-        const rewritten = await rewriteNews({
-          sourceTitle,
-          sourceSummary,
-          sourceName: src.name,
-          category: normCategory(src.category),
-        });
-
-        // Layer 2 — AI moderation gate. Skip anything the model flags.
-        if (!rewritten.publishable) {
-          rejected++;
-          seen.add(link);
-          continue;
-        }
-
-        const now = new Date();
-        const publishedAt = item.isoDate ? new Date(item.isoDate) : now;
-        await db.insert(news).values({
-          id: nanoid(),
-          slug: await uniqueSlug(slugify(rewritten.title)),
-          title: rewritten.title,
-          excerpt: rewritten.excerpt,
-          body: rewritten.body,
-          category: rewritten.category,
-          source: src.name,
-          sourceUrl: link,
-          tags: rewritten.tags,
-          publishedAt,
-          timeLabel: "",
-          views: 0,
-          pipeline: autoPublish ? "published" : "review",
-          hot: false,
-          originalUrl: link,
-          originalTitle: sourceTitle,
-          sourceId: src.id,
-          fetchedAt: now,
-        });
-        created++;
-        perSource++;
-        seen.add(link);
-      } catch (err) {
-        errors.push(`${src.name} rewrite: ${err instanceof Error ? err.message : "error"}`);
-      }
+      const now = new Date();
+      const publishedAt = item.isoDate ? new Date(item.isoDate) : now;
+      await db.insert(news).values({
+        id: nanoid(),
+        slug: await uniqueSlug(`queued-${nanoid(6).toLowerCase()}`),
+        title: sourceTitle, // placeholder — overwritten by the AI title on write
+        excerpt: sourceSummary, // parked here so the writer can read it back
+        body: [],
+        category: normCategory(src.category),
+        source: src.name,
+        sourceUrl: link,
+        tags: [],
+        publishedAt,
+        timeLabel: "",
+        views: 0,
+        pipeline: "queued",
+        hot: false,
+        originalUrl: link,
+        originalTitle: sourceTitle,
+        sourceId: src.id,
+        fetchedAt: now,
+      });
+      queued++;
+      perSource++;
+      seen.add(link);
     }
 
     await db
@@ -166,14 +180,140 @@ export async function runNewsbot(): Promise<{
       .where(eq(newsbotSources.id, src.id));
   }
 
-  const parts = [`создано ${created}`, `отфильтровано ${blocked}`, `отклонено ИИ ${rejected}`];
+  const base = `Собрано в очередь: ${queued}, отфильтровано ${blocked}`;
+  const message = errors.length ? `${base}; замечания: ${errors.slice(0, 3).join("; ")}` : base;
+  await db.insert(newsbotRuns).values({
+    status: errors.length && queued === 0 ? "error" : "ok",
+    fetched,
+    created: queued,
+    message,
+  });
+  return { fetched, queued, blocked, message };
+}
+
+/* ============================================================================
+ * PHASE 2 — WRITE (bounded concurrency, publish instantly)
+ * Drain queued items, AI-rewrite each into an original Russian note, and the
+ * moment a note is written it is published instantly (or sent to review when
+ * auto-publish is off). Writing runs through a fixed-size worker pool so we
+ * never write more than WRITE_CONCURRENCY items at the same time.
+ * ==========================================================================*/
+export async function writeQueuedNews(opts?: {
+  max?: number;
+  concurrency?: number;
+}): Promise<{
+  written: number;
+  published: number;
+  rejected: number;
+  remaining: number;
+  message: string;
+}> {
+  const max = opts?.max ?? MAX_WRITE_PER_RUN;
+  const concurrency = opts?.concurrency ?? WRITE_CONCURRENCY;
+
+  const settings = (await db.select().from(contentSettings).where(eq(contentSettings.id, 1)).limit(1))[0];
+  const autoPublish = settings?.newsAutoPublish ?? false;
+
+  // Oldest queued first (FIFO) so nothing starves.
+  const batch = await db
+    .select()
+    .from(news)
+    .where(eq(news.pipeline, "queued"))
+    .orderBy(asc(news.fetchedAt))
+    .limit(max);
+
+  if (batch.length === 0) {
+    return { written: 0, published: 0, rejected: 0, remaining: 0, message: "очередь пуста" };
+  }
+
+  const startedAt = Date.now();
+  let published = 0;
+  let rejected = 0;
+  let written = 0;
+  let skippedForTime = 0;
+  const errors: string[] = [];
+
+  await mapPool(batch, concurrency, async (row) => {
+    // Respect the time budget: leave leftover items queued for the next run
+    // rather than risk a mid-write function timeout.
+    if (Date.now() - startedAt > WRITE_TIME_BUDGET_MS) {
+      skippedForTime++;
+      return;
+    }
+    try {
+      const rewritten = await rewriteNews({
+        sourceTitle: row.originalTitle || row.title,
+        sourceSummary: row.excerpt || "",
+        sourceName: row.source,
+        category: normCategory(row.category),
+      });
+
+      if (!rewritten.publishable) {
+        await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, row.id));
+        rejected++;
+        return;
+      }
+
+      // Written → publish instantly (or route to review when auto-publish is off).
+      await db
+        .update(news)
+        .set({
+          title: rewritten.title,
+          excerpt: rewritten.excerpt,
+          body: rewritten.body,
+          tags: rewritten.tags,
+          category: rewritten.category,
+          slug: await uniqueSlug(slugify(rewritten.title)),
+          pipeline: autoPublish ? "published" : "review",
+          publishedAt: new Date(),
+        })
+        .where(eq(news.id, row.id));
+      written++;
+      if (autoPublish) published++;
+    } catch (err) {
+      errors.push(`${row.source}: ${err instanceof Error ? err.message : "write error"}`);
+    }
+  });
+
+  const [{ n: remaining }] = await db
+    .select({ n: count() })
+    .from(news)
+    .where(eq(news.pipeline, "queued"));
+
+  const verb = autoPublish ? "опубликовано" : "в модерацию";
+  const parts = [`написано ${written} (${verb})`, `отклонено ИИ ${rejected}`];
+  if (skippedForTime) parts.push(`перенесено ${skippedForTime}`);
   const base = `Готово: ${parts.join(", ")}`;
   const message = errors.length ? `${base}; замечания: ${errors.slice(0, 3).join("; ")}` : base;
   await db.insert(newsbotRuns).values({
-    status: errors.length && created === 0 ? "error" : "ok",
-    fetched,
-    created,
+    status: errors.length && written === 0 ? "error" : "ok",
+    fetched: 0,
+    created: written,
     message,
   });
-  return { fetched, created, blocked, rejected, message };
+  return { written, published, rejected, remaining, message };
+}
+
+/* ============================================================================
+ * ORCHESTRATOR — collect, then drain a bounded batch of writes.
+ * Kept so the existing cron + the admin "Запустить сбор" button do a full
+ * cycle in one call. Return shape stays backward-compatible.
+ * ==========================================================================*/
+export async function runNewsbot(): Promise<{
+  fetched: number;
+  created: number;
+  blocked: number;
+  rejected: number;
+  message: string;
+}> {
+  const collected = await collectNews();
+  const written = await writeQueuedNews();
+  const message = `${collected.message}. ${written.message} (в очереди ещё ${written.remaining})`;
+  return {
+    fetched: collected.fetched,
+    created: written.written,
+    blocked: collected.blocked,
+    rejected: written.rejected,
+    message,
+  };
 }

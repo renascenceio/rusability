@@ -15,7 +15,7 @@ import {
 import { and, eq, sql } from "drizzle-orm";
 import { requireRole, ADMIN_ROLES } from "@/lib/auth-helpers";
 import { runCron, runDueCrons } from "@/lib/ai/cron-engine";
-import { runNewsbot } from "@/lib/ai/news-engine";
+import { runNewsbot, writeQueuedNews } from "@/lib/ai/news-engine";
 
 const rid = () => Math.random().toString(36).slice(2, 10);
 const guard = () => requireRole(ADMIN_ROLES);
@@ -159,7 +159,17 @@ export async function discardBuffered(id: string) {
 
 export async function runNewsNow() {
   await guard();
-  return runNewsbot();
+  const r = await runNewsbot();
+  revalidatePath("/admin/news");
+  return r;
+}
+
+/** Drain the writing queue now (bounded concurrency, publishes instantly). */
+export async function runNewsWriteNow() {
+  await guard();
+  const r = await writeQueuedNews();
+  revalidatePath("/admin/news");
+  return { ...r, message: r.message, created: r.written };
 }
 
 export async function toggleNewsSource(id: string, active: boolean) {
