@@ -137,6 +137,7 @@ export function CronsWorkspace({
             <input
               type="number"
               min={0}
+              step={0.5}
               value={s.minHoursBetween}
               onChange={(e) => setS({ ...s, minHoursBetween: Number(e.target.value) })}
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"

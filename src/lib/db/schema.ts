@@ -3,6 +3,7 @@ import {
   text,
   boolean,
   integer,
+  real,
   timestamp,
   numeric,
   jsonb,
@@ -342,7 +343,7 @@ export const newsbotSources = pgTable("newsbot_sources", {
 /** Single-row (id=1) global publishing pace + engine config. */
 export const contentSettings = pgTable("content_settings", {
   id: integer("id").primaryKey().default(1),
-  minHoursBetween: integer("min_hours_between").notNull().default(6),
+  minHoursBetween: real("min_hours_between").notNull().default(6),
   maxPerDay: integer("max_per_day").notNull().default(8),
   autoPublish: boolean("auto_publish").notNull().default(false),
   newsAutoPublish: boolean("news_auto_publish").notNull().default(false),
