@@ -12,6 +12,9 @@ import {
 import { desc, eq, sql } from "drizzle-orm";
 import { CronsWorkspace } from "./CronsWorkspace";
 import { ArticleTabs } from "@/components/admin/ArticleTabs";
+import { getSetting } from "@/lib/data/settings";
+
+type CronTick = { at: string; due: number; ran: number; created: number };
 
 export const metadata = { title: "Генерация статей — Rusability" };
 export const dynamic = "force-dynamic";
@@ -52,6 +55,39 @@ export default async function ArticleCronsPage() {
     ]),
   );
 
+  const cronTick = await getSetting<CronTick | null>("articles_cron_tick", null);
+
+  // Per-author article counts (published / in review / total created).
+  const articleStats = await db
+    .select({
+      authorId: articles.authorId,
+      published: sql<number>`count(*) filter (where ${articles.status} = 'published')::int`,
+      review: sql<number>`count(*) filter (where ${articles.status} = 'review')::int`,
+      created: sql<number>`count(*)::int`,
+    })
+    .from(articles)
+    .groupBy(articles.authorId);
+  const statMap = new Map(articleStats.map((s) => [s.authorId, s]));
+
+  // Planned (unused) topics per author, summed across that author's crons.
+  const plannedByAuthor = new Map<string, number>();
+  for (const c of crons) {
+    if (!c.authorId) continue;
+    const unused = topicCounts.find((t) => t.cronId === c.id)?.unused ?? 0;
+    plannedByAuthor.set(c.authorId, (plannedByAuthor.get(c.authorId) ?? 0) + unused);
+  }
+
+  const authorStats = aiAuthorRows.map((a) => ({
+    id: a.id,
+    name: a.name,
+    active: a.active,
+    category: a.category,
+    published: statMap.get(a.id)?.published ?? 0,
+    review: statMap.get(a.id)?.review ?? 0,
+    created: statMap.get(a.id)?.created ?? 0,
+    planned: plannedByAuthor.get(a.id) ?? 0,
+  }));
+
   const settings = settingsRow[0] ?? {
     minHoursBetween: 6,
     maxPerDay: 8,
@@ -90,6 +126,8 @@ export default async function ArticleCronsPage() {
           newsAutoPublish: settings.newsAutoPublish,
         }}
         authors={aiAuthorRows.map((a) => ({ id: a.id, name: a.name, active: a.active, category: a.category }))}
+        health={cronTick}
+        authorStats={authorStats}
       />
     </div>
   );

@@ -15,6 +15,7 @@ import { generateArticle } from "./generate-article";
 import { generateArticleCover } from "./generate-image";
 import { generateTopic } from "./generate-topic";
 import { slugify } from "@/lib/utils";
+import { putSetting } from "@/lib/data/settings";
 import type { CategorySlug } from "@/lib/types";
 
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000; // Europe/Moscow = UTC+3, no DST
@@ -266,22 +267,54 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
   }
 }
 
-/** How many crons to generate in parallel per batch. With ~20 hourly crons
- * each producing a long (2400+ word) article, sequential runs would blow past
- * the 300s function limit, so we fan out in bounded batches. */
+/** How many crons to generate in parallel per batch. */
 const CRON_CONCURRENCY = 4;
 
-/** Run every cron that is due right now, in bounded-concurrency batches. */
-export async function runDueCrons(): Promise<{ ran: number; created: number }> {
+/**
+ * Max crons to process in a single hourly tick. Each cron produces a long
+ * (2400+ word) article plus a cover image, so running all ~24 authors in one
+ * invocation blows past the 300s function limit and NOTHING gets produced.
+ * We instead process a small batch per tick — the least-recently-run crons
+ * first — so successive hourly ticks round-robin through everyone and the load
+ * is spread evenly across the day.
+ */
+const MAX_CRONS_PER_TICK = 4;
+
+/** Run the most-overdue due crons this tick (bounded so we never time out). */
+export async function runDueCrons(): Promise<{ due: number; ran: number; created: number }> {
   const crons = await db.select().from(articleCrons).where(eq(articleCrons.status, "active"));
-  const due = crons.filter((cron) => cronIsDue(cron));
+  const dueAll = crons.filter((cron) => cronIsDue(cron));
+
+  // Oldest-run first → fair round-robin across ticks. Never-run crons (null
+  // lastRunAt) sort to the very front so new authors start producing promptly.
+  const due = [...dueAll]
+    .sort((a, b) => {
+      const ta = a.lastRunAt ? new Date(a.lastRunAt).getTime() : 0;
+      const tb = b.lastRunAt ? new Date(b.lastRunAt).getTime() : 0;
+      return ta - tb;
+    })
+    .slice(0, MAX_CRONS_PER_TICK);
+
   let created = 0;
   for (let i = 0; i < due.length; i += CRON_CONCURRENCY) {
     const batch = due.slice(i, i + CRON_CONCURRENCY);
     const results = await Promise.all(batch.map((cron) => runCron(cron.id)));
     for (const res of results) created += res.created;
   }
-  return { ran: due.length, created };
+
+  // Record this tick so the admin health panel can show "last fired".
+  try {
+    await putSetting("articles_cron_tick", {
+      at: new Date().toISOString(),
+      due: dueAll.length,
+      ran: due.length,
+      created,
+    });
+  } catch {
+    /* non-critical */
+  }
+
+  return { due: dueAll.length, ran: due.length, created };
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Play, Pause, Trash2, Plus, Check, X, ListPlus } from "lucide-react";
+import { Play, Pause, Trash2, Plus, Check, X, ListPlus, Zap, Clock, Activity } from "lucide-react";
 import { Panel, AdminButton, Tag, Table, Th, Td, KpiCard } from "@/components/admin/ui";
 import { CATEGORIES, categoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
@@ -17,6 +17,7 @@ import {
   discardBuffered,
   runAllDueCrons,
 } from "../ai-content/actions";
+import { AuthorManager, type AuthorStat } from "./AuthorManager";
 
 type Cron = {
   id: string;
@@ -38,8 +39,32 @@ type Run = { id: number; cronId: string; status: string; articlesCreated: number
 type Buffered = { id: string; title: string; excerpt: string; category: string; authorName: string; bufferReason: string | null; createdAt: string };
 type Settings = { minHoursBetween: number; maxPerDay: number; autoPublish: boolean; newsAutoPublish: boolean };
 type AuthorOpt = { id: string; name: string; active: boolean; category: string };
+type CronHealth = { at: string; due: number; ran: number; created: number } | null;
 
 const FREQ_LABEL: Record<string, string> = { hourly: "Каждый час", daily: "Ежедневно", weekly: "Еженедельно" };
+
+/** Short human "N минут/часов назад" for the scheduler health panel. */
+function relTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.round(diffMs / 60000);
+  if (min < 1) return "только что";
+  if (min < 60) return `${min} мин назад`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `${h} ч назад`;
+  const d = Math.round(h / 24);
+  return `${d} дн назад`;
+}
+
+/** Time of the next hourly Vercel cron tick (top of the next hour, MSK label). */
+function nextTick(): string {
+  const now = new Date();
+  const next = new Date(now);
+  next.setMinutes(0, 0, 0);
+  next.setHours(now.getHours() + 1);
+  const msk = new Date(next.getTime() + 3 * 60 * 60 * 1000);
+  const hh = String(msk.getUTCHours()).padStart(2, "0");
+  return `~${hh}:00 МСК`;
+}
 
 export function CronsWorkspace({
   crons,
@@ -47,12 +72,16 @@ export function CronsWorkspace({
   buffered,
   settings,
   authors,
+  health,
+  authorStats,
 }: {
   crons: Cron[];
   runs: Run[];
   buffered: Buffered[];
   settings: Settings;
   authors: AuthorOpt[];
+  health: CronHealth;
+  authorStats: AuthorStat[];
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -101,6 +130,55 @@ export function CronsWorkspace({
         <KpiCard label="ИИ-авторов активно" value={String(authors.filter((a) => a.active).length)} />
       </div>
 
+      {/* Scheduler health */}
+      <Panel title="Состояние планировщика">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex items-start gap-3 rounded-xl border border-[var(--border)] p-4">
+            <Activity className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+                Последний запуск
+              </div>
+              <div className="mt-0.5 text-sm font-semibold text-[var(--foreground)]">
+                {health ? relTime(health.at) : "ещё не запускался"}
+              </div>
+              {health && (
+                <div className="text-xs text-[var(--muted-foreground)]">
+                  {formatDate(health.at)} · создано: {health.created}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-start gap-3 rounded-xl border border-[var(--border)] p-4">
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[var(--gold)]" />
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+                Следующий запуск
+              </div>
+              <div className="mt-0.5 text-sm font-semibold text-[var(--foreground)]">{nextTick()}</div>
+              <div className="text-xs text-[var(--muted-foreground)]">каждый час, в начале часа</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 rounded-xl border border-[var(--border)] p-4">
+            <Zap className="mt-0.5 h-4 w-4 shrink-0 text-[var(--success)]" />
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+                За один запуск
+              </div>
+              <div className="mt-0.5 text-sm font-semibold text-[var(--foreground)]">до 4 авторов</div>
+              <div className="text-xs text-[var(--muted-foreground)]">
+                по очереди (сначала те, кто дольше не запускался)
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+          Планировщик обрабатывает авторов небольшими партиями, поэтому нагрузка распределяется в
+          течение суток и не упирается в лимит времени. За полный день очередь проходит всех активных
+          авторов.
+        </p>
+      </Panel>
+
       {msg && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 text-sm text-[var(--primary)]">
           {msg}
@@ -137,6 +215,7 @@ export function CronsWorkspace({
             <input
               type="number"
               min={0}
+              step={0.5}
               value={s.minHoursBetween}
               onChange={(e) => setS({ ...s, minHoursBetween: Number(e.target.value) })}
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"
@@ -379,23 +458,36 @@ export function CronsWorkspace({
                     </span>
                   </Td>
                   <Td className="text-right">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {/* Generate one article right now (one-off, distinct from the on/off state). */}
                       <button
-                        title="Запустить сейчас"
+                        title="Сгенерировать статью сейчас"
                         disabled={pending}
-                        className="rounded-md border border-[var(--border)] p-1.5 hover:bg-[var(--muted)] disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-1.5 text-xs font-semibold hover:bg-[var(--muted)] disabled:opacity-50"
                         onClick={() => act(() => runCronNow(c.id), `run-${c.id}`)}
                       >
-                        <Play size={15} />
+                        <Zap size={14} /> Сейчас
                       </button>
-                      <button
-                        title={c.status === "active" ? "Пауза" : "Возобновить"}
-                        disabled={pending}
-                        className="rounded-md border border-[var(--border)] p-1.5 hover:bg-[var(--muted)] disabled:opacity-50"
-                        onClick={() => act(() => toggleCronStatus(c.id), `toggle-${c.id}`)}
-                      >
-                        {c.status === "active" ? <Pause size={15} /> : <Play size={15} />}
-                      </button>
+                      {/* On/off state toggle — labelled so the active state is unambiguous. */}
+                      {c.status === "active" ? (
+                        <button
+                          title="Крон включён. Нажмите, чтобы поставить на паузу."
+                          disabled={pending}
+                          className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-1.5 text-xs font-semibold text-[var(--muted-foreground)] hover:bg-[var(--muted)] disabled:opacity-50"
+                          onClick={() => act(() => toggleCronStatus(c.id), `toggle-${c.id}`)}
+                        >
+                          <Pause size={14} /> Пауза
+                        </button>
+                      ) : (
+                        <button
+                          title="Крон на паузе. Нажмите, чтобы включить."
+                          disabled={pending}
+                          className="inline-flex items-center gap-1 rounded-md border border-[var(--primary)] bg-[var(--primary-soft)] px-2 py-1.5 text-xs font-semibold text-[var(--primary)] hover:opacity-90 disabled:opacity-50"
+                          onClick={() => act(() => toggleCronStatus(c.id), `toggle-${c.id}`)}
+                        >
+                          <Play size={14} /> Включить
+                        </button>
+                      )}
                       <button
                         title="Удалить"
                         disabled={pending}
@@ -417,6 +509,9 @@ export function CronsWorkspace({
           <p className="mt-3 text-xs text-[var(--muted-foreground)]">Генерация статьи может занять до минуты…</p>
         )}
       </Panel>
+
+      {/* Per-author management: counts + article list + topic queue */}
+      <AuthorManager authors={authorStats} />
 
       {/* Moderation buffer */}
       <Panel title={`Буфер модерации (${buffered.length})`}>

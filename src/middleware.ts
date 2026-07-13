@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isGoneLink } from "@/lib/archive/known-slugs";
 import { goneHtml } from "@/lib/archive/gone-page";
+import { matchRedirect } from "@/lib/archive/redirects-edge";
 
 /**
  * SEO guard: only the canonical domain should be indexable.
@@ -86,6 +87,17 @@ function gonePage(section: "articles" | "news"): NextResponse {
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
   const { pathname } = request.nextUrl;
+
+  // Admin-defined redirects run FIRST so an explicit rule always wins over the
+  // generic old-link → 410 handling below (e.g. mapping a specific old URL to a
+  // new page instead of the archive notice).
+  const redirect = await matchRedirect(pathname);
+  if (redirect) {
+    const target = redirect.destination.startsWith("http")
+      ? redirect.destination
+      : new URL(redirect.destination, request.url).toString();
+    return NextResponse.redirect(target, redirect.statusCode);
+  }
 
   // Old nested link (slug + trailing MongoDB id / extra segment) → always the
   // branded archive page. These URLs only ever existed on the old site, so no
