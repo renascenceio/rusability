@@ -172,6 +172,7 @@ export const news = pgTable("news", {
   publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow(),
   timeLabel: text("time_label").notNull().default(""),
   views: integer("views").notNull().default(0),
+  likes: integer("likes").notNull().default(0),
   pipeline: text("pipeline"),
   hot: boolean("hot").notNull().default(false),
   /* Aggregator provenance + dedupe. originalUrl is unique to prevent re-ingest. */
@@ -212,13 +213,18 @@ export const apps = pgTable("apps", {
 
 export const comments = pgTable("comments", {
   id: text("id").primaryKey(),
+  // articleId holds the target content id for BOTH articles and news (ids are
+  // globally-unique nanoids); contentType disambiguates for admin/queries.
   articleId: text("article_id"),
+  contentType: text("content_type").notNull().default("article"),
   authorName: text("author_name").notNull(),
   authorAvatar: text("author_avatar").notNull().default(""),
   text: text("text").notNull(),
   timeLabel: text("time_label").notNull().default(""),
   likes: integer("likes").notNull().default(0),
   parentId: text("parent_id"),
+  status: text("status").notNull().default("published"),
+  ip: text("ip"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

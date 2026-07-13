@@ -7,8 +7,7 @@ import { commentsForArticle } from "@/lib/data/comments";
 import { ArticleBody } from "@/components/site/ArticleBody";
 import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
-import { CommentThread } from "@/components/site/CommentThread";
-import { ArticleActions } from "@/components/site/ArticleActions";
+import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
 import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
@@ -151,63 +150,66 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
         </header>
 
-        {/* Cover — always 16:9, cropped to fill (never letterboxed) */}
-        <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-3xl bg-[var(--surface-3)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={article.cover || "/placeholder.svg"}
-            alt={article.title}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </div>
+        <ArticleEngagement
+          kind="article"
+          contentId={article.id}
+          title={article.title}
+          initialLikes={article.claps}
+          comments={comments}
+        >
+          {/* Cover — always 16:9, cropped to fill (never letterboxed) */}
+          <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-3xl bg-[var(--surface-3)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={article.cover || "/placeholder.svg"}
+              alt={article.title}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </div>
 
-        {/* Body */}
-        <ArticleBody blocks={article.body} />
+          {/* Body */}
+          <ArticleBody blocks={article.body} />
 
-        {/* Tags */}
-        <div className="mt-10 flex flex-wrap gap-2">
-          {article.tags.map((t) => (
-            <span
-              key={t}
-              className="rounded-full bg-[var(--surface-2)] px-3 py-1.5 text-sm text-[var(--muted-foreground)]"
-            >
-              #{t}
-            </span>
-          ))}
-        </div>
+          {/* Tags */}
+          <div className="mt-10 flex flex-wrap gap-2">
+            {article.tags.map((t) => (
+              <span
+                key={t}
+                className="rounded-full bg-[var(--surface-2)] px-3 py-1.5 text-sm text-[var(--muted-foreground)]"
+              >
+                #{t}
+              </span>
+            ))}
+          </div>
 
-        {/* Actions */}
-        <ArticleActions claps={article.claps} />
-
-        {/* Author box */}
-        {author && (
-          <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
-            <div className="flex items-start gap-4">
-              <Avatar src={author.avatar} alt={author.name} size={64} elite={author.elite} />
-              <div className="flex-1">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="font-serif text-lg font-bold text-[var(--foreground)]">
-                    {author.name}
-                  </h3>
-                  {author.elite && <Crown className="h-4 w-4 text-[var(--gold)]" />}
+          {/* Author box */}
+          {author && (
+            <div className="mt-12 rounded-3xl border border-[var(--border)] bg-[var(--surface-2)] p-6">
+              <div className="flex items-start gap-4">
+                <Avatar src={author.avatar} alt={author.name} size={64} elite={author.elite} />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-serif text-lg font-bold text-[var(--foreground)]">
+                      {author.name}
+                    </h3>
+                    {author.elite && <Crown className="h-4 w-4 text-[var(--gold)]" />}
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                    {author.bio}
+                  </p>
+                  <ButtonLink
+                    href={`/authors/${author.username}`}
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                  >
+                    Профиль автора
+                  </ButtonLink>
                 </div>
-                <p className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  {author.bio}
-                </p>
-                <ButtonLink
-                  href={`/authors/${author.username}`}
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                >
-                  Профиль автора
-                </ButtonLink>
               </div>
             </div>
-          </div>
-        )}
-
-        <CommentThread comments={comments} />
+          )}
+        </ArticleEngagement>
       </div>
 
       {/* Related */}

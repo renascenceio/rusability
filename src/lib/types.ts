@@ -129,6 +129,7 @@ export interface NewsItem {
   /** relative time label like "2 часа назад" */
   timeLabel: string;
   views: number;
+  likes?: number;
   /** admin pipeline status */
   pipeline?: "queued" | "rewriting" | "review" | "published" | "rejected";
   hot?: boolean;

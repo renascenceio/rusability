@@ -1,17 +1,21 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { comments } from "@/lib/db/schema";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import type { Comment } from "@/lib/types";
 
 type Row = typeof comments.$inferSelect;
 
-/** Build a nested comment tree (one level of replies) for an article. */
-export async function commentsForArticle(articleId: string): Promise<Comment[]> {
+/**
+ * Build a nested comment tree (one level of replies) for a piece of content.
+ * Works for both articles and news — comment.articleId stores the target id
+ * (globally-unique nanoid) for either. Only published comments are returned.
+ */
+export async function commentsForArticle(contentId: string): Promise<Comment[]> {
   const rows = await db
     .select()
     .from(comments)
-    .where(eq(comments.articleId, articleId))
+    .where(and(eq(comments.articleId, contentId), eq(comments.status, "published")))
     .orderBy(asc(comments.createdAt));
   return nest(rows);
 }

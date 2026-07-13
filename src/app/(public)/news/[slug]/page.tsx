@@ -2,9 +2,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getNews, latestNews } from "@/lib/data/news";
+import { commentsForArticle } from "@/lib/data/comments";
 import { newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
-import { NewsShareRow } from "@/components/site/NewsShareRow";
+import { NewsSource } from "@/components/site/NewsShareRow";
+import { ArticleEngagement } from "@/components/site/ArticleEngagement";
+import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 
 export async function generateStaticParams() {
   return (await latestNews()).map((n) => ({ slug: n.slug }));
@@ -44,7 +47,11 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   const categoryLabel = newsCategoryName(news.category);
   const bar = NEWS_BAR[news.category] ?? "var(--primary)";
   const minutes = readMinutes(news.body);
-  const more = (await latestNews(6)).filter((n) => n.id !== news.id).slice(0, 3);
+  const [comments, moreAll] = await Promise.all([
+    commentsForArticle(news.id),
+    latestNews(6),
+  ]);
+  const more = moreAll.filter((n) => n.id !== news.id).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">

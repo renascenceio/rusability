@@ -25,6 +25,7 @@ export function mapNews(r: Row): NewsItem {
     publishedAt: toISO(r.publishedAt),
     timeLabel: r.timeLabel,
     views: r.views,
+    likes: r.likes ?? 0,
     pipeline: (r.pipeline as NewsItem["pipeline"]) ?? undefined,
     hot: r.hot,
   };
