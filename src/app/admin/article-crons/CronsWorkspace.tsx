@@ -17,6 +17,7 @@ import {
   discardBuffered,
   runAllDueCrons,
 } from "../ai-content/actions";
+import { AuthorManager, type AuthorStat } from "./AuthorManager";
 
 type Cron = {
   id: string;
@@ -72,6 +73,7 @@ export function CronsWorkspace({
   settings,
   authors,
   health,
+  authorStats,
 }: {
   crons: Cron[];
   runs: Run[];
@@ -79,6 +81,7 @@ export function CronsWorkspace({
   settings: Settings;
   authors: AuthorOpt[];
   health: CronHealth;
+  authorStats: AuthorStat[];
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -506,6 +509,9 @@ export function CronsWorkspace({
           <p className="mt-3 text-xs text-[var(--muted-foreground)]">Генерация статьи может занять до минуты…</p>
         )}
       </Panel>
+
+      {/* Per-author management: counts + article list + topic queue */}
+      <AuthorManager authors={authorStats} />
 
       {/* Moderation buffer */}
       <Panel title={`Буфер модерации (${buffered.length})`}>
