@@ -62,12 +62,23 @@ async function getSettings() {
   );
 }
 
-/** How many more articles may be *published* right now under the pace rules. */
+/**
+ * How many more articles may be *published* right now under the pace rules.
+ *
+ * Catch-up aware: instead of only spacing off the *last* publish (which can
+ * never recover after a missed window), we compute how many articles *should*
+ * already be out by the current moment — the daily quota spread linearly across
+ * the publishing window — and allow publishing until we reach that target. So
+ * if the scheduler misses several ticks, the next run bursts just enough to
+ * catch up to schedule, then resumes an even drip. An explicit `minHoursBetween`
+ * (admin) still acts as an absolute floor between consecutive publishes.
+ */
 async function paceAllowsPublish(): Promise<boolean> {
   const s = await getSettings();
 
   // Only publish inside the daily Moscow window (starts at the agreed hour).
-  const mskHour = mskNow().getUTCHours();
+  const nowMsk = mskNow();
+  const mskHour = nowMsk.getUTCHours() + nowMsk.getUTCMinutes() / 60;
   if (mskHour < PUBLISH_START_HOUR_MSK || mskHour >= PUBLISH_END_HOUR_MSK) return false;
 
   // Hard ceiling: max publishes per Moscow calendar day (resets at 00:00 MSK,
@@ -79,22 +90,26 @@ async function paceAllowsPublish(): Promise<boolean> {
     .where(and(eq(articles.status, "published"), gte(articles.publishedAt, dayStart)));
   if (publishedToday >= s.maxPerDay) return false;
 
-  // Even drip: spacing is auto-derived from the daily quota spread across the
-  // publishing window, so raising maxPerDay tightens the interval automatically.
-  // An explicit minHoursBetween (admin) acts as a floor if it's larger.
+  // Target-by-now: how many of today's quota should be published by this moment,
+  // spreading maxPerDay evenly over the window. Publishing is allowed while we're
+  // behind this target — this is what lets a run catch up after missed ticks.
   const windowH = PUBLISH_END_HOUR_MSK - PUBLISH_START_HOUR_MSK;
-  const derivedGapH = s.maxPerDay > 0 ? windowH / s.maxPerDay : windowH;
-  const minGapH = Math.max(s.minHoursBetween ?? 0, derivedGapH);
+  const elapsedH = mskHour - PUBLISH_START_HOUR_MSK;
+  const targetByNow = Math.min(s.maxPerDay, Math.ceil(s.maxPerDay * (elapsedH / windowH)));
+  if (publishedToday >= targetByNow) return false;
 
-  const last = await db
-    .select({ publishedAt: articles.publishedAt })
-    .from(articles)
-    .where(eq(articles.status, "published"))
-    .orderBy(desc(articles.publishedAt))
-    .limit(1);
-  if (last[0]?.publishedAt) {
-    const elapsedH = (Date.now() - new Date(last[0].publishedAt).getTime()) / 36e5;
-    if (elapsedH < minGapH) return false;
+  // Absolute floor between consecutive publishes, only if admin set one (>0).
+  if ((s.minHoursBetween ?? 0) > 0) {
+    const last = await db
+      .select({ publishedAt: articles.publishedAt })
+      .from(articles)
+      .where(eq(articles.status, "published"))
+      .orderBy(desc(articles.publishedAt))
+      .limit(1);
+    if (last[0]?.publishedAt) {
+      const sinceLastH = (Date.now() - new Date(last[0].publishedAt).getTime()) / 36e5;
+      if (sinceLastH < s.minHoursBetween) return false;
+    }
   }
   return true;
 }
