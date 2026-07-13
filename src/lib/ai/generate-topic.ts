@@ -19,14 +19,15 @@ export async function generateTopic(input: {
 }): Promise<{ topic: string; keywords: string[] }> {
   const { author, category, keywords } = input;
   const beats = author.topics.length ? author.topics.join(", ") : category;
+  const year = new Date().getFullYear();
 
   const { output } = await generateText({
     model: CONTENT_MODEL,
     output: Output.object({ schema: topicSchema }),
-    system: `Ты — контент-стратег русскоязычного медиа Rusability. Придумываешь темы, которые реально ищут в поиске и задают ИИ-ассистентам.`,
+    system: `Ты — контент-стратег русскоязычного медиа Rusability. Придумываешь темы, которые реально ищут в поиске и задают ИИ-ассистентам. Сейчас ${year} год: НИКОГДА не указывай прошедшие годы в теме. Год добавляй в формулировку только если он реально важен для темы, и тогда используй ${year} (не ${year - 1} и не более ранние).`,
     prompt: `Автор «${author.name}» (${author.archetype}) пишет о: ${beats}.
 ${keywords.length ? `Ориентируйся на запросы: ${keywords.join(", ")}.` : ""}
-Предложи ОДНУ свежую, конкретную и практическую тему для экспертной статьи в категории «${category}». Избегай общих формулировок — тема должна отвечать на конкретный вопрос аудитории.`,
+Предложи ОДНУ свежую, конкретную и практическую тему для экспертной статьи в категории «${category}». Избегай общих формулировок — тема должна отвечать на конкретный вопрос аудитории. Тема должна быть актуальной для ${year} года; не упоминай прошедшие годы (${year - 1} и ранее).`,
   });
 
   return {
