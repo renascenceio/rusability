@@ -1,14 +1,16 @@
 import { MetadataRoute } from "next";
 import { publishedArticles } from "@/lib/data/articles";
 import { publishedNews } from "@/lib/data/news";
+import { allAuthors } from "@/lib/data/authors";
 import { SITE_URL } from "@/lib/site";
 
 const BASE = SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [publishedA, publishedN] = await Promise.all([
+  const [publishedA, publishedN, authors] = await Promise.all([
     publishedArticles(),
     publishedNews(),
+    allAuthors(),
   ]);
 
   const articles = publishedA.map((a) => ({
@@ -25,14 +27,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const staticRoutes = ["", "/articles", "/news", "/events", "/apps", "/search"].map(
-    (path) => ({
-      url: `${BASE}${path}`,
+  // Public author profile pages (skip any author without a username slug).
+  const authorPages = authors
+    .filter((a) => a.username)
+    .map((a) => ({
+      url: `${BASE}/authors/${a.username}`,
       lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: path === "" ? 1 : 0.6,
-    }),
-  );
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }));
 
-  return [...staticRoutes, ...articles, ...news];
+  // Every static route the new site actually serves (all return 200).
+  const staticRoutes = [
+    "",
+    "/articles",
+    "/news",
+    "/authors",
+    "/search",
+    "/subscriptions",
+    "/about",
+    "/contacts",
+    "/privacy",
+    "/terms",
+    "/cookies",
+  ].map((path) => ({
+    url: `${BASE}${path}`,
+    lastModified: new Date(),
+    changeFrequency: "daily" as const,
+    priority: path === "" ? 1 : 0.6,
+  }));
+
+  return [...staticRoutes, ...articles, ...news, ...authorPages];
 }
