@@ -19,12 +19,22 @@ const DEFAULT_REDIRECTS = [
   { id: 3, from: "/news/2024", to: "/news", code: 302 },
 ];
 
+export type SitemapStats = {
+  articles: number;
+  news: number;
+  authors: number;
+  staticPages: number;
+  total: number;
+};
+
 export function SeoWorkspace({
   initialMeta,
   initialRobots,
+  sitemapStats,
 }: {
   initialMeta: SeoMeta;
   initialRobots: RobotsSettings;
+  sitemapStats: SitemapStats;
 }) {
   const [tab, setTab] = useState<TabKey>("meta");
   const [saved, setSaved] = useState<string | null>(null);
@@ -154,38 +164,43 @@ export function SeoWorkspace({
 
       {/* SITEMAP */}
       {tab === "sitemap" && (
-        <Panel
-          title="Карта сайта"
-          action={
-            <AdminButton variant="ghost" onClick={() => flash("Sitemap перегенерирован")}>
-              <RefreshCw size={15} /> Перегенерировать
-            </AdminButton>
-          }
-        >
-          <div className="space-y-2 text-sm">
-            {[
-              { url: "/sitemap.xml", count: "312 URL", updated: "сегодня, 06:00" },
-              { url: "/sitemap-articles.xml", count: "248 статей", updated: "сегодня, 06:00" },
-              { url: "/sitemap-news.xml", count: "51 новость", updated: "сегодня, 09:15" },
-              { url: "/sitemap-authors.xml", count: "13 авторов", updated: "вчера" },
-            ].map((s) => (
-              <div
-                key={s.url}
-                className="flex items-center justify-between rounded-xl border border-[var(--border)] px-4 py-3"
+        <Panel title="Карта сайта">
+          <div className="flex items-center justify-between rounded-xl border border-[var(--border)] px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Globe size={15} className="text-[var(--muted-foreground)]" />
+              <a
+                href="/sitemap.xml"
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-[var(--primary)] hover:underline"
               >
-                <div className="flex items-center gap-2">
-                  <Globe size={15} className="text-[var(--muted-foreground)]" />
-                  <a href={s.url} target="_blank" rel="noreferrer" className="font-medium text-[var(--primary)] hover:underline">
-                    {s.url}
-                  </a>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
-                  <span>{s.count}</span>
-                  <span>обновлено {s.updated}</span>
-                </div>
+                /sitemap.xml
+              </a>
+            </div>
+            <div className="text-xs text-[var(--muted-foreground)]">
+              {sitemapStats.total} URL · обновляется автоматически
+            </div>
+          </div>
+
+          {/* Real breakdown of what the single sitemap contains */}
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: "Статьи", value: sitemapStats.articles },
+              { label: "Новости", value: sitemapStats.news },
+              { label: "Авторы", value: sitemapStats.authors },
+              { label: "Статические", value: sitemapStats.staticPages },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl border border-[var(--border)] px-4 py-3">
+                <div className="font-serif text-2xl font-bold text-[var(--foreground)]">{s.value}</div>
+                <div className="text-xs text-[var(--muted-foreground)]">{s.label}</div>
               </div>
             ))}
           </div>
+
+          <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+            Единый sitemap генерируется автоматически из опубликованного контента. Устаревшие ссылки
+            старого портала намеренно отдают 410 и не входят в карту сайта.
+          </p>
         </Panel>
       )}
 

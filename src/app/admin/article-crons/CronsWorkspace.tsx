@@ -362,8 +362,13 @@ export function CronsWorkspace({
                     <div className="text-xs text-[var(--muted-foreground)]">{c.runTime} МСК</div>
                   </Td>
                   <Td>
-                    <span className="text-sm">{c.topicsUnused}</span>
-                    <span className="text-xs text-[var(--muted-foreground)]"> / {c.topicsTotal}</span>
+                    <div title="Неиспользованных тем в очереди / всего добавлено тем. Это не число статей.">
+                      <span className="text-sm">{c.topicsUnused}</span>
+                      <span className="text-xs text-[var(--muted-foreground)]"> / {c.topicsTotal}</span>
+                      <div className="text-[10px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                        свободно / тем
+                      </div>
+                    </div>
                   </Td>
                   <Td>
                     {c.status === "active" ? <Tag tone="success">Активен</Tag> : <Tag tone="neutral">Пауза</Tag>}
