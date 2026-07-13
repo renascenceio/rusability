@@ -6,6 +6,7 @@ import { newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
 import { NewsSource } from "@/components/site/NewsShareRow";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
+import { ViewCounter } from "@/components/site/ViewCounter";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 
 export async function generateStaticParams() {

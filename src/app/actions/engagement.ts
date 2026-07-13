@@ -120,6 +120,47 @@ export async function submitComment(input: {
 }
 
 /**
+ * Record (or peek) a view. The browser calls this once per session per item;
+ * `peek` returns the current count without incrementing (repeat visits in the
+ * same session), so the indicator always shows the true value even though the
+ * article/news pages are statically prerendered.
+ */
+export async function recordView(input: {
+  kind: ContentKind;
+  contentId: string;
+  peek?: boolean;
+}): Promise<{ ok: true; views: number } | { ok: false }> {
+  const { kind, contentId, peek } = input;
+  try {
+    if (peek) {
+      const table = kind === "article" ? articles : news;
+      const [row] = await db
+        .select({ views: table.views })
+        .from(table)
+        .where(eq(table.id, contentId))
+        .limit(1);
+      return row ? { ok: true, views: row.views ?? 0 } : { ok: false };
+    }
+    if (kind === "article") {
+      const [row] = await db
+        .update(articles)
+        .set({ views: sql`${articles.views} + 1` })
+        .where(eq(articles.id, contentId))
+        .returning({ views: articles.views });
+      return row ? { ok: true, views: row.views ?? 0 } : { ok: false };
+    }
+    const [row] = await db
+      .update(news)
+      .set({ views: sql`${news.views} + 1` })
+      .where(eq(news.id, contentId))
+      .returning({ views: news.views });
+    return row ? { ok: true, views: row.views ?? 0 } : { ok: false };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
  * Shared, anonymous +1 counter. The browser enforces one +1 per visitor via
  * localStorage; the server just applies the signed delta to the shared count.
  */

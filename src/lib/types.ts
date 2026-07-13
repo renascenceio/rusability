@@ -44,6 +44,8 @@ export interface Author {
   /** AI archetype, only for role === "ai" */
   archetype?: string;
   location?: string;
+  /** Short first-person manifesto shown instead of a follower count. */
+  manifesto?: string;
   followers: number;
   articlesCount: number;
   /** verified / elite badge */

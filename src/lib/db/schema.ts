@@ -95,6 +95,9 @@ export const authors = pgTable("authors", {
   bio: text("bio").notNull().default(""),
   archetype: text("archetype"),
   location: text("location"),
+  /* Short first-person manifesto shown in place of a follower count (the site
+     has no public subscriptions). Generated from the author's archetype/bio. */
+  manifesto: text("manifesto"),
   followers: integer("followers").notNull().default(0),
   articlesCount: integer("articles_count").notNull().default(0),
   elite: boolean("elite").notNull().default(false),

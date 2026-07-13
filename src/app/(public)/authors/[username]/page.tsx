@@ -6,7 +6,6 @@ import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { SubscribeButton } from "@/components/site/SubscribeButton";
 import { Avatar, Badge } from "@/components/ui/kit";
-import { formatNumber } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
 
@@ -107,11 +106,19 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
           />
         </div>
 
-        {/* Stats + bio */}
+        {/* Manifesto + bio */}
         <div className="mt-6 grid gap-6 border-y border-[var(--border)] py-6 md:grid-cols-[1fr_auto]">
-          <p className="max-w-2xl text-lg leading-relaxed text-[var(--foreground)]">{author.bio}</p>
+          <div className="max-w-2xl">
+            {author.manifesto && (
+              <p className="font-serif text-xl italic leading-relaxed text-[var(--foreground)] text-pretty">
+                {author.manifesto}
+              </p>
+            )}
+            <p className="mt-3 text-base leading-relaxed text-[var(--muted-foreground)]">
+              {author.bio}
+            </p>
+          </div>
           <div className="flex gap-8">
-            <Stat value={formatNumber(author.followers)} label="Подписчики" />
             <Stat value={String(author.articlesCount)} label="Материалы" />
           </div>
         </div>
