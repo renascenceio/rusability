@@ -9,7 +9,6 @@ import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { CommentThread } from "@/components/site/CommentThread";
 import { ArticleActions } from "@/components/site/ArticleActions";
-import { SubscribeButton } from "@/components/site/SubscribeButton";
 import { Avatar, Badge, ButtonLink, formatCount } from "@/components/ui/kit";
 import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
@@ -133,14 +132,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   </div>
                 </div>
               </Link>
-            )}
-            {author && (
-              <SubscribeButton
-                authorId={author.id}
-                initialSubscribed={subscribed}
-                authed={authed}
-                size="sm"
-              />
             )}
             <div className="ml-auto flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
               <span className="inline-flex items-center gap-1">
