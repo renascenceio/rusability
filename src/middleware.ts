@@ -34,6 +34,55 @@ const GONE_PATH = /^\/(articles|news)\/([^/]+)\/?$/;
  */
 const OLD_NESTED_PATH = /^\/(articles|news)\/[^/]+\/.+/;
 
+/**
+ * Every top-level URL segment the NEW site actually serves. The old MongoDB
+ * site published content under dozens of section slugs (content-marketing,
+ * research, courses, infographics, blog, usability, featured, internet-
+ * marketing, creative, …) AND under author-name roots (e.g. /pfanshtil/<slug>),
+ * which are open-ended and impossible to enumerate. So instead of listing old
+ * sections, we allowlist the handful of segments the new app owns — any
+ * multi-segment content path whose first segment is NOT here can only be an old
+ * link, and gets the branded archive page.
+ */
+const NEW_SITE_SEGMENTS = new Set([
+  // (public)
+  "about",
+  "articles",
+  "authors",
+  "contacts",
+  "cookies",
+  "news",
+  "privacy",
+  "search",
+  "subscriptions",
+  "terms",
+  // (auth)
+  "sign-in",
+  "sign-up",
+  // top-level app
+  "admin",
+  "api",
+  "author",
+  "discussion",
+  "editor",
+  "email",
+  "onboarding",
+  // framework
+  "_next",
+]);
+
+/** Branded HTTP 410 Gone response for a removed old-site link. */
+function gonePage(section: "articles" | "news"): NextResponse {
+  return new NextResponse(goneHtml(section), {
+    status: 410,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "x-robots-tag": "noindex, nofollow",
+      "cache-control": "public, max-age=0, s-maxage=86400",
+    },
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
   const { pathname } = request.nextUrl;
@@ -43,14 +92,17 @@ export async function middleware(request: NextRequest) {
   // DB check is needed to tell them apart from new content.
   const nested = pathname.match(OLD_NESTED_PATH);
   if (nested) {
-    return new NextResponse(goneHtml(nested[1] as "articles" | "news"), {
-      status: 410,
-      headers: {
-        "content-type": "text/html; charset=utf-8",
-        "x-robots-tag": "noindex, nofollow",
-        "cache-control": "public, max-age=0, s-maxage=86400",
-      },
-    });
+    return gonePage(nested[1] as "articles" | "news");
+  }
+
+  // Generic old-site link: any multi-segment content path (/<section>/<slug>
+  // or /<section>/<slug>/<objectId>) whose first segment is NOT a new-site
+  // route. Covers old category roots (content-marketing, research, blog,
+  // usability, featured, …) AND author-name roots (/pfanshtil/<slug>). The new
+  // app never serves such paths, so this needs no DB lookup.
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length >= 2 && !NEW_SITE_SEGMENTS.has(segments[0])) {
+    return gonePage("articles");
   }
 
   // Old-link → 410 Gone (only for single-segment article/news detail paths).
@@ -64,14 +116,7 @@ export async function middleware(request: NextRequest) {
       /* keep raw slug if it isn't valid percent-encoding */
     }
     if (await isGoneLink(section, slug)) {
-      return new NextResponse(goneHtml(section), {
-        status: 410,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "x-robots-tag": "noindex, nofollow",
-          "cache-control": "public, max-age=0, s-maxage=86400",
-        },
-      });
+      return gonePage(section);
     }
   }
 
