@@ -387,6 +387,32 @@ h1, h2, h3, h4, h5 {
 }
 .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+/* Ghost/skeleton shimmer for admin loading states */
+@keyframes admin-shimmer {
+  100% { transform: translateX(100%); }
+}
+.admin-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.admin-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--foreground) 7%, transparent),
+    transparent
+  );
+  animation: admin-shimmer 1.5s infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-shimmer::after { animation: none; }
+  .admin-shimmer { opacity: 0.7; }
+}
+
 @keyframes fadein {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }

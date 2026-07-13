@@ -104,7 +104,16 @@ export type ArticleBlock =
   | { type: "list"; items: string[]; ordered?: boolean }
   | { type: "image"; src: string; caption?: string };
 
-export type NewsCategory = "tech" | "marketing" | "business" | "science";
+export type NewsCategory =
+  | "tech"
+  | "marketing"
+  | "business"
+  | "science"
+  | "fintech"
+  | "biotech"
+  | "ai"
+  | "startups"
+  | "ecommerce";
 
 export interface NewsItem {
   id: string;
@@ -120,6 +129,7 @@ export interface NewsItem {
   /** relative time label like "2 часа назад" */
   timeLabel: string;
   views: number;
+  likes?: number;
   /** admin pipeline status */
   pipeline?: "queued" | "rewriting" | "review" | "published" | "rejected";
   hot?: boolean;

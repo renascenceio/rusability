@@ -2,7 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
-import { SAFETY_POLICY_RU } from "./content-filter";
+import { SAFETY_POLICY_RU, RELEVANCE_POLICY_RU } from "./content-filter";
 import type { NewsCategory } from "@/lib/types";
 
 export interface RewriteNewsInput {
@@ -26,19 +26,23 @@ const newsSchema = z.object({
   publishable: z
     .boolean()
     .describe(
-      "true, если материал соответствует редакционной политике (бизнес/маркетинг/технологии/наука и НЕ относится к запрещённым темам). false — если тема запрещена (Украина, война, политика, наркотики, азартные игры, 18+, терроризм).",
+      "true ТОЛЬКО если материал (1) относится к нашим рубрикам (бизнес, маркетинг, технологии, нейросети/ИИ, финтех, биотех, стартапы, e-commerce, наука) И (2) не относится к запрещённым темам. false — если тема запрещена (Украина, война, политика, наркотики, азартные игры, 18+, терроризм) ИЛИ нерелевантна (спорт, знаменитости, расписания рейсов, погода, здоровье/диеты, гороскопы, туризм, бытовые новости).",
     ),
   blockReason: z
     .string()
     .nullable()
-    .describe("Если publishable=false — короткая причина на русском. Иначе null."),
+    .describe("Если publishable=false — короткая причина на русском (например «нерелевантная тема» или «спорт»). Иначе null."),
   title: z.string().describe("Оригинальный заголовок новости на русском, до 90 символов, без кликбейта"),
   excerpt: z.string().describe("Лид-абзац: суть новости в 1–2 предложениях, прямой ответ на вопрос «что произошло»"),
   body: z
     .array(z.string())
     .describe("2–4 абзаца связного текста на русском: что произошло, детали, значение для рынка. Только чистый текст."),
   tags: z.array(z.string()).describe("2–5 тегов на русском в нижнем регистре"),
-  category: z.enum(["tech", "marketing", "business", "science"]),
+  category: z
+    .enum(["tech", "marketing", "business", "science", "fintech", "biotech", "ai", "startups", "ecommerce"])
+    .describe(
+      "Наиболее точная рубрика: ai — нейросети/ИИ; fintech — финтех, платежи, банки; biotech — биотех/медтех/фарма; startups — стартапы и инвестиции; ecommerce — онлайн-торговля; tech — прочие технологии; marketing; business; science.",
+    ),
 });
 
 /**
@@ -53,8 +57,11 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     "Ты — новостной редактор русскоязычного делового медиа Rusability.",
     "Ты получаешь заголовок и краткое описание из внешнего источника и пишешь СВОЮ оригинальную новостную заметку на русском.",
     "Категорически нельзя копировать текст источника дословно — только переосмысление и пересказ своими словами.",
+    "Источник может быть на русском, английском или китайском — итоговую заметку всегда пиши на русском.",
     "",
     SAFETY_POLICY_RU,
+    "",
+    RELEVANCE_POLICY_RU,
     "",
     preamble,
   ].join("\n");

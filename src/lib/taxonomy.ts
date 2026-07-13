@@ -26,8 +26,13 @@ export const CATEGORIES: Category[] = [
 
 export const NEWS_CATEGORIES: { slug: NewsCategory; name: string }[] = [
   { slug: "tech", name: "Технологии" },
-  { slug: "marketing", name: "Маркетинг" },
+  { slug: "ai", name: "Нейросети" },
   { slug: "business", name: "Бизнес" },
+  { slug: "marketing", name: "Маркетинг" },
+  { slug: "fintech", name: "Финтех" },
+  { slug: "biotech", name: "Биотех" },
+  { slug: "startups", name: "Стартапы" },
+  { slug: "ecommerce", name: "E-commerce" },
   { slug: "science", name: "Наука" },
 ];
 

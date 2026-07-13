@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { getNews, latestNews } from "@/lib/data/news";
+import { commentsForArticle } from "@/lib/data/comments";
 import { newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
-import { NewsShareRow } from "@/components/site/NewsShareRow";
+import { NewsSource } from "@/components/site/NewsShareRow";
+import { ArticleEngagement } from "@/components/site/ArticleEngagement";
+import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 
 export async function generateStaticParams() {
   return (await latestNews()).map((n) => ({ slug: n.slug }));
@@ -23,6 +25,11 @@ const NEWS_BAR: Record<string, string> = {
   marketing: "#c2703d",
   business: "#4d5aff",
   science: "#4d8f6b",
+  ai: "#7a5cff",
+  fintech: "#2f9e7d",
+  biotech: "#c74d7a",
+  startups: "#d08a2c",
+  ecommerce: "#4d8f6b",
 };
 
 /** ~180 wpm reading estimate from the body word count. */
@@ -39,52 +46,61 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   const categoryLabel = newsCategoryName(news.category);
   const bar = NEWS_BAR[news.category] ?? "var(--primary)";
   const minutes = readMinutes(news.body);
-  const more = (await latestNews(6)).filter((n) => n.id !== news.id).slice(0, 3);
+  const [comments, moreAll] = await Promise.all([
+    commentsForArticle(news.id),
+    latestNews(6),
+  ]);
+  const more = moreAll.filter((n) => n.id !== news.id).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
-      <Link
-        href="/news"
-        className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+      <Breadcrumbs
+        items={[
+          { label: "Главная", href: "/" },
+          { label: "Новости", href: "/news" },
+          { label: categoryLabel, href: `/news?category=${news.category}` },
+          { label: news.title },
+        ]}
+      />
+
+      <ArticleEngagement
+        kind="news"
+        contentId={news.id}
+        title={news.title}
+        initialLikes={news.likes ?? 0}
+        comments={comments}
       >
-        <ArrowLeft size={16} /> Новости
-      </Link>
+        <article>
+          {/* meta line: | КАТЕГОРИЯ · дата · время чтения */}
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px]">
+            <span
+              className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]"
+              style={{ color: bar }}
+            >
+              <span className="inline-block h-3 w-[3px] rounded-full" style={{ backgroundColor: bar }} />
+              {categoryLabel}
+            </span>
+            <span className="text-muted-foreground">
+              {formatDate(news.publishedAt)} · {minutes} мин
+            </span>
+          </div>
 
-      <article>
-        {/* meta line: | КАТЕГОРИЯ · дата · время чтения */}
-        <div className="mb-4 flex flex-wrap items-center gap-2 text-[13px]">
-          <span
-            className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em]"
-            style={{ color: bar }}
-          >
-            <span className="inline-block h-3 w-[3px] rounded-full" style={{ backgroundColor: bar }} />
-            {categoryLabel}
-          </span>
-          <span className="text-muted-foreground">
-            {formatDate(news.publishedAt)} · {minutes} мин
-          </span>
-        </div>
+          <h1 className="font-serif text-[2rem] font-bold leading-[1.12] text-foreground text-balance md:text-[2.7rem]">
+            {news.title}
+          </h1>
 
-        <h1 className="font-serif text-[2rem] font-bold leading-[1.12] text-foreground text-balance md:text-[2.7rem]">
-          {news.title}
-        </h1>
+          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{news.excerpt}</p>
 
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{news.excerpt}</p>
+          <div className="article-prose mt-8 space-y-5 text-[1.05rem] leading-[1.75] text-foreground">
+            {news.body.map((p, i) => (
+              <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
+            ))}
+          </div>
 
-        <div className="article-prose mt-8 space-y-5 text-[1.05rem] leading-[1.75] text-foreground">
-          {news.body.map((p, i) => (
-            <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
-          ))}
-        </div>
-
-        {/* source + share row */}
-        <NewsShareRow
-          slug={news.slug}
-          title={news.title}
-          source={news.source}
-          sourceUrl={news.sourceUrl}
-        />
-      </article>
+          {/* source attribution (nofollow) */}
+          <NewsSource source={news.source} sourceUrl={news.sourceUrl} />
+        </article>
+      </ArticleEngagement>
 
       {more.length > 0 && (
         <section className="mt-10">

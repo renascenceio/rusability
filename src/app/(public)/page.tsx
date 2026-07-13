@@ -21,6 +21,30 @@ function catColor(cat: string): string {
   return ACCENT_VAR[categoryAccent(cat)] ?? "var(--primary)";
 }
 
+type NewsRow = { id: string; slug: string; timeLabel: string; title: string };
+
+/** A single vertical list of news one-liners (shared by both layouts). */
+function NewsColumn({ items }: { items: NewsRow[] }) {
+  return (
+    <div className="flex flex-col">
+      {items.map((n) => (
+        <Link
+          key={n.id}
+          href={`/news/${n.slug}`}
+          className="group flex items-baseline gap-4 border-t border-[var(--border)] py-3.5 first:border-t-0 first:pt-0"
+        >
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+            {n.timeLabel}
+          </span>
+          <span className="text-[15px] font-medium leading-snug text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
+            {n.title}
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 const HERO_FILTERS = [
   { label: "Все", slug: "" },
   { label: "Дизайн", slug: "design" },
@@ -34,7 +58,7 @@ export default async function HomePage() {
   const [featured, published, news, digestCta, eventsCta] = await Promise.all([
     heroArticles(6),
     publishedArticles(),
-    latestNews(6),
+    latestNews(8),
     activeCta("home_digest"),
     activeCta("home_events"),
   ]);
@@ -373,20 +397,28 @@ export default async function HomePage() {
 
       <div className="mx-auto max-w-5xl">
         {/* ---------- CTA + НОВОСТИ ---------- */}
-        <section className="mb-14 grid gap-10 md:grid-cols-2">
-          {/* Admin-managed CTA (replaces the old События column) */}
-          <div>
-            {eventsCta ? (
-              <CtaBand cta={eventsCta} />
-            ) : (
-              <div className="flex h-full min-h-[220px] items-center justify-center rounded-[26px] border border-dashed border-[var(--border)] p-8 text-center text-sm text-[var(--muted-foreground)]">
-                Здесь появится CTA-блок. Добавьте его в админке: Реклама → CTA-блоки.
+        {/* When an events CTA is published, keep the CTA-left / news-right split.
+            Otherwise the news takes the full width in two balanced columns. */}
+        {eventsCta ? (
+          <section className="mb-14 grid gap-10 md:grid-cols-2">
+            <CtaBand cta={eventsCta} />
+            <div>
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="font-serif text-2xl font-bold text-[var(--foreground)]">
+                  Новости
+                </h2>
+                <Link
+                  href="/news"
+                  className="text-sm font-medium text-[var(--primary)] hover:underline"
+                >
+                  Все →
+                </Link>
               </div>
-            )}
-          </div>
-
-          {/* Новости */}
-          <div>
+              <NewsColumn items={news.slice(0, 6)} />
+            </div>
+          </section>
+        ) : (
+          <section className="mb-14">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-serif text-2xl font-bold text-[var(--foreground)]">
                 Новости
@@ -398,24 +430,12 @@ export default async function HomePage() {
                 Все →
               </Link>
             </div>
-            <div className="flex flex-col">
-              {news.map((n) => (
-                <Link
-                  key={n.id}
-                  href={`/news/${n.slug}`}
-                  className="group flex items-baseline gap-4 border-t border-[var(--border)] py-3.5 first:border-t-0 first:pt-0"
-                >
-                  <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-                    {n.timeLabel}
-                  </span>
-                  <span className="text-[15px] font-medium leading-snug text-[var(--foreground)] transition-colors group-hover:text-[var(--primary)]">
-                    {n.title}
-                  </span>
-                </Link>
-              ))}
+            <div className="grid gap-x-10 md:grid-cols-2">
+              <NewsColumn items={news.slice(0, Math.ceil(news.length / 2))} />
+              <NewsColumn items={news.slice(Math.ceil(news.length / 2))} />
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ---------- AUTHOR CTA ---------- */}
         <section

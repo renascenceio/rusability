@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminNewsPage() {
   const dayAgo = new Date(Date.now() - 86_400_000);
-  const [sources, runs, queue, feed, totalRow, todayRow, queueRow] = await Promise.all([
+  const [sources, runs, queue, feed, totalRow, todayRow, queueRow, writeQueueRow] = await Promise.all([
     db.select().from(newsbotSources).orderBy(newsbotSources.name),
     db.select().from(newsbotRuns).orderBy(desc(newsbotRuns.startedAt)).limit(15),
     db
@@ -52,11 +52,14 @@ export default async function AdminNewsPage() {
       .where(and(isPublished, gt(news.publishedAt, dayAgo))),
     // Real moderation-queue size (items awaiting review).
     db.select({ n: count() }).from(news).where(eq(news.pipeline, "review")),
+    // Real writing-queue size (collected items awaiting AI rewrite).
+    db.select({ n: count() }).from(news).where(eq(news.pipeline, "queued")),
   ]);
 
   const totalPublished = totalRow[0]?.n ?? 0;
   const publishedToday = todayRow[0]?.n ?? 0;
   const queueCount = queueRow[0]?.n ?? 0;
+  const writeQueueCount = writeQueueRow[0]?.n ?? 0;
 
   return (
     <div className="mx-auto max-w-[1180px]">
@@ -84,6 +87,7 @@ export default async function AdminNewsPage() {
         totalPublished={totalPublished}
         publishedToday={publishedToday}
         queueCount={queueCount}
+        writeQueueCount={writeQueueCount}
       />
     </div>
   );
