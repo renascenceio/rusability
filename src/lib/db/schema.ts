@@ -284,6 +284,18 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Admin-managed URL redirects (source → destination), enforced in middleware. */
+export const redirects = pgTable("redirects", {
+  id: serial("id").primaryKey(),
+  source: text("source").notNull().unique(),
+  destination: text("destination").notNull(),
+  statusCode: integer("status_code").notNull().default(301),
+  enabled: boolean("enabled").notNull().default(true),
+  hits: integer("hits").notNull().default(0),
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** Admin-managed marketing CTAs rendered on the public site (keyed by placement). */
 export const siteCtas = pgTable("site_ctas", {
   placement: text("placement").primaryKey(),

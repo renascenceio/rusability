@@ -1,9 +1,19 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Plus, Trash2, RefreshCw, Search, Bot, Globe } from "lucide-react";
+import { Check, Plus, Trash2, RefreshCw, Search, Bot, Globe, Lock } from "lucide-react";
 import { Panel, AdminButton, Tag, Table, Th, Td } from "@/components/admin/ui";
-import { saveSeoMeta, saveRobots, type SeoMeta, type RobotsSettings } from "./actions";
+import {
+  saveSeoMeta,
+  saveRobots,
+  listRedirects,
+  createRedirect,
+  toggleRedirect,
+  deleteRedirect,
+  type SeoMeta,
+  type RobotsSettings,
+  type RedirectRow,
+} from "./actions";
 
 type TabKey = "meta" | "sitemap" | "robots" | "redirects" | "geo";
 
@@ -13,10 +23,28 @@ const SEO_SCORES = [
   { label: "GEO", value: 58, tone: "var(--primary)", caption: "Геолокальные запросы" },
 ];
 
-const DEFAULT_REDIRECTS = [
-  { id: 1, from: "/blog/staraya-statya", to: "/articles/novaya-statya", code: 301 },
-  { id: 2, from: "/tools", to: "/apps", code: 301 },
-  { id: 3, from: "/news/2024", to: "/news", code: 302 },
+/**
+ * Read-only "system" rules enforced in middleware.ts. These aren't editable —
+ * they document how legacy links from the old MongoDB portal are handled
+ * automatically (HTTP 410 Gone + branded archive page), so nobody wonders why
+ * old URLs "redirect" without a rule here.
+ */
+const SYSTEM_RULES = [
+  {
+    pattern: "/articles/<slug>/<id> · /news/<slug>/<id>",
+    behavior: "410 — архивная страница",
+    note: "Старые ссылки с ID (MongoDB) старого портала",
+  },
+  {
+    pattern: "/<старый-раздел>/<slug>",
+    behavior: "410 — архивная страница",
+    note: "Разделы и авторы старого сайта (content-marketing, blog, research…)",
+  },
+  {
+    pattern: "/articles/<slug> · /news/<slug> (удалённые)",
+    behavior: "410 — архивная страница",
+    note: "Слаг отсутствует в новой базе → считается удалённым",
+  },
 ];
 
 export type SitemapStats = {
@@ -31,10 +59,12 @@ export function SeoWorkspace({
   initialMeta,
   initialRobots,
   sitemapStats,
+  initialRedirects,
 }: {
   initialMeta: SeoMeta;
   initialRobots: RobotsSettings;
   sitemapStats: SitemapStats;
+  initialRedirects: RedirectRow[];
 }) {
   const [tab, setTab] = useState<TabKey>("meta");
   const [saved, setSaved] = useState<string | null>(null);
@@ -46,9 +76,42 @@ export function SeoWorkspace({
   // robots / sitemap toggles
   const [robots, setRobots] = useState<RobotsSettings>(initialRobots);
 
-  // redirects
-  const [redirects, setRedirects] = useState(DEFAULT_REDIRECTS);
+  // redirects (DB-backed)
+  const [redirects, setRedirects] = useState<RedirectRow[]>(initialRedirects);
   const [newRedirect, setNewRedirect] = useState({ from: "", to: "", code: 301 });
+  const [busy, setBusy] = useState(false);
+
+  async function refreshRedirects() {
+    setRedirects(await listRedirects());
+  }
+
+  async function addRedirect() {
+    setBusy(true);
+    const res = await createRedirect({
+      source: newRedirect.from,
+      destination: newRedirect.to,
+      statusCode: newRedirect.code,
+    });
+    setBusy(false);
+    if (res.ok) {
+      setNewRedirect({ from: "", to: "", code: 301 });
+      await refreshRedirects();
+      flash("Редирект сохранён");
+    } else {
+      flash(res.error ?? "Не удалось сохранить");
+    }
+  }
+
+  async function removeRedirect(id: number) {
+    await deleteRedirect(id);
+    await refreshRedirects();
+    flash("Редирект удалён");
+  }
+
+  async function flipRedirect(id: number, enabled: boolean) {
+    setRedirects((rs) => rs.map((r) => (r.id === id ? { ...r, enabled } : r)));
+    await toggleRedirect(id, enabled);
+  }
 
   function flash(msg: string) {
     setSaved(msg);
@@ -247,69 +310,117 @@ ${robots.sitemap ? "Sitemap: https://rusability.ru/sitemap.xml" : ""}`}
 
       {/* REDIRECTS */}
       {tab === "redirects" && (
-        <Panel title={`Редиректы (${redirects.length})`}>
-          <div className="mb-4 flex flex-wrap items-end gap-2">
-            <input
-              value={newRedirect.from}
-              onChange={(e) => setNewRedirect({ ...newRedirect, from: e.target.value })}
-              placeholder="Откуда /old-url"
-              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
-            />
-            <input
-              value={newRedirect.to}
-              onChange={(e) => setNewRedirect({ ...newRedirect, to: e.target.value })}
-              placeholder="Куда /new-url"
-              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
-            />
-            <select
-              value={newRedirect.code}
-              onChange={(e) => setNewRedirect({ ...newRedirect, code: Number(e.target.value) })}
-              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
-            >
-              <option value={301}>301</option>
-              <option value={302}>302</option>
-            </select>
-            <AdminButton
-              disabled={!newRedirect.from.trim() || !newRedirect.to.trim()}
-              onClick={() => {
-                setRedirects([...redirects, { id: Date.now(), ...newRedirect }]);
-                setNewRedirect({ from: "", to: "", code: 301 });
-                flash("Редирект добавлен");
-              }}
-            >
-              <Plus size={15} /> Добавить
-            </AdminButton>
-          </div>
-          <Table>
-            <thead>
-              <tr>
-                <Th>Откуда</Th>
-                <Th>Куда</Th>
-                <Th>Код</Th>
-                <Th className="text-right">Действие</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {redirects.map((r) => (
-                <tr key={r.id}>
-                  <Td className="font-mono text-xs">{r.from}</Td>
-                  <Td className="font-mono text-xs">{r.to}</Td>
-                  <Td>
-                    <Tag tone={r.code === 301 ? "success" : "warn"}>{r.code}</Tag>
-                  </Td>
-                  <Td className="text-right">
-                    <button
-                      className="rounded-md border border-[var(--border)] p-1.5 text-[var(--danger)] hover:bg-[var(--surface-2)]"
-                      onClick={() => setRedirects(redirects.filter((x) => x.id !== r.id))}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </Td>
-                </tr>
+        <div className="space-y-5">
+          <Panel title={`Ваши редиректы (${redirects.length})`}>
+            <div className="mb-4 flex flex-wrap items-end gap-2">
+              <input
+                value={newRedirect.from}
+                onChange={(e) => setNewRedirect({ ...newRedirect, from: e.target.value })}
+                placeholder="Откуда /old-url"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+              />
+              <input
+                value={newRedirect.to}
+                onChange={(e) => setNewRedirect({ ...newRedirect, to: e.target.value })}
+                placeholder="Куда /new-url"
+                className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+              />
+              <select
+                value={newRedirect.code}
+                onChange={(e) => setNewRedirect({ ...newRedirect, code: Number(e.target.value) })}
+                className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+              >
+                <option value={301}>301</option>
+                <option value={302}>302</option>
+              </select>
+              <AdminButton
+                disabled={busy || !newRedirect.from.trim() || !newRedirect.to.trim()}
+                onClick={addRedirect}
+              >
+                <Plus size={15} /> Добавить
+              </AdminButton>
+            </div>
+            {redirects.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-[var(--border)] px-4 py-6 text-center text-sm text-[var(--muted-foreground)]">
+                Пока нет собственных редиректов. Добавьте правило выше, чтобы перенаправить
+                конкретный URL на новую страницу.
+              </p>
+            ) : (
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Откуда</Th>
+                    <Th>Куда</Th>
+                    <Th>Код</Th>
+                    <Th>Активен</Th>
+                    <Th className="text-right">Действие</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {redirects.map((r) => (
+                    <tr key={r.id}>
+                      <Td className="font-mono text-xs">{r.source}</Td>
+                      <Td className="font-mono text-xs">{r.destination}</Td>
+                      <Td>
+                        <Tag tone={r.statusCode === 301 ? "success" : "warn"}>{r.statusCode}</Tag>
+                      </Td>
+                      <Td>
+                        <button
+                          onClick={() => flipRedirect(r.id, !r.enabled)}
+                          aria-pressed={r.enabled}
+                          className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                            r.enabled ? "bg-[var(--primary)]" : "bg-[var(--surface-3)]"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                              r.enabled ? "translate-x-4" : "translate-x-0.5"
+                            }`}
+                          />
+                        </button>
+                      </Td>
+                      <Td className="text-right">
+                        <button
+                          className="rounded-md border border-[var(--border)] p-1.5 text-[var(--danger)] hover:bg-[var(--surface-2)]"
+                          onClick={() => removeRedirect(r.id)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Panel>
+
+          {/* System rules — read-only */}
+          <Panel title="Системные правила (только чтение)">
+            <p className="mb-3 text-xs text-[var(--muted-foreground)]">
+              Эти правила зашиты в код и обрабатывают ссылки старого портала автоматически. Их нельзя
+              изменить здесь — они всегда активны для корректной деиндексации в поиске.
+            </p>
+            <div className="space-y-2">
+              {SYSTEM_RULES.map((rule) => (
+                <div
+                  key={rule.pattern}
+                  className="flex items-start justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <div className="break-words font-mono text-xs text-[var(--foreground)]">
+                      {rule.pattern}
+                    </div>
+                    <div className="mt-0.5 text-xs text-[var(--muted-foreground)]">{rule.note}</div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Tag tone="neutral">410</Tag>
+                    <Lock size={13} className="text-[var(--muted-foreground)]" />
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </Table>
-        </Panel>
+            </div>
+          </Panel>
+        </div>
       )}
 
       {/* GEO / AEO */}
@@ -319,7 +430,7 @@ ${robots.sitemap ? "Sitemap: https://rusability.ru/sitemap.xml" : ""}`}
             <div className="flex items-start gap-3 rounded-xl border border-[var(--border)] p-4">
               <Bot className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
               <div>
-                <div className="font-semibold text-[var(--foreground)]">FAQ-бло��и на статьях Elite</div>
+                <div className="font-semibold text-[var(--foreground)]">FAQ-блоки на статьях Elite</div>
                 <p>Structured Q&amp;A повышает шанс цитирования в ответах ИИ-движков.</p>
               </div>
             </div>

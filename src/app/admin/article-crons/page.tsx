@@ -12,6 +12,9 @@ import {
 import { desc, eq, sql } from "drizzle-orm";
 import { CronsWorkspace } from "./CronsWorkspace";
 import { ArticleTabs } from "@/components/admin/ArticleTabs";
+import { getSetting } from "@/lib/data/settings";
+
+type CronTick = { at: string; due: number; ran: number; created: number };
 
 export const metadata = { title: "Генерация статей — Rusability" };
 export const dynamic = "force-dynamic";

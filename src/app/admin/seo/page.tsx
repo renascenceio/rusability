@@ -4,7 +4,7 @@ import { publishedArticles } from "@/lib/data/articles";
 import { publishedNews } from "@/lib/data/news";
 import { allAuthors } from "@/lib/data/authors";
 import { SeoWorkspace } from "./SeoWorkspace";
-import type { SeoMeta, RobotsSettings } from "./actions";
+import { listRedirects, type SeoMeta, type RobotsSettings } from "./actions";
 
 // Number of static routes listed in app/sitemap.ts (keep in sync with it).
 const STATIC_ROUTE_COUNT = 11;
@@ -22,12 +22,13 @@ const DEFAULT_META: SeoMeta = {
 const DEFAULT_ROBOTS: RobotsSettings = { index: true, follow: true, ai: true, sitemap: true };
 
 export default async function AdminSeoPage() {
-  const [meta, robots, articles, news, authors] = await Promise.all([
+  const [meta, robots, articles, news, authors, redirectRows] = await Promise.all([
     getSetting<SeoMeta>("seo_meta", DEFAULT_META),
     getSetting<RobotsSettings>("seo_robots", DEFAULT_ROBOTS),
     publishedArticles(),
     publishedNews(),
     allAuthors(),
+    listRedirects(),
   ]);
 
   // Real breakdown of what /sitemap.xml actually contains (matches app/sitemap.ts).
@@ -46,7 +47,12 @@ export default async function AdminSeoPage() {
         title="SEO / AEO / GEO"
         subtitle="Мета-теги, карта сайта, robots.txt, редиректы и оптимизация под ИИ-поиск."
       />
-      <SeoWorkspace initialMeta={meta} initialRobots={robots} sitemapStats={sitemapStats} />
+      <SeoWorkspace
+        initialMeta={meta}
+        initialRobots={robots}
+        sitemapStats={sitemapStats}
+        initialRedirects={redirectRows}
+      />
     </div>
   );
 }
