@@ -66,13 +66,17 @@ export function NewsbotWorkspace({
   runs,
   queue,
   feed,
+  totalPublished,
   publishedToday,
+  queueCount,
 }: {
   sources: Source[];
   runs: Run[];
   queue: QueueItem[];
   feed: FeedItem[];
+  totalPublished: number;
   publishedToday: number;
+  queueCount: number;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -93,7 +97,7 @@ export function NewsbotWorkspace({
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
     { key: "feed", label: "Лента" },
     { key: "sources", label: "Источники" },
-    { key: "queue", label: "Очередь", badge: queue.length },
+    { key: "queue", label: "Очередь", badge: queueCount },
     { key: "log", label: "Журнал" },
   ];
 
@@ -126,9 +130,9 @@ export function NewsbotWorkspace({
 
       {/* KPI row */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard value={feed.length} label="Новостей в ленте" tone="var(--danger)" />
-        <StatCard value={publishedToday} label="Опубликовано сегодня" tone="var(--success)" />
-        <StatCard value={queue.length} label="В очереди" tone="var(--gold)" />
+        <StatCard value={totalPublished} label="Опубликовано всего" tone="var(--primary)" />
+        <StatCard value={publishedToday} label="Опубликовано за 24 часа" tone="var(--success)" />
+        <StatCard value={queueCount} label="В очереди на модерацию" tone="var(--gold)" />
       </div>
 
       {/* Tabs */}
