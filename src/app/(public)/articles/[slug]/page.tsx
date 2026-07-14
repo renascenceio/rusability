@@ -39,6 +39,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     return (
       <EliteArticle
         data={{
+          contentId: article.id,
           title: article.title,
           excerpt: article.excerpt,
           cover: article.cover || "/placeholder.svg",
@@ -50,6 +51,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           }),
           readingMinutes: article.readingMinutes,
           claps: article.claps,
+          comments,
           body: article.body,
           faq: article.faq ?? [],
           scores: {

@@ -89,12 +89,29 @@ function SharePopover({
   );
 }
 
+/**
+ * Optional palette override. When provided, the engagement bar + comment thread
+ * adopt these colors by overriding the site design tokens on a wrapper — used to
+ * blend the shared UI into the Elite article's selectable skins.
+ */
+export type EngagementTheme = {
+  border: string;
+  surface: string;
+  surface2: string;
+  surface3: string;
+  background: string;
+  foreground: string;
+  muted: string;
+  accent: string;
+};
+
 export function ArticleEngagement({
   kind,
   contentId,
   title,
   initialLikes,
   comments,
+  theme,
   children,
 }: {
   kind: ContentKind;
@@ -102,6 +119,7 @@ export function ArticleEngagement({
   title: string;
   initialLikes: number;
   comments: Comment[];
+  theme?: EngagementTheme;
   children: React.ReactNode;
 }) {
   const [liked, setLiked] = useState(false);
@@ -217,10 +235,10 @@ export function ArticleEngagement({
     </div>
   );
 
-  return (
+  const content = (
     <>
-      {/* Top bar */}
-      <div className="mb-8 flex flex-wrap items-center gap-3 border-y border-[var(--border)] py-3">
+      {/* Top bar (no divider lines) */}
+      <div className="mb-8 flex flex-wrap items-center gap-3">
         <LikeBtn />
         <CommentBtn />
         <div className="ml-auto">
@@ -230,8 +248,8 @@ export function ArticleEngagement({
 
       {children}
 
-      {/* Bottom bar */}
-      <div className="mt-10 flex flex-wrap items-center gap-3 border-y border-[var(--border)] py-4">
+      {/* Bottom bar (no divider lines) */}
+      <div className="mt-10 flex flex-wrap items-center gap-3">
         <LikeBtn />
         <CommentBtn />
         <div className="ml-auto">
@@ -264,4 +282,30 @@ export function ArticleEngagement({
       />
     </>
   );
+
+  // When a skin theme is supplied (Elite article), override the site design
+  // tokens on a wrapper so the whole subtree — including the fixed rail and the
+  // comment thread — inherits the Elite skin colors.
+  if (theme) {
+    return (
+      <div
+        style={
+          {
+            "--border": theme.border,
+            "--surface": theme.surface,
+            "--surface-2": theme.surface2,
+            "--surface-3": theme.surface3,
+            "--background": theme.background,
+            "--foreground": theme.foreground,
+            "--muted-foreground": theme.muted,
+            "--primary": theme.accent,
+          } as React.CSSProperties
+        }
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return content;
 }
