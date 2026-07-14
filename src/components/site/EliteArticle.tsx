@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import type { ArticleBlock, FaqItem } from "@/lib/types";
+import type { ArticleBlock, FaqItem, Comment } from "@/lib/types";
 import { normalizeList } from "@/lib/article-list";
+import { ArticleEngagement } from "./ArticleEngagement";
 
 type SkinKey = "classic" | "night" | "sepia" | "forest" | "blue";
 
@@ -51,6 +52,7 @@ export type EliteRelated = {
 };
 
 export type EliteArticleData = {
+  contentId: string;
   title: string;
   excerpt: string;
   cover: string;
@@ -58,6 +60,7 @@ export type EliteArticleData = {
   publishedLabel: string;
   readingMinutes: number;
   claps: number;
+  comments: Comment[];
   body: ArticleBlock[];
   faq: FaqItem[];
   scores: { geo?: number; seo?: number; aeo?: number };
@@ -73,11 +76,6 @@ export type EliteArticleData = {
   related: EliteRelated[];
 };
 
-function fmt(n: number) {
-  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(".0", "")}K`;
-  return String(n);
-}
-
 /** Convert **bold** markdown into <strong>; leaves plain text otherwise. */
 function inline(text: string) {
   if (!text.includes("**")) return text;
@@ -90,6 +88,18 @@ function inline(text: string) {
 export function EliteArticle({ data }: { data: EliteArticleData }) {
   const [skin, setSkin] = useState<SkinKey>("classic");
   const s = SKINS[skin];
+
+  // Make the shared like/comment/share bar adopt the active skin.
+  const engagementTheme = {
+    border: s.bdr,
+    surface: s.card,
+    surface2: s.card,
+    surface3: s.card,
+    background: s.bg,
+    foreground: s.text,
+    muted: s.textM,
+    accent: s.accent,
+  };
 
   return (
     <div style={{ background: s.bg, minHeight: "100vh", transition: "background .3s ease" }}>
@@ -281,9 +291,7 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
           </div>
           <div style={{ fontSize: 12, color: s.textM, textAlign: "right" }}>
             <div>{data.publishedLabel}</div>
-            <div style={{ marginTop: 2 }}>
-              {data.readingMinutes} мин · {fmt(data.claps)} реакций
-            </div>
+            <div style={{ marginTop: 2 }}>{data.readingMinutes} мин</div>
           </div>
         </div>
 
@@ -300,6 +308,14 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
 
       {/* Body: narrow column */}
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px 80px" }}>
+        <ArticleEngagement
+          kind="article"
+          contentId={data.contentId}
+          title={data.title}
+          initialLikes={data.claps}
+          comments={data.comments}
+          theme={engagementTheme}
+        >
         {data.body.map((block, i) => (
           <EliteBlock key={i} block={block} skin={s} first={i === 0} />
         ))}
@@ -399,7 +415,7 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
                       {r.title}
                     </div>
                     <div style={{ fontSize: 11, color: s.textM }}>
-                      {r.readingMinutes} мин · {fmt(r.claps)} ♥
+                      {r.readingMinutes} мин
                     </div>
                   </div>
                 </Link>
@@ -407,6 +423,7 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
             </div>
           </div>
         )}
+        </ArticleEngagement>
       </div>
     </div>
   );
