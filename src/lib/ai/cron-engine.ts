@@ -13,7 +13,7 @@ import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { generateArticle } from "./generate-article";
 import { generateArticleCover } from "./generate-image";
-import { generateTopic } from "./generate-topic";
+import { generateTopic, isDuplicateTopic } from "./generate-topic";
 import { slugify } from "@/lib/utils";
 import { putSetting } from "@/lib/data/settings";
 import type { CategorySlug } from "@/lib/types";
@@ -171,24 +171,52 @@ async function pickAuthor(cron: typeof articleCrons.$inferSelect) {
   return any[0] ?? null;
 }
 
+/**
+ * The author's memory: titles they have already published or have buffered for
+ * review. Used to stop the same author repeating a topic. Scoped per author
+ * (not per cron) so memory follows the author across categories.
+ */
+async function authorMemory(authorId: string, limit = 60): Promise<string[]> {
+  const rows = await db
+    .select({ title: articles.title })
+    .from(articles)
+    .where(eq(articles.authorId, authorId))
+    .orderBy(desc(sql`coalesce(${articles.publishedAt}, ${articles.createdAt})`))
+    .limit(limit);
+  return rows.map((r) => r.title).filter(Boolean);
+}
+
 async function pickTopic(
   cron: typeof articleCrons.$inferSelect,
   author: typeof aiAuthors.$inferSelect,
 ): Promise<{ topic: string; keywords: string[]; topicRowId?: number }> {
-  const unused = await db
+  const memory = await authorMemory(author.id);
+
+  // Curated queue first — but skip any queued topic the author already covered
+  // (mark such rows used so they don't keep resurfacing).
+  const queued = await db
     .select()
     .from(articleCronTopics)
     .where(and(eq(articleCronTopics.cronId, cron.id), eq(articleCronTopics.used, false)))
     .orderBy(asc(articleCronTopics.id))
-    .limit(1);
-  if (unused[0]) {
-    return { topic: unused[0].topic, keywords: unused[0].keywords, topicRowId: unused[0].id };
+    .limit(20);
+  for (const row of queued) {
+    if (isDuplicateTopic(row.topic, memory)) {
+      await db
+        .update(articleCronTopics)
+        .set({ used: true, usedAt: new Date() })
+        .where(eq(articleCronTopics.id, row.id));
+      continue;
+    }
+    return { topic: row.topic, keywords: row.keywords, topicRowId: row.id };
   }
-  // No queued topics — let the model propose one from the author's beats.
+
+  // No fresh queued topic — let the model propose one, avoiding past topics.
   const gen = await generateTopic({
     author,
     category: cron.category,
     keywords: cron.keywords,
+    avoidTitles: memory,
   });
   return { topic: gen.topic, keywords: gen.keywords };
 }
