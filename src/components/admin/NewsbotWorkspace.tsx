@@ -2,7 +2,22 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Rss, Play, Trash2, Plus, Check, X, ExternalLink, Pencil, PenLine, Ban, Newspaper, Scale } from "lucide-react";
+import {
+  Rss,
+  Play,
+  Trash2,
+  Plus,
+  Check,
+  X,
+  ExternalLink,
+  Pencil,
+  PenLine,
+  Ban,
+  Newspaper,
+  Scale,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { Panel, AdminButton, Tag } from "@/components/admin/ui";
 import { NEWS_CATEGORIES, newsCategoryName } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/utils";
@@ -130,7 +145,7 @@ export function NewsbotWorkspace({
     setMsg(null);
     start(async () => {
       const r = (await fn()) as { message?: string; created?: number } | undefined;
-      if (r?.message) setMsg(`${r.message}${typeof r.created === "number" ? ` · создано: ${r.created}` : ""}`);
+      if (r?.message) setMsg(r.message);
       router.refresh();
     });
   }
@@ -168,7 +183,6 @@ export function NewsbotWorkspace({
             <span className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--success)]" /> Работает
           </Tag>
           {pending && <span className="text-sm text-[var(--muted-foreground)]">Обработка…</span>}
-          {msg && <Tag tone="primary">{msg}</Tag>}
         </div>
         <div className="flex items-center gap-2">
           <AdminButton variant="ghost" disabled={pending} onClick={() => act(() => runNewsNow())}>
@@ -198,6 +212,9 @@ export function NewsbotWorkspace({
           </AdminButton>
         </div>
       </div>
+
+      {/* Run status banner (result of the last collect/write action) */}
+      {msg && <StatusBanner text={msg} onClose={() => setMsg(null)} />}
 
       {/* KPI row — real pipeline statuses */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -663,6 +680,62 @@ export function NewsbotWorkspace({
           )}
         </Panel>
       )}
+    </div>
+  );
+}
+
+/**
+ * Result of the last collect/write action. Splits the summary from any
+ * "Замечания:" notes, renders notes as chips, and colors itself green/amber
+ * depending on whether there were issues. Dismissible.
+ */
+function StatusBanner({ text, onClose }: { text: string; onClose: () => void }) {
+  const idx = text.indexOf("Замечания:");
+  const summary = (idx >= 0 ? text.slice(0, idx) : text).replace(/[.\s]+$/, "").trim();
+  const notes =
+    idx >= 0
+      ? text
+          .slice(idx + "Замечания:".length)
+          .split(";")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+  const hasIssues = notes.length > 0;
+  const accent = hasIssues ? "var(--warn)" : "var(--success)";
+  const Icon = hasIssues ? AlertTriangle : CheckCircle2;
+
+  return (
+    <div
+      className="flex items-start gap-3 rounded-2xl border p-4"
+      style={{
+        borderColor: `color-mix(in srgb, ${accent} 35%, transparent)`,
+        background: `color-mix(in srgb, ${accent} 8%, var(--surface))`,
+      }}
+      role="status"
+    >
+      <Icon size={18} className="mt-0.5 shrink-0" style={{ color: accent }} />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-[var(--foreground)]">{summary}</p>
+        {hasIssues && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {notes.map((n, i) => (
+              <span
+                key={i}
+                className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-xs text-[var(--muted-foreground)]"
+              >
+                {n}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      <button
+        onClick={onClose}
+        aria-label="Скрыть"
+        className="shrink-0 rounded-md p-1 text-[var(--muted-foreground)] hover:bg-[var(--surface-2)] hover:text-[var(--foreground)]"
+      >
+        <X size={16} />
+      </button>
     </div>
   );
 }

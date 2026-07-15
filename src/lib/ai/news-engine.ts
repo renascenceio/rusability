@@ -91,6 +91,46 @@ async function mapPool<T, R>(
   return results;
 }
 
+/**
+ * Turn a raw thrown error into a short, human-readable Russian note. Provider
+ * errors (e.g. AI Gateway "A positive credit balance is required…" with encoded
+ * top-up URLs) are long, English, and leak internal links — collapse the common
+ * ones into a clean phrase and hard-cap length so the status line stays tidy.
+ */
+function friendlyError(err: unknown, fallback: string): string {
+  const raw = err instanceof Error ? err.message : String(err ?? fallback);
+  const lower = raw.toLowerCase();
+  if (lower.includes("credit balance") || lower.includes("insufficient") || lower.includes("quota")) {
+    return "закончились кредиты ИИ";
+  }
+  if (lower.includes("rate limit") || lower.includes("429")) return "лимит запросов ИИ";
+  if (lower.includes("timeout") || lower.includes("timed out") || lower.includes("etimedout")) {
+    return "таймаут";
+  }
+  if (lower.includes("fetch") || lower.includes("network") || lower.includes("enotfound")) {
+    return "источник недоступен";
+  }
+  // Otherwise: strip any URLs and clip to a readable length.
+  const cleaned = raw.replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
+  return cleaned.length > 80 ? `${cleaned.slice(0, 80)}…` : cleaned || fallback;
+}
+
+/**
+ * Collapse per-source error notes into a compact, de-duplicated list. When many
+ * sources fail the same way (e.g. all hit "закончились кредиты ИИ"), report the
+ * reason once with an occurrence count instead of repeating it per source.
+ */
+function dedupeNotes(errors: string[]): string[] {
+  const byReason = new Map<string, number>();
+  for (const e of errors) {
+    const reason = e.includes(": ") ? e.slice(e.indexOf(": ") + 2) : e;
+    byReason.set(reason, (byReason.get(reason) ?? 0) + 1);
+  }
+  return Array.from(byReason.entries())
+    .slice(0, 3)
+    .map(([reason, n]) => (n > 1 ? `${reason} (×${n})` : reason));
+}
+
 /* ============================================================================
  * PHASE 1 — COLLECT
  * Fetch active sources, dedupe, keyword pre-filter, and QUEUE items for later
@@ -123,7 +163,7 @@ export async function collectNews(): Promise<{
       items = feed.items.slice(0, 12);
       fetched += items.length;
     } catch (err) {
-      errors.push(`${src.name}: ${err instanceof Error ? err.message : "fetch error"}`);
+      errors.push(`${src.name}: ${friendlyError(err, "ошибка загрузки")}`);
       continue;
     }
 
@@ -193,7 +233,8 @@ export async function collectNews(): Promise<{
   }
 
   const base = `Собрано в очередь: ${queued}, отфильтровано ${blocked}`;
-  const message = errors.length ? `${base}; замечания: ${errors.slice(0, 3).join("; ")}` : base;
+  const notes = dedupeNotes(errors);
+  const message = notes.length ? `${base}. Замечания: ${notes.join("; ")}` : base;
   await db.insert(newsbotRuns).values({
     status: errors.length && queued === 0 ? "error" : "ok",
     fetched,
@@ -314,7 +355,7 @@ export async function writeQueuedNews(opts?: {
       written++;
       if (autoPublish) published++;
     } catch (err) {
-      errors.push(`${row.source}: ${err instanceof Error ? err.message : "write error"}`);
+      errors.push(`${row.source}: ${friendlyError(err, "ошибка записи")}`);
     }
   });
 
@@ -328,7 +369,8 @@ export async function writeQueuedNews(opts?: {
   if (disputed) parts.push(`спорных ${disputed}`);
   if (skippedForTime) parts.push(`перенесено ${skippedForTime}`);
   const base = `Готово: ${parts.join(", ")}`;
-  const message = errors.length ? `${base}; замечания: ${errors.slice(0, 3).join("; ")}` : base;
+  const notes = dedupeNotes(errors);
+  const message = notes.length ? `${base}. Замечания: ${notes.join("; ")}` : base;
   await db.insert(newsbotRuns).values({
     status: errors.length && written === 0 ? "error" : "ok",
     fetched: 0,
@@ -352,7 +394,27 @@ export async function runNewsbot(): Promise<{
 }> {
   const collected = await collectNews();
   const written = await writeQueuedNews();
-  const message = `${collected.message}. ${written.message} (в очереди ещё ${written.remaining})`;
+
+  // Build ONE clean summary + a single "Замечания:" section, so the admin
+  // status banner can split it cleanly. Strip any per-phase notes first and
+  // merge them, deduped, at the end.
+  const stripNotes = (m: string) => {
+    const i = m.indexOf("Замечания:");
+    return (i >= 0 ? m.slice(0, i) : m).replace(/[.\s]+$/, "").trim();
+  };
+  const extractNotes = (m: string) => {
+    const i = m.indexOf("Замечания:");
+    return i >= 0
+      ? m
+          .slice(i + "Замечания:".length)
+          .split(";")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+  };
+  const summary = `${stripNotes(collected.message)}. ${stripNotes(written.message)}. В очереди ещё ${written.remaining}`;
+  const notes = dedupeNotes([...extractNotes(collected.message), ...extractNotes(written.message)]);
+  const message = notes.length ? `${summary}. Замечания: ${notes.join("; ")}` : summary;
   return {
     fetched: collected.fetched,
     created: written.written,
