@@ -30,6 +30,14 @@ const MSK_OFFSET_MS = 3 * 60 * 60 * 1000; // Europe/Moscow = UTC+3, no DST
 const PUBLISH_START_HOUR_MSK = 9;
 const PUBLISH_END_HOUR_MSK = 23;
 
+/**
+ * Canonical buffer reason for an AI article held back by the pace gate. Defined
+ * once so the writer, the promoter and the generation planner always agree on
+ * the exact string (a mismatched/corrupted copy previously meant buffered
+ * articles were never promoted).
+ */
+const BUFFER_REASON_PACE = "Отложено лимитом публикаций";
+
 /** Current wall clock in Moscow, read via getUTC* on a shifted Date. */
 function mskNow(now = new Date()): Date {
   return new Date(now.getTime() + MSK_OFFSET_MS);
@@ -62,15 +70,56 @@ async function getSettings() {
   );
 }
 
+/** Length of the daily publishing window in hours. */
+function windowHours(): number {
+  return PUBLISH_END_HOUR_MSK - PUBLISH_START_HOUR_MSK;
+}
+
+/**
+ * How many articles *should* already be published by this moment today — the
+ * daily quota (maxPerDay) spread linearly across the 09:00–23:00 MSK window.
+ * Returns 0 before the window opens and maxPerDay once it closes. This single
+ * function defines the whole publishing schedule; both the publish gate and the
+ * generation planner read from it so they always agree.
+ */
+function publishTargetByNow(maxPerDay: number, now = new Date()): number {
+  const nowMsk = mskNow(now);
+  const mskHour = nowMsk.getUTCHours() + nowMsk.getUTCMinutes() / 60;
+  const windowH = windowHours();
+  const elapsedH = Math.max(0, Math.min(windowH, mskHour - PUBLISH_START_HOUR_MSK));
+  return Math.min(maxPerDay, Math.ceil(maxPerDay * (elapsedH / windowH)));
+}
+
+/** Number of AI articles currently buffered by the pace gate (ready to drip). */
+async function bufferedCount(): Promise<number> {
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(articles)
+    .where(
+      and(
+        eq(articles.status, "review"),
+        eq(articles.aiGenerated, true),
+        eq(articles.bufferReason, BUFFER_REASON_PACE),
+      ),
+    );
+  return n;
+}
+
+/** Count of articles published so far in the current Moscow calendar day. */
+async function publishedTodayCount(): Promise<number> {
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(articles)
+    .where(and(eq(articles.status, "published"), gte(articles.publishedAt, startOfMskDayUtc())));
+  return n;
+}
+
 /**
  * How many more articles may be *published* right now under the pace rules.
  *
- * Catch-up aware: instead of only spacing off the *last* publish (which can
- * never recover after a missed window), we compute how many articles *should*
- * already be out by the current moment — the daily quota spread linearly across
- * the publishing window — and allow publishing until we reach that target. So
- * if the scheduler misses several ticks, the next run bursts just enough to
- * catch up to schedule, then resumes an even drip. An explicit `minHoursBetween`
+ * Catch-up aware: we allow publishing while today's published count is behind
+ * `publishTargetByNow`, so a run after missed ticks bursts just enough to catch
+ * up to schedule, then resumes an even drip. An explicit `minHoursBetween`
  * (admin) still acts as an absolute floor between consecutive publishes.
  */
 async function paceAllowsPublish(): Promise<boolean> {
@@ -81,22 +130,9 @@ async function paceAllowsPublish(): Promise<boolean> {
   const mskHour = nowMsk.getUTCHours() + nowMsk.getUTCMinutes() / 60;
   if (mskHour < PUBLISH_START_HOUR_MSK || mskHour >= PUBLISH_END_HOUR_MSK) return false;
 
-  // Hard ceiling: max publishes per Moscow calendar day (resets at 00:00 MSK,
-  // so yesterday's manual bulk runs never freeze today's auto-publishing).
-  const dayStart = startOfMskDayUtc();
-  const [{ n: publishedToday }] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(articles)
-    .where(and(eq(articles.status, "published"), gte(articles.publishedAt, dayStart)));
-  if (publishedToday >= s.maxPerDay) return false;
-
-  // Target-by-now: how many of today's quota should be published by this moment,
-  // spreading maxPerDay evenly over the window. Publishing is allowed while we're
-  // behind this target — this is what lets a run catch up after missed ticks.
-  const windowH = PUBLISH_END_HOUR_MSK - PUBLISH_START_HOUR_MSK;
-  const elapsedH = mskHour - PUBLISH_START_HOUR_MSK;
-  const targetByNow = Math.min(s.maxPerDay, Math.ceil(s.maxPerDay * (elapsedH / windowH)));
-  if (publishedToday >= targetByNow) return false;
+  const publishedToday = await publishedTodayCount();
+  if (publishedToday >= s.maxPerDay) return false; // hard daily ceiling
+  if (publishedToday >= publishTargetByNow(s.maxPerDay)) return false; // ahead of schedule
 
   // Absolute floor between consecutive publishes, only if admin set one (>0).
   if ((s.minHoursBetween ?? 0) > 0) {
@@ -127,8 +163,12 @@ function cronIsDue(cron: typeof articleCrons.$inferSelect, now = new Date()): bo
     const lastMsk = mskNow(new Date(cron.lastRunAt));
     if (cron.frequency !== "hourly" && mskDayKey(lastMsk) === mskDayKey(msk)) return false;
     if (cron.frequency === "hourly") {
+      // Minimum gap before the SAME author may write again. The planner already
+      // rotates least-recently-run first, so this just prevents one author from
+      // being picked twice in quick succession while still allowing the fleet
+      // to drip every few minutes.
       const elapsedMin = (now.getTime() - new Date(cron.lastRunAt).getTime()) / 6e4;
-      if (elapsedMin < 55) return false;
+      if (elapsedMin < 20) return false;
       return true;
     }
   }
@@ -275,7 +315,7 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
         status = "published";
         bufferReason = null;
       } else {
-        bufferReason = "Отложено лимитом публикаций";
+        bufferReason = BUFFER_REASON_PACE;
       }
     }
 
@@ -336,38 +376,75 @@ export async function runCron(cronId: string): Promise<{ created: number; messag
   }
 }
 
-/** How many crons to generate in parallel per batch. */
-const CRON_CONCURRENCY = 4;
+/**
+ * Hard ceiling on how many articles a single tick may generate, so one
+ * invocation can never blow past the 300s function limit (each article is a
+ * 2400+ word generation plus a cover image). A tick recovering from an outage
+ * bursts up to this many to refill the buffer; a normal frequent tick generates
+ * far fewer (usually one), giving the smooth author-A-then-author-B cadence.
+ */
+const MAX_GEN_PER_TICK = 6;
+
+/** Stop starting new generations once this much wall-clock has elapsed. */
+const GEN_TIME_BUDGET_MS = 210_000;
+
+/** Generate at most this many articles at once (kept small for model limits). */
+const GEN_CONCURRENCY = 2;
 
 /**
- * Max crons to process in a single hourly tick. Each cron produces a long
- * (2400+ word) article plus a cover image, so running all ~24 authors in one
- * invocation blows past the 300s function limit and NOTHING gets produced.
- * We instead process a small batch per tick — the least-recently-run crons
- * first — so successive hourly ticks round-robin through everyone and the load
- * is spread evenly across the day.
+ * How many hours of quota to keep buffered *ahead* of the current publish
+ * target. This ready stock lets `promoteBuffer` drip on schedule even if the
+ * next tick is delayed, and absorbs generation being slower than publishing.
  */
-const MAX_CRONS_PER_TICK = 4;
+const BUFFER_LOOKAHEAD_HOURS = 2;
 
-/** Run the most-overdue due crons this tick (bounded so we never time out). */
-export async function runDueCrons(): Promise<{ due: number; ran: number; created: number }> {
+/**
+ * Demand-driven generation. Rather than always bursting a fixed number of
+ * authors, we compute how much *ready stock* (published today + buffered) we
+ * want by now — the publish target plus a couple hours of look-ahead — and
+ * generate only the shortfall, capped for time safety. Result:
+ *  - steady state: ~1 author per tick → the sequential A→B→C drip you want;
+ *  - after an outage: a short catch-up burst to refill, then back to the drip;
+ *  - never exceeds the daily quota.
+ * Authors are chosen least-recently-run first, so the 24 authors rotate fairly.
+ */
+export async function runDueCrons(): Promise<{ due: number; ran: number; created: number; planned: number }> {
+  const s = await getSettings();
   const crons = await db.select().from(articleCrons).where(eq(articleCrons.status, "active"));
   const dueAll = crons.filter((cron) => cronIsDue(cron));
 
-  // Oldest-run first → fair round-robin across ticks. Never-run crons (null
-  // lastRunAt) sort to the very front so new authors start producing promptly.
-  const due = [...dueAll]
+  // How many to generate this tick.
+  let planned: number;
+  if (!s.autoPublish) {
+    // Approval mode: keep a light trickle flowing into the moderation queue.
+    planned = Math.min(2, dueAll.length);
+  } else {
+    const perHour = s.maxPerDay / windowHours();
+    const lookahead = Math.ceil(perHour * BUFFER_LOOKAHEAD_HOURS);
+    const desiredStock = Math.min(s.maxPerDay, publishTargetByNow(s.maxPerDay) + lookahead);
+    const currentStock = (await publishedTodayCount()) + (await bufferedCount());
+    planned = Math.max(0, desiredStock - currentStock);
+  }
+  planned = Math.min(planned, MAX_GEN_PER_TICK, dueAll.length);
+
+  // Oldest-run first → fair round-robin. Never-run crons (null lastRunAt) sort
+  // to the very front so new authors start producing promptly.
+  const queue = [...dueAll]
     .sort((a, b) => {
       const ta = a.lastRunAt ? new Date(a.lastRunAt).getTime() : 0;
       const tb = b.lastRunAt ? new Date(b.lastRunAt).getTime() : 0;
       return ta - tb;
     })
-    .slice(0, MAX_CRONS_PER_TICK);
+    .slice(0, planned);
 
+  const startedAt = Date.now();
   let created = 0;
-  for (let i = 0; i < due.length; i += CRON_CONCURRENCY) {
-    const batch = due.slice(i, i + CRON_CONCURRENCY);
+  let ran = 0;
+  for (let i = 0; i < queue.length; i += GEN_CONCURRENCY) {
+    if (Date.now() - startedAt > GEN_TIME_BUDGET_MS) break; // leave headroom for promoteBuffer
+    const batch = queue.slice(i, i + GEN_CONCURRENCY);
     const results = await Promise.all(batch.map((cron) => runCron(cron.id)));
+    ran += batch.length;
     for (const res of results) created += res.created;
   }
 
@@ -376,14 +453,15 @@ export async function runDueCrons(): Promise<{ due: number; ran: number; created
     await putSetting("articles_cron_tick", {
       at: new Date().toISOString(),
       due: dueAll.length,
-      ran: due.length,
+      planned,
+      ran,
       created,
     });
   } catch {
     /* non-critical */
   }
 
-  return { due: dueAll.length, ran: due.length, created };
+  return { due: dueAll.length, ran, created, planned };
 }
 
 /**
@@ -397,7 +475,7 @@ export async function promoteBuffer(): Promise<{ promoted: number }> {
   const buffered = await db
     .select({ id: articles.id, authorId: articles.authorId, cronId: articles.cronId })
     .from(articles)
-    .where(and(eq(articles.status, "review"), eq(articles.aiGenerated, true), eq(articles.bufferReason, "Отложено лимитом публикаций")))
+    .where(and(eq(articles.status, "review"), eq(articles.aiGenerated, true), eq(articles.bufferReason, BUFFER_REASON_PACE)))
     .orderBy(asc(articles.createdAt));
 
   let promoted = 0;
