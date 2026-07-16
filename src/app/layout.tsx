@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { SITE_URL } from "@/lib/site";
 
 // Manrope ships full Cyrillic + Latin, so Russian body/UI text renders in one
@@ -61,6 +62,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>
+        <GoogleAnalytics />
       </body>
     </html>
   );
