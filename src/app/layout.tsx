@@ -3,6 +3,7 @@ import { Lora, Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { HeartbeatPinger } from "@/components/system/HeartbeatPinger";
 import { SITE_URL } from "@/lib/site";
 
 // Manrope ships full Cyrillic + Latin, so Russian body/UI text renders in one
@@ -63,6 +64,7 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
         <GoogleAnalytics />
+        <HeartbeatPinger />
       </body>
     </html>
   );

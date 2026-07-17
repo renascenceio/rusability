@@ -15,7 +15,7 @@ import { generateArticle } from "./generate-article";
 import { generateArticleCover } from "./generate-image";
 import { generateTopic, isDuplicateTopic } from "./generate-topic";
 import { slugify } from "@/lib/utils";
-import { putSetting } from "@/lib/data/settings";
+import { getSetting, putSetting } from "@/lib/data/settings";
 import type { CategorySlug } from "@/lib/types";
 
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000; // Europe/Moscow = UTC+3, no DST
@@ -495,4 +495,64 @@ export async function promoteBuffer(): Promise<{ promoted: number }> {
     promoted++;
   }
   return { promoted };
+}
+
+/**
+ * A scheduled tick is considered DUE if the last one ran more than this long
+ * ago. Kept a little below the Vercel cron interval so a healthy scheduler
+ * always wins the race and the heartbeat only kicks in when the platform
+ * scheduler has actually stalled.
+ */
+const TICK_DUE_AFTER_MS = 8 * 60_000;
+
+/** Soft-lock lifetime — long enough to cover a full generation batch. */
+const TICK_LOCK_TTL_MS = 280_000;
+
+/**
+ * Self-healing tick runner. Safe to call from ANY trigger (Vercel cron, a public
+ * heartbeat hit by site traffic, an external uptime pinger, or the admin button)
+ * because it is idempotent and guarded:
+ *   1. Skips immediately if a tick already ran within TICK_DUE_AFTER_MS (so it's
+ *      cheap to call on every page view).
+ *   2. Takes a short DB soft-lock so concurrent callers never launch parallel
+ *      generation batches.
+ * When it does run, it executes the exact same schedule logic as the cron
+ * (`runDueCrons` + `promoteBuffer`). This removes Vercel's scheduler as a single
+ * point of failure: as long as the site gets any traffic during the day, it
+ * keeps publishing on schedule even if the platform cron stops firing.
+ */
+export async function runTickIfDue(
+  source: string,
+): Promise<{ ran: boolean; reason?: string; due?: number; ran_count?: number; created?: number; planned?: number; promoted?: number }> {
+  const tick = await getSetting<{ at?: string }>("articles_cron_tick", {});
+  const lastAt = tick.at ? new Date(tick.at).getTime() : 0;
+  if (Date.now() - lastAt < TICK_DUE_AFTER_MS) return { ran: false, reason: "fresh" };
+
+  // Soft lock so concurrent visitors don't launch parallel generation batches.
+  const lock = await getSetting<{ until?: string | null }>("articles_cron_lock", {});
+  if (lock.until && new Date(lock.until).getTime() > Date.now()) return { ran: false, reason: "locked" };
+  await putSetting("articles_cron_lock", {
+    until: new Date(Date.now() + TICK_LOCK_TTL_MS).toISOString(),
+    source,
+  });
+
+  try {
+    // Re-check freshness after acquiring the lock (mitigates the acquire race).
+    const t2 = await getSetting<{ at?: string }>("articles_cron_tick", {});
+    if (t2.at && Date.now() - new Date(t2.at).getTime() < TICK_DUE_AFTER_MS) {
+      return { ran: false, reason: "fresh" };
+    }
+    const due = await runDueCrons(); // updates articles_cron_tick
+    const promoted = await promoteBuffer();
+    return {
+      ran: true,
+      due: due.due,
+      ran_count: due.ran,
+      created: due.created,
+      planned: due.planned,
+      promoted: promoted.promoted,
+    };
+  } finally {
+    await putSetting("articles_cron_lock", { until: null });
+  }
 }
