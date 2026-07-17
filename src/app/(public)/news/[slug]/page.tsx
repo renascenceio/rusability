@@ -9,9 +9,7 @@ import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 
-export async function generateStaticParams() {
-  return (await latestNews()).map((n) => ({ slug: n.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
