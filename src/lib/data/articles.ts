@@ -92,18 +92,34 @@ export async function articlesByAuthor(authorId: string): Promise<Article[]> {
 export function articleScore(a: Article, now = Date.now()): number {
   const quality = (a.seoScore ?? 0) + (a.aeoScore ?? 0) + (a.geoScore ?? 0); // 0..294
   const engagement = a.views + a.claps * 5 + a.comments * 8;
-  const effort = a.readingMinutes * 12 + (a.body?.length ?? 0) * 4;
+  // Reward substantive work without letting an unusually long article pin the
+  // homepage forever. Reading time and structure both have sensible ceilings.
+  const effort = Math.min(a.readingMinutes, 20) * 8 + Math.min(a.body?.length ?? 0, 60) * 2;
   const eliteBonus = a.tier === "elite" ? 120 : 0;
-  const ageDays = a.publishedAt ? (now - +new Date(a.publishedAt)) / 86_400_000 : 999;
-  const recency = Math.max(0, 60 - ageDays) * 3;
+  const ageDays = a.publishedAt ? Math.max(0, (now - +new Date(a.publishedAt)) / 86_400_000) : 999;
+  // Freshness matters strongly for the lead story, but naturally expires after
+  // two weeks so evergreen quality and real engagement can still compete.
+  const recency = Math.max(0, 14 - ageDays) * 30;
   return quality + engagement * 0.1 + effort + eliteBonus + recency;
 }
 
-/** Top published articles by trend/effort score — always returns something. */
+/**
+ * Top published articles by editorial score. The first position rotates among
+ * the four strongest candidates every six hours, while the remaining order
+ * stays score-driven. This keeps the homepage current without random results or
+ * manual curation, and every visitor in the same time window sees the same hero.
+ */
 export async function heroArticles(limit = 5): Promise<Article[]> {
   const list = await publishedArticles();
   const now = Date.now();
-  return [...list].sort((a, b) => articleScore(b, now) - articleScore(a, now)).slice(0, limit);
+  const ranked = [...list].sort((a, b) => articleScore(b, now) - articleScore(a, now));
+  const rotationSize = Math.min(4, ranked.length);
+  if (rotationSize > 1) {
+    const slot = Math.floor(now / (6 * 60 * 60 * 1000)) % rotationSize;
+    const [hero] = ranked.splice(slot, 1);
+    ranked.unshift(hero);
+  }
+  return ranked.slice(0, limit);
 }
 
 export async function featuredArticles(): Promise<Article[]> {
