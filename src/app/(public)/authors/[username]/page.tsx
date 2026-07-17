@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MapPin, Send, Globe, Crown, Sparkles, ArrowLeft } from "lucide-react";
-import { allAuthors, getAuthorByUsername } from "@/lib/data/authors";
+import { getAuthorByUsername } from "@/lib/data/authors";
 import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { SubscribeButton } from "@/components/site/SubscribeButton";
@@ -9,9 +9,7 @@ import { Avatar, Badge } from "@/components/ui/kit";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
 
-export async function generateStaticParams() {
-  return (await allAuthors()).map((a) => ({ username: a.username }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Clock, Crown, Sparkles, Calendar } from "lucide-react";
-import { getArticle, relatedArticles, publishedArticles } from "@/lib/data/articles";
+import { getArticle, relatedArticles } from "@/lib/data/articles";
 import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { commentsForArticle } from "@/lib/data/comments";
 import { ArticleBody } from "@/components/site/ArticleBody";
@@ -15,9 +15,7 @@ import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
 
-export async function generateStaticParams() {
-  return (await publishedArticles()).map((a) => ({ slug: a.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
