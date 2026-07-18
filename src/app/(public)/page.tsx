@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Heart, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
@@ -448,29 +449,26 @@ export default async function HomePage() {
         >
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <div className="flex items-center gap-2 text-sm font-bold tracking-tight">
-                <span
-                  aria-hidden="true"
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-sm font-black"
-                  style={{ backgroundColor: "#101116", color: "#f8f9fb" }}
-                >
-                  R
-                </span>
-                RenéStudio
-              </div>
+              <Image
+                src="/brands/rene-logo.png"
+                alt="RenéStudio"
+                width={224}
+                height={70}
+                className="h-auto w-48 object-contain object-left md:w-56"
+              />
               <div
                 className="mt-8 text-[11px] font-bold uppercase tracking-[0.18em]"
                 style={{ color: "#2456c7" }}
               >
-                От понимания клиента — к системным изменениям
+                CX-дизайн, усиленный поведенческой наукой
               </div>
-              <h2 className="mt-3 max-w-xl text-balance font-sans text-3xl font-bold leading-tight md:text-5xl">
-                Перестаньте угадывать, что чувствует ваш клиент.
+              <h2 className="mt-3 max-w-2xl text-balance font-sans text-3xl font-bold leading-tight md:text-5xl">
+                Постройте путь клиента за минуты. Улучшайте его на основе науки, а не догадок.
               </h2>
               <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed opacity-65 md:text-base">
-                René помогает CX-командам собирать карты пути клиента, находить точки
-                напряжения и превращать исследования, метрики и поведенческие инсайты в
-                конкретный план улучшений.
+                René превращает исследования, обратную связь и метрики в живую карту
+                клиентского пути — с точками напряжения, возможностями роста и конкретным
+                планом действий для команды.
               </p>
             </div>
 
