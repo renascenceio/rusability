@@ -437,32 +437,69 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ---------- AUTHOR CTA ---------- */}
+        {/* ---------- RENÉ STUDIO CTA ---------- */}
         <section
-          className="mb-6 overflow-hidden rounded-[26px] p-8 text-white md:p-12"
+          className="mb-6 overflow-hidden rounded-3xl border p-6 md:p-10"
           style={{
-            background: "linear-gradient(135deg, #2a1410 0%, #7a2f1c 60%, #c4523b 130%)",
+            backgroundColor: "#f8f9fb",
+            borderColor: "#dfe2e8",
+            color: "#101116",
           }}
         >
-          <div className="max-w-2xl">
-            <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/55">
-              Для авторов
-            </div>
-            <h2 className="mt-3 font-serif text-3xl font-bold leading-tight text-balance md:text-4xl">
-              Ваши идеи заслуживают аудитории. Начните писать на Rusability.
-            </h2>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/70">
-              ИИ-помощник для черновиков, Elite-статус для лучших авторов и встроенные
-              SEO/AEO/GEO инструменты — всё, чтобы ваш материал нашли и люди, и нейросети.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-4">
-              <Link
-                href="/editor"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#7a2f1c] transition-transform hover:scale-[1.03]"
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2 text-sm font-bold tracking-tight">
+                <span
+                  aria-hidden="true"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-sm font-black"
+                  style={{ backgroundColor: "#101116", color: "#f8f9fb" }}
+                >
+                  R
+                </span>
+                RenéStudio
+              </div>
+              <div
+                className="mt-8 text-[11px] font-bold uppercase tracking-[0.18em]"
+                style={{ color: "#2456c7" }}
               >
-                Стать автором <ArrowRight className="h-4 w-4" />
-              </Link>
+                От понимания клиента — к системным изменениям
+              </div>
+              <h2 className="mt-3 max-w-xl text-balance font-sans text-3xl font-bold leading-tight md:text-5xl">
+                Перестаньте угадывать, что чувствует ваш клиент.
+              </h2>
+              <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed opacity-65 md:text-base">
+                René помогает CX-командам собирать карты пути клиента, находить точки
+                напряжения и превращать исследования, метрики и поведенческие инсайты в
+                конкретный план улучшений.
+              </p>
             </div>
+
+            <a
+              href="https://rene.cx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center gap-3 rounded-xl px-6 py-3.5 text-sm font-semibold transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              style={{ backgroundColor: "#2456c7", color: "#f8f9fb" }}
+            >
+              Познакомиться с René <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <div className="mt-8 grid border-t sm:grid-cols-3" style={{ borderColor: "#dfe2e8" }}>
+            {[
+              ["~10 минут", "на карту пути клиента"],
+              ["144 паттерна", "поведенческой науки"],
+              ["5 направлений", "от голоса клиента до решений"],
+            ].map(([value, label]) => (
+              <div
+                key={value}
+                className="border-b py-5 last:border-b-0 sm:border-b-0 sm:border-r sm:px-6 sm:first:pl-0 sm:last:border-r-0"
+                style={{ borderColor: "#dfe2e8" }}
+              >
+                <div className="text-xl font-bold tracking-tight">{value}</div>
+                <div className="mt-1 text-sm opacity-55">{label}</div>
+              </div>
+            ))}
           </div>
         </section>
       </div>
