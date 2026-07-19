@@ -7,6 +7,7 @@ import { Search, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
 import { CATEGORIES, categoryName, categoryAccent } from "@/lib/taxonomy";
 import { CategoryTabs, type TabItem } from "@/components/site/CategoryTabs";
+import { HomeArticleRail } from "@/components/site/HomeArticleRail";
 import { Avatar, formatCount } from "@/components/ui/kit";
 
 const ACCENT_VAR: Record<string, string> = {
@@ -42,6 +43,25 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
   }, [articles, category, query]);
 
   const visible = filtered.slice(0, limit);
+
+  // Discovery rail lists — computed from the full catalogue so the panel stays
+  // stable regardless of the active filter/search.
+  const rail = useMemo(() => {
+    const engagement = (a: Article) => a.views + a.claps * 5 + a.comments * 8;
+    const editorialScore = (a: Article) =>
+      (a.seoScore ?? 0) +
+      (a.aeoScore ?? 0) +
+      (a.geoScore ?? 0) +
+      (a.tier === "elite" ? 120 : 0) +
+      engagement(a) * 0.1;
+    return {
+      popular: [...articles].sort((a, b) => engagement(b) - engagement(a)),
+      fresh: [...articles].sort(
+        (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt),
+      ),
+      editorial: [...articles].sort((a, b) => editorialScore(b) - editorialScore(a)),
+    };
+  }, [articles]);
 
   // Dynamic tab ordering: categories with the most fresh material (published in
   // the last 24h) sit closest to the left, with total volume as a tiebreak.
@@ -110,23 +130,32 @@ export function ArticlesBrowser({ articles }: { articles: Article[] }) {
           Ничего не найдено. Попробуйте изменить фильтры.
         </p>
       ) : (
-        <div className="grid auto-rows-auto grid-cols-1 items-start gap-x-9 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((a, i) => {
-            const featured = i === 0;
-            if (featured) {
-              return (
-                <div key={a.id} className="sm:col-span-2">
-                  <FeaturedCard article={a} />
-                </div>
-              );
-            }
-            return a.tier === "elite" ? (
-              <EliteCard key={a.id} article={a} />
-            ) : (
-              <PlainCard key={a.id} article={a} />
-            );
-          })}
-        </div>
+        <>
+          {/* Lead story + discovery rail */}
+          <div className="mb-12 grid gap-x-9 gap-y-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <FeaturedCard article={visible[0]} />
+            </div>
+            <HomeArticleRail
+              popular={rail.popular}
+              fresh={rail.fresh}
+              editorial={rail.editorial}
+            />
+          </div>
+
+          {/* Remaining articles */}
+          {visible.length > 1 && (
+            <div className="grid auto-rows-auto grid-cols-1 items-start gap-x-9 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {visible.slice(1).map((a) =>
+                a.tier === "elite" ? (
+                  <EliteCard key={a.id} article={a} />
+                ) : (
+                  <PlainCard key={a.id} article={a} />
+                ),
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {limit < filtered.length && (
