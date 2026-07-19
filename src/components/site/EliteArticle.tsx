@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Moon, Sun } from "lucide-react";
 import type { ArticleBlock, FaqItem, Comment } from "@/lib/types";
 import { normalizeList } from "@/lib/article-list";
 import { ArticleEngagement } from "./ArticleEngagement";
 
-type SkinKey = "classic" | "night" | "sepia" | "forest" | "blue";
+type SkinKey = "sepia" | "night";
 
 type Skin = {
   bg: string;
@@ -20,28 +20,9 @@ type Skin = {
 };
 
 const SKINS: Record<SkinKey, Skin> = {
-  classic: { bg: "#FAFAF8", card: "#FFFFFF", bdr: "rgba(0,0,0,.08)", text: "#1A1612", textM: "rgba(26,22,18,.55)", textF: "rgba(26,22,18,.3)", accent: "#4D5AFF" },
-  night: { bg: "#0D1117", card: "#161B22", bdr: "rgba(255,255,255,.08)", text: "#E6EDF3", textM: "rgba(230,237,243,.55)", textF: "rgba(230,237,243,.28)", accent: "#58A6FF" },
-  sepia: { bg: "#F4ECD8", card: "#EDE0C4", bdr: "rgba(100,70,30,.1)", text: "#3A2A1A", textM: "rgba(58,42,26,.55)", textF: "rgba(58,42,26,.3)", accent: "#8B5E2A" },
-  forest: { bg: "#1A2A1A", card: "#243424", bdr: "rgba(255,255,255,.08)", text: "#D4E8C8", textM: "rgba(212,232,200,.5)", textF: "rgba(212,232,200,.28)", accent: "#6AAA4A" },
-  blue: { bg: "#0A1628", card: "#142038", bdr: "rgba(255,255,255,.08)", text: "#D8E8FF", textM: "rgba(216,232,255,.5)", textF: "rgba(216,232,255,.28)", accent: "#9AA0FF" },
+  sepia: { bg: "#F2E7CF", card: "#E8D8B8", bdr: "rgba(86,57,25,.16)", text: "#332418", textM: "rgba(51,36,24,.62)", textF: "rgba(51,36,24,.34)", accent: "#945B24" },
+  night: { bg: "#0D0E10", card: "#17181B", bdr: "rgba(245,239,225,.12)", text: "#F2EDE3", textM: "rgba(242,237,227,.62)", textF: "rgba(242,237,227,.32)", accent: "#D9A34A" },
 };
-
-const SWATCH: Record<SkinKey, string> = {
-  classic: "#F7F5F2",
-  night: "#0D1117",
-  sepia: "#F4ECD8",
-  forest: "#1A2A1A",
-  blue: "#0A1628",
-};
-
-const SKIN_ORDER: { key: SkinKey; title: string }[] = [
-  { key: "classic", title: "Классика" },
-  { key: "night", title: "Ночь" },
-  { key: "sepia", title: "Сепия" },
-  { key: "forest", title: "Лес" },
-  { key: "blue", title: "Синева" },
-];
 
 export type EliteRelated = {
   slug: string;
@@ -86,8 +67,16 @@ function inline(text: string) {
 }
 
 export function EliteArticle({ data }: { data: EliteArticleData }) {
-  const [skin, setSkin] = useState<SkinKey>("classic");
+  const [skin, setSkin] = useState<SkinKey>("sepia");
   const s = SKINS[skin];
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.eliteTheme = skin;
+    return () => {
+      delete root.dataset.eliteTheme;
+    };
+  }, [skin]);
 
   // Make the shared like/comment/share bar adopt the active skin.
   const engagementTheme = {
@@ -103,55 +92,33 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
 
   return (
     <div style={{ background: s.bg, minHeight: "100vh", transition: "background .3s ease" }}>
-      {/* Skin toolbar */}
+      {/* Elite reading mode */}
       <div
-        style={{
-          position: "fixed",
-          right: 20,
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 50,
-          display: "flex",
-          flexDirection: "column",
-          gap: 8,
-          background: s.card,
-          border: `1px solid ${s.bdr}`,
-          borderRadius: 20,
-          padding: "10px 8px",
-          boxShadow: "0 8px 32px rgba(0,0,0,.18)",
-        }}
+        className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 rounded-full border p-1 shadow-2xl md:bottom-auto md:left-auto md:right-6 md:top-24 md:translate-x-0"
+        style={{ background: s.card, borderColor: s.bdr }}
+        role="group"
+        aria-label="Режим чтения"
       >
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.12em",
-            color: s.textM,
-            textAlign: "center",
-            marginBottom: 4,
-          }}
-        >
-          Скин
-        </div>
-        {SKIN_ORDER.map(({ key, title }) => {
+        {([
+          ["sepia", "Сепия", Sun],
+          ["night", "Ночь", Moon],
+        ] as const).map(([key, title, Icon]) => {
           const active = skin === key;
           return (
             <button
               key={key}
+              type="button"
               onClick={() => setSkin(key)}
-              title={title}
-              aria-label={title}
+              aria-pressed={active}
+              className="flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold transition-colors"
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: "50%",
-                background: SWATCH[key],
-                cursor: "pointer",
-                border: active ? "2px solid #4D5AFF" : "2px solid transparent",
-                boxShadow: active ? "0 0 0 2px rgba(77,90,255,.3)" : "none",
+                background: active ? s.text : "transparent",
+                color: active ? s.bg : s.textM,
               }}
-            />
+            >
+              <Icon className="size-4" />
+              {title}
+            </button>
           );
         })}
       </div>
@@ -173,7 +140,7 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
           <ArrowLeft size={14} /> Статьи
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
           <span
             style={{
               fontSize: 9,
@@ -200,11 +167,11 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
               boxShadow: "0 2px 8px rgba(255,165,0,.35)",
             }}
           >
-            ✦ Elite
+            Elite
           </span>
 
           {/* AEO / SEO / GEO scores — Elite-only */}
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <div style={{ marginLeft: "auto", display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 }}>
             {([
               ["AEO", data.scores.aeo],
               ["SEO", data.scores.seo],

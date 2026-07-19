@@ -117,6 +117,71 @@
   --shadow-lift: 0 16px 40px -16px rgba(0, 0, 0, 0.6);
 }
 
+/* Elite articles use their own two-mode reading environment across the whole shell. */
+html[data-elite-theme="sepia"] {
+  --background: #f2e7cf;
+  --foreground: #332418;
+  --card: #eadcbe;
+  --card-foreground: #332418;
+  --popover: #eadcbe;
+  --popover-foreground: #332418;
+  --muted: #e6d6b5;
+  --muted-foreground: rgba(51, 36, 24, 0.62);
+  --faint: rgba(51, 36, 24, 0.34);
+  --warm-white: #eadcbe;
+  --border: rgba(86, 57, 25, 0.16);
+  --border-soft: rgba(86, 57, 25, 0.1);
+  --primary: #945b24;
+  --primary-foreground: #fffaf0;
+  --primary-soft: rgba(148, 91, 36, 0.1);
+  --surface: #eadcbe;
+  --surface-2: #e6d6b5;
+  --surface-3: #d9c49c;
+  color-scheme: light;
+}
+
+html[data-elite-theme="night"] {
+  --background: #0d0e10;
+  --foreground: #f2ede3;
+  --card: #17181b;
+  --card-foreground: #f2ede3;
+  --popover: #17181b;
+  --popover-foreground: #f2ede3;
+  --muted: #1d1e21;
+  --muted-foreground: rgba(242, 237, 227, 0.62);
+  --faint: rgba(242, 237, 227, 0.32);
+  --warm-white: #17181b;
+  --border: rgba(245, 239, 225, 0.12);
+  --border-soft: rgba(245, 239, 225, 0.07);
+  --primary: #d9a34a;
+  --primary-foreground: #171109;
+  --primary-soft: rgba(217, 163, 74, 0.12);
+  --surface: #17181b;
+  --surface-2: #1d1e21;
+  --surface-3: #27282c;
+  color-scheme: dark;
+}
+
+html[data-elite-theme] .site-theme-toggle {
+  display: none;
+}
+
+html[data-elite-theme="night"] img[src="/brand/rusability-logo-black.png"] {
+  display: none !important;
+}
+
+html[data-elite-theme="night"] img[src="/brand/rusability-logo-white.png"] {
+  display: block !important;
+}
+
+html[data-elite-theme="sepia"] img[src="/brand/rusability-logo-black.png"] {
+  display: block !important;
+}
+
+html[data-elite-theme="sepia"] img[src="/brand/rusability-logo-white.png"] {
+  display: none !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

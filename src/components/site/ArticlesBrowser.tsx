@@ -187,38 +187,37 @@ function FeaturedCard({ article }: { article: Article }) {
   );
 }
 
-/* ---------- Elite card (contained dark, image top + dark body) ---------- */
+/* ---------- Elite card (full-bleed editorial image) ---------- */
 function EliteCard({ article }: { article: Article }) {
   const author = article.author;
   return (
     <Link
       href={`/articles/${article.slug}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[16px] bg-[var(--ink)] text-white transition-transform duration-300 hover:-translate-y-1"
+      className="group relative flex min-h-[430px] overflow-hidden rounded-[20px] text-white transition-transform duration-300 hover:-translate-y-1"
     >
-      <div className="relative h-[190px] overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={article.cover || "/placeholder.svg"}
-          alt=""
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1 rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
-          <Crown className="h-3 w-3" /> Elite
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/50">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={article.cover || "/placeholder.svg"}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/5" />
+      <span className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-md bg-[var(--gold)] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
+        <Crown className="size-3" /> Elite
+      </span>
+      <div className="relative mt-auto flex w-full flex-col p-6">
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-white/65">
           {categoryName(article.category)}
         </div>
-        <h3 className="font-serif text-[23px] font-bold leading-snug text-balance text-white">
+        <h3 className="text-balance font-serif text-[25px] font-bold leading-snug text-white">
           {article.title}
         </h3>
-        <div className="mt-auto flex items-center gap-2 pt-5 text-xs text-white/55">
-          {author && <Avatar src={author.avatar} alt={author.name} size={22} />}
-          <span className="text-white/80">{author?.name}</span>
-          <span className="text-white/30">·</span>
+        <div className="mt-5 flex items-center gap-2 text-xs text-white/65">
+          {author && <Avatar src={author.avatar} alt={author.name} size={24} elite />}
+          <span className="text-white/90">{author?.name}</span>
+          <span className="text-white/35">·</span>
           <span>{article.readingMinutes} мин</span>
-          <span className="ml-auto text-white/40">{formatCount(article.claps)} ♥</span>
+          <span className="ml-auto text-white/55">{formatCount(article.claps)} ♥</span>
         </div>
       </div>
     </Link>
