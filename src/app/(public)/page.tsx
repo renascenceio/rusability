@@ -2,11 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Heart, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
-import { articleScore, heroArticles, publishedArticles } from "@/lib/data/articles";
+import { heroArticles, publishedArticles } from "@/lib/data/articles";
 import { latestNews } from "@/lib/data/news";
 import { activeCta } from "@/lib/data/ctas";
 import { CtaBand } from "@/components/site/CtaBand";
-import { HomeArticleRail } from "@/components/site/HomeArticleRail";
 import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { Avatar } from "@/components/ui/kit";
 import { formatDate } from "@/lib/utils";
@@ -70,21 +69,16 @@ export default async function HomePage() {
   const used = new Set<string>();
   if (hero) used.add(hero.id);
 
-  // One strong visual lead sits beside a compact, switchable editorial rail.
-  const featureLead =
-    featured.find((a) => !used.has(a.id)) ?? published.find((a) => !used.has(a.id));
-  if (featureLead) used.add(featureLead.id);
-
-  const railPool = published.filter((a) => !used.has(a.id));
-  const popularRail = [...railPool]
-    .sort((a, b) => b.views + b.claps * 5 + b.comments * 8 - (a.views + a.claps * 5 + a.comments * 8))
-    .slice(0, 5);
-  const freshRail = [...railPool]
-    .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt))
-    .slice(0, 5);
-  const editorialRail = [...railPool]
-    .sort((a, b) => articleScore(b) - articleScore(a))
-    .slice(0, 5);
+  // Two more top-scoring pieces fill the split feature row below the hero.
+  const featureRow = featured.filter((a) => !used.has(a.id)).slice(0, 2);
+  if (featureRow.length < 2) {
+    for (const a of published) {
+      if (featureRow.length >= 2) break;
+      if (!used.has(a.id) && !featureRow.some((f) => f.id === a.id)) featureRow.push(a);
+    }
+  }
+  featureRow.forEach((a) => used.add(a.id));
+  const [featureLead, featuredSide] = featureRow;
 
   // "Читать сейчас" — three category columns
   const pick = (cats: string[], n: number): Article[] => {
@@ -191,60 +185,101 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ---------- FEATURE + EDITORIAL RAIL ---------- */}
-        <section className="mb-12 grid items-stretch gap-5 lg:grid-cols-[minmax(0,1.65fr)_minmax(300px,1fr)]">
-          <div className="flex min-w-0 flex-col gap-5">
-            {featureLead && (
-              <Link
-                href={`/articles/${featureLead.slug}`}
-                className="group relative flex min-h-[360px] flex-1 flex-col justify-end overflow-hidden rounded-[26px] text-white md:min-h-[430px]"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={featureLead.cover || "/placeholder.svg"}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/5" />
-                <div className="relative p-7 md:p-9">
-                  <div className="mb-3 flex items-center gap-2.5">
-                    {featureLead.tier === "elite" && (
-                      <span className="inline-flex items-center rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
-                        Elite
-                      </span>
-                    )}
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-white/75">
-                      {categoryName(featureLead.category)}
+        {/* ---------- SPLIT FEATURE ROW (2/3 + 1/3) ---------- */}
+        <section className="mb-6 grid gap-5 lg:grid-cols-[2fr_1fr]">
+          {featureLead && (
+            <Link
+              href={`/articles/${featureLead.slug}`}
+              className="group relative flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[26px] bg-[var(--ink)] p-8 text-white md:p-9"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={featureLead.cover || "/placeholder.svg"}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-55 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+              <div className="relative">
+                <div className="mb-2 flex items-center gap-2.5">
+                  {featureLead.tier === "elite" && (
+                    <span className="inline-flex items-center rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
+                      Elite
                     </span>
-                  </div>
-                  <h2 className="max-w-2xl text-balance font-serif text-2xl font-bold leading-tight text-white md:text-4xl">
-                    {featureLead.title}
-                  </h2>
-                  <div className="mt-5 flex items-center gap-2.5 text-[13px] text-white/70">
-                    {featureLead.author && (
-                      <Avatar
-                        src={featureLead.author.avatar}
-                        alt={featureLead.author.name}
-                        size={30}
-                        elite={featureLead.tier === "elite"}
-                      />
-                    )}
-                    <span className="font-semibold text-white">{featureLead.author?.name}</span>
-                    <span className="text-white/35">·</span>
-                    <span>{featureLead.readingMinutes} мин</span>
-                  </div>
+                  )}
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                    {categoryName(featureLead.category)}
+                  </span>
                 </div>
-              </Link>
-            )}
-            {digestCta && <CtaBand cta={digestCta} />}
-          </div>
+                <h2 className="max-w-lg font-serif text-xl font-bold leading-snug text-balance text-white md:text-[1.45rem]">
+                  {featureLead.title}
+                </h2>
+                <div className="mt-4 flex items-center gap-2.5 text-[13px] text-white/65">
+                  {featureLead.author && (
+                    <Avatar
+                      src={featureLead.author.avatar}
+                      alt={featureLead.author.name}
+                      size={28}
+                      elite={featureLead.tier === "elite"}
+                    />
+                  )}
+                  <span className="font-semibold text-white/90">{featureLead.author?.name}</span>
+                  <span className="text-white/30">·</span>
+                  <span>{featureLead.readingMinutes} мин</span>
+                </div>
+              </div>
+            </Link>
+          )}
 
-          <HomeArticleRail
-            popular={popularRail}
-            fresh={freshRail}
-            editorial={editorialRail}
-          />
+          {featuredSide && (
+            <Link
+              href={`/articles/${featuredSide.slug}`}
+              className="group relative flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[26px] bg-[var(--ink)] p-6 text-white"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={featuredSide.cover || "/placeholder.svg"}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+              <div className="relative">
+                <div className="mb-2 flex items-center gap-2.5">
+                  {featuredSide.tier === "elite" && (
+                    <span className="inline-flex items-center rounded-md bg-[var(--gold)] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-[#3a2a10]">
+                      Elite
+                    </span>
+                  )}
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/70">
+                    {categoryName(featuredSide.category)}
+                  </span>
+                </div>
+                <h3 className="font-serif text-xl font-bold leading-snug text-balance text-white group-hover:text-white/90 md:text-[1.45rem]">
+                  {featuredSide.title}
+                </h3>
+                <div className="mt-4 flex items-center gap-2.5 text-[13px] text-white/65">
+                  {featuredSide.author && (
+                    <Avatar
+                      src={featuredSide.author.avatar}
+                      alt={featuredSide.author.name}
+                      size={28}
+                      elite={featuredSide.tier === "elite"}
+                    />
+                  )}
+                  <span className="font-semibold text-white/90">{featuredSide.author?.name}</span>
+                  <span className="text-white/30">·</span>
+                  <span>{featuredSide.readingMinutes} мин</span>
+                </div>
+              </div>
+            </Link>
+          )}
         </section>
+
+        {/* ---------- ADMIN-MANAGED CTA (replaces the old email form) ---------- */}
+        {digestCta && (
+          <div className="mb-12">
+            <CtaBand cta={digestCta} />
+          </div>
+        )}
 
         {/* ---------- ЧИТАТЬ СЕЙЧАС ---------- */}
         <section className="mb-14">
