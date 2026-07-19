@@ -331,6 +331,46 @@ export const contactMessages = pgTable("contact_messages", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Real email inbox (Resend inbound + outbound).
+ * A thread groups a back-and-forth conversation with one external correspondent.
+ */
+export const mailThreads = pgTable("mail_threads", {
+  id: text("id").primaryKey(),
+  subject: text("subject").notNull().default(""),
+  /** The external correspondent (the human on the other side). */
+  correspondentEmail: text("correspondent_email").notNull(),
+  correspondentName: text("correspondent_name").notNull().default(""),
+  /** Our own inbound address this thread arrived at, e.g. hello@rusability.ru. */
+  mailbox: text("mailbox").notNull().default(""),
+  status: text("status").notNull().default("open"), // open | closed | spam
+  unread: boolean("unread").notNull().default(true),
+  lastMessageAt: timestamp("last_message_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const mailMessages = pgTable("mail_messages", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id")
+    .notNull()
+    .references(() => mailThreads.id, { onDelete: "cascade" }),
+  direction: text("direction").notNull(), // inbound | outbound
+  fromEmail: text("from_email").notNull(),
+  fromName: text("from_name").notNull().default(""),
+  toEmails: text("to_emails").array().notNull().default([]),
+  subject: text("subject").notNull().default(""),
+  html: text("html").notNull().default(""),
+  text: text("text").notNull().default(""),
+  /** RFC Message-ID of this message + the one it replies to, for correct threading. */
+  messageId: text("message_id"),
+  inReplyTo: text("in_reply_to"),
+  /** Resend identifiers (received email id / sent email id). */
+  providerId: text("provider_id"),
+  /** [{ filename, url, contentType, size }] uploaded to Blob. */
+  attachments: jsonb("attachments").notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const connections = pgTable("connections", {
   id: text("id").primaryKey(),
   platform: text("platform").notNull(),

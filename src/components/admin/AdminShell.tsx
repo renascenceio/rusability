@@ -16,6 +16,7 @@ import {
   Megaphone,
   ListChecks,
   Inbox,
+  Mailbox,
   Menu,
   X,
   Sun,
@@ -63,6 +64,7 @@ const NAV: NavGroup[] = [
     title: "Аудитория",
     items: [
       { href: "/admin/users", label: "Пользователи", icon: Users },
+      { href: "/admin/inbox", label: "Почта", icon: Mailbox },
       { href: "/admin/messages", label: "Сообщения", icon: Inbox, roles: ["superadmin"] },
     ],
   },
