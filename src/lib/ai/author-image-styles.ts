@@ -245,8 +245,10 @@ export const NEGATIVE_TERMS =
  */
 export const POSITIVE_TAIL =
   "Purely visual, symbolic and artful — convey the idea through imagery, colour, texture, light and metaphor only. " +
-  "Completely wordless and text-free. A single clear focal point with generous negative space, gallery-grade and inspiring. " +
-  "Full-bleed edge-to-edge composition that completely fills the entire widescreen frame — the artwork must extend all the way to every edge with NO white borders, NO margins, NO frame, NO letterboxing and NO empty background bars; the scene bleeds off all four sides.";
+  "Completely wordless and text-free, with one clear focal point and rich visual detail distributed across the full canvas. " +
+  "Compose this as immersive edge-to-edge photography or artwork, never as a poster, print, card or artwork placed on a background. " +
+  "Every corner and every outermost pixel must contain a natural continuation of the scene; foreground, texture, colour and light must visibly continue beyond all four crop edges. " +
+  "The scene occupies 100% of the widescreen canvas and is immediately crop-ready for a website hero without padding or cleanup.";
 
 /**
  * Deterministic art-direction prompt for one article. Combines a seeded art

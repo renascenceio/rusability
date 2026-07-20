@@ -45,8 +45,9 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
     "Walk AWAY from the obvious, literal image a person would first expect for the topic. Translate the topic into a pure VISUAL METAPHOR from nature, light, material, colour or abstract form.",
     "Describe ONLY beautiful, gallery-grade imagery. Do NOT mention people in business settings, offices, devices, or any diagram/chart/text — simply don't reference them at all; instead describe an evocative abstract scene.",
     "Never put the article's literal title or any quoted phrase into the image. Keep it wordless and symbolic.",
-    "The composition MUST be full-bleed: it fills the entire widescreen frame edge-to-edge and bleeds off all four sides, with absolutely no white borders, margins, frame or letterboxing.",
-    "Output ONE single English prompt of 55–100 words describing: medium/style, the abstract subject, full-bleed composition, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
+    "This is a WEBSITE HERO ASSET, not a poster or print. The generated scene itself must occupy 100% of the canvas, with subject, environment, texture, colour and light extending naturally through every corner and beyond all four crop edges.",
+    "Reject any concept that places a smaller rectangular artwork, card, print, canvas, photograph or isolated vignette onto a plain backdrop. Avoid broad empty bands at the top or bottom. The result must be immediately crop-ready with visually active outer edges.",
+    "Output ONE single English prompt of 65–110 words describing: medium/style, abstract subject, immersive edge-to-edge environment, active outer edges, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
   ].join("\n");
 
   const prompt = [
@@ -93,7 +94,14 @@ export async function generateArticleCover(input: GenerateCoverInput): Promise<s
     });
     const bytes = image.uint8Array;
     if (!bytes || bytes.length === 0) return null;
-    return await storeWebp(bytes, { prefix: "covers", name: input.title });
+    // Prompt compliance is not trusted: Imagen occasionally returns a smaller
+    // artwork baked onto a white canvas. Strip any detected matte before the
+    // cover reaches Blob so every generated hero is structurally full-bleed.
+    return await storeWebp(bytes, {
+      prefix: "covers",
+      name: input.title,
+      removeLightMatte: true,
+    });
   } catch (err) {
     console.log("[v0] generateArticleCover failed:", err instanceof Error ? err.message : String(err));
     return null;
