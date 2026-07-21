@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
 import { normalizeList } from "@/lib/article-list";
 import type { ArticleBlock } from "@/lib/types";
 
@@ -124,14 +125,16 @@ ${materials.slice(0, 8000)}
   });
 
   const body = toBlocks(output.body);
-  const words = countWords(body);
+  const humanizer = await getHumanizerConfig();
+  const finalBody = await humanizeBlocks(body, humanizer);
+  const words = countWords(finalBody);
   const clamp = (n: number) => Math.min(98, Math.max(60, Math.round(n)));
 
   return {
     title: output.title.trim(),
     subtitle: output.subtitle.trim(),
     excerpt: output.excerpt.trim(),
-    body,
+    body: finalBody,
     tags: output.tags.map((t) => t.toLowerCase().trim()).filter(Boolean).slice(0, 6),
     readingMinutes: Math.max(1, Math.round(words / 180)),
     geoScore: clamp(output.geoScore),
