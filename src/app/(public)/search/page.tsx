@@ -8,6 +8,9 @@ export const metadata = {
   title: "Поиск — Rusability",
 };
 
+// Reads live published content from the DB — render at request time.
+export const dynamic = "force-dynamic";
+
 export default async function SearchPage() {
   const [articles, news, authors] = await Promise.all([
     publishedArticles(),

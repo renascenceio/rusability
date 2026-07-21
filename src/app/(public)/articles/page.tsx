@@ -7,6 +7,9 @@ export const metadata = {
   description: "Аналитика, практика и мнения о маркетинге, дизайне и технологиях.",
 };
 
+// Reads live published articles from the DB — render at request time.
+export const dynamic = "force-dynamic";
+
 export default async function ArticlesPage() {
   const articles = await publishedArticles();
   return (

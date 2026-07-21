@@ -8,6 +8,9 @@ export const metadata = {
   description: "Эксперты, исследователи и практики, которые пишут для Rusability.",
 };
 
+// Reads live authors from the DB — render at request time.
+export const dynamic = "force-dynamic";
+
 export default async function AuthorsPage() {
   const AUTHORS = await allAuthors();
   return (

@@ -11,6 +11,7 @@ const TABS = [
   { href: "/admin/article-crons", label: "Автопубликация" },
   { href: "/admin/ai-filter", label: "⚠ РКН-фильтр" },
   { href: "/admin/ai-requirements", label: "Политика" },
+  { href: "/admin/humanizer", label: "✍ Гуманизатор" },
 ];
 
 /**

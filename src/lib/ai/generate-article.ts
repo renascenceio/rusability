@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
 import { normalizeList } from "@/lib/article-list";
 import type { aiAuthors } from "@/lib/db/schema";
 import type { ArticleBlock, CategorySlug, FaqItem } from "@/lib/types";
@@ -188,7 +189,12 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     }
   }
 
-  const words = countWords(body);
+  // Optional second humanize pass: rewrite the assembled draft to strip any
+  // residual AI markers (structure/facts preserved). No-op unless enabled.
+  const humanizer = await getHumanizerConfig();
+  const finalBody = await humanizeBlocks(body, humanizer);
+
+  const words = countWords(finalBody);
   const readingMinutes = Math.max(1, Math.round(words / 180));
   const clampScore = (n: number) => Math.min(98, Math.max(60, Math.round(n)));
 
@@ -203,7 +209,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
   return {
     title: output.title.trim(),
     excerpt: output.excerpt.trim(),
-    body,
+    body: finalBody,
     tags: output.tags.map((t) => t.toLowerCase().trim()).filter(Boolean).slice(0, 6),
     readingMinutes,
     geoScore: clampScore(output.geoScore),

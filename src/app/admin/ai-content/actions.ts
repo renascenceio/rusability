@@ -19,6 +19,8 @@ import { runNewsbot, writeQueuedNews } from "@/lib/ai/news-engine";
 import { matchesBlockedTerm } from "@/lib/ai/content-filter";
 import { addBlockedTerm, removeBlockedTerm } from "@/lib/data/news-blocklist";
 import { addGoodExample, addBadExample } from "@/lib/data/news-examples";
+import { putSetting } from "@/lib/data/settings";
+import { mergeHumanizer, type HumanizerConfig } from "@/lib/ai/humanizer-config";
 
 const rid = () => Math.random().toString(36).slice(2, 10);
 const guard = () => requireRole(ADMIN_ROLES);
@@ -32,6 +34,16 @@ export async function saveRequirement(key: string, title: string, content: strin
     .values({ key, title, content, updatedAt: new Date() })
     .onConflictDoUpdate({ target: aiRequirements.key, set: { title, content, updatedAt: new Date() } });
   revalidatePath("/admin/ai-requirements");
+  return { ok: true };
+}
+
+/* ---------------- Humanizer (humanizer-ru) ---------------- */
+
+export async function saveHumanizerConfig(config: HumanizerConfig) {
+  await guard();
+  const clean = mergeHumanizer(config);
+  await putSetting("humanizer", clean);
+  revalidatePath("/admin/humanizer");
   return { ok: true };
 }
 

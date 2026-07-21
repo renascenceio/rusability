@@ -10,7 +10,9 @@ import { categoryName, categoryAccent } from "@/lib/taxonomy";
 import { Avatar } from "@/components/ui/kit";
 import { formatDate } from "@/lib/utils";
 
-export const revalidate = 3600;
+// Live, DB-driven homepage: render at request time (no build-time prerender,
+// which would require a database connection during the build).
+export const dynamic = "force-dynamic";
 
 const ACCENT_VAR: Record<string, string> = {
   primary: "var(--primary)",
