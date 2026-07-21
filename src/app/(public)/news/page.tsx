@@ -7,6 +7,9 @@ export const metadata = {
   description: "Живая лента индустрии: технологии, маркетинг, бизнес и наука.",
 };
 
+// Reads live published news from the DB — render at request time.
+export const dynamic = "force-dynamic";
+
 export default async function NewsPage() {
   const [news, popular, cta] = await Promise.all([
     publishedNews(),

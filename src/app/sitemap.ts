@@ -6,6 +6,9 @@ import { SITE_URL } from "@/lib/site";
 
 const BASE = SITE_URL;
 
+// Built from live DB content — generate on request, not during the build.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [publishedA, publishedN, authors] = await Promise.all([
     publishedArticles(),
