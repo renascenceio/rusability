@@ -72,21 +72,27 @@
   --radius-pill: 40px;
 }
 
+/*
+  Dark mode = the "night" reading canvas (previously Elite-only), now the
+  site-wide dark scheme: cool near-black greys + warm off-white text.
+  Brand BLUE stays the accent for buttons/links (gold remains a reading-only
+  accent inside Elite article bodies).
+*/
 .dark {
-  --background: #0d0b09;
-  --foreground: #f0ebe3;
-  --card: #1c1917;
-  --card-foreground: #f0ebe3;
-  --popover: #1c1917;
-  --popover-foreground: #f0ebe3;
+  --background: #0d0e10;
+  --foreground: #f2ede3;
+  --card: #17181b;
+  --card-foreground: #f2ede3;
+  --popover: #17181b;
+  --popover-foreground: #f2ede3;
 
-  --muted: #141210;
-  --muted-foreground: rgba(240, 235, 227, 0.5);
-  --faint: rgba(240, 235, 227, 0.25);
-  --warm-white: #141210;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-soft: rgba(255, 255, 255, 0.04);
-  --input: rgba(255, 255, 255, 0.12);
+  --muted: #1d1e21;
+  --muted-foreground: rgba(242, 237, 227, 0.55);
+  --faint: rgba(242, 237, 227, 0.3);
+  --warm-white: #17181b;
+  --border: rgba(245, 239, 225, 0.12);
+  --border-soft: rgba(245, 239, 225, 0.06);
+  --input: rgba(245, 239, 225, 0.14);
   --ring: #7a8aff;
 
   --primary: #6a76ff;
@@ -102,19 +108,19 @@
   --success-soft: rgba(124, 192, 92, 0.14);
   --gold: #e8a85a;
 
-  --elite: #0d0b09;
-  --elite-foreground: #f0ebe3;
+  --elite: #0d0e10;
+  --elite-foreground: #f2ede3;
 
   /* Component aliases */
-  --surface: #1c1917;
-  --surface-2: #141210;
-  --surface-3: #2a2420;
-  --ink: #0d0b09;
-  --on-ink: #f0ebe3;
+  --surface: #17181b;
+  --surface-2: #1d1e21;
+  --surface-3: #27282c;
+  --ink: #0d0e10;
+  --on-ink: #f2ede3;
   --gold-ink: #e8a85a;
   --danger: #e0655c;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
-  --shadow-lift: 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px -12px rgba(0, 0, 0, 0.55);
+  --shadow-lift: 0 16px 40px -16px rgba(0, 0, 0, 0.65);
 }
 
 /* Elite articles use their own two-mode reading environment across the whole shell. */
@@ -140,47 +146,12 @@ html[data-elite-theme="sepia"] {
   color-scheme: light;
 }
 
-html[data-elite-theme="night"] {
-  --background: #0d0e10;
-  --foreground: #f2ede3;
-  --card: #17181b;
-  --card-foreground: #f2ede3;
-  --popover: #17181b;
-  --popover-foreground: #f2ede3;
-  --muted: #1d1e21;
-  --muted-foreground: rgba(242, 237, 227, 0.62);
-  --faint: rgba(242, 237, 227, 0.32);
-  --warm-white: #17181b;
-  --border: rgba(245, 239, 225, 0.12);
-  --border-soft: rgba(245, 239, 225, 0.07);
-  --primary: #d9a34a;
-  --primary-foreground: #171109;
-  --primary-soft: rgba(217, 163, 74, 0.12);
-  --surface: #17181b;
-  --surface-2: #1d1e21;
-  --surface-3: #27282c;
-  color-scheme: dark;
-}
-
-html[data-elite-theme] .site-theme-toggle {
-  display: none;
-}
-
-html[data-elite-theme="night"] img[src="/brand/rusability-logo-black.png"] {
-  display: none !important;
-}
-
-html[data-elite-theme="night"] img[src="/brand/rusability-logo-white.png"] {
-  display: block !important;
-}
-
-html[data-elite-theme="sepia"] img[src="/brand/rusability-logo-black.png"] {
-  display: block !important;
-}
-
-html[data-elite-theme="sepia"] img[src="/brand/rusability-logo-white.png"] {
-  display: none !important;
-}
+/*
+  In dark mode Elite articles inherit the site-wide night scheme (.dark),
+  so only the light reading mode needs the sepia override above.
+  The sepia chrome has no `.dark` class, so the default (black) logo already
+  shows — no manual logo swap needed.
+*/
 
 @theme inline {
   --color-background: var(--background);

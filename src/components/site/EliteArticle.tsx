@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { ArticleBlock, FaqItem, Comment } from "@/lib/types";
 import { normalizeList } from "@/lib/article-list";
 import { ArticleEngagement } from "./ArticleEngagement";
@@ -67,12 +68,21 @@ function inline(text: string) {
 }
 
 export function EliteArticle({ data }: { data: EliteArticleData }) {
-  const [skin, setSkin] = useState<SkinKey>("sepia");
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Reading skin follows the site-wide light/dark toggle: light -> sepia,
+  // dark -> night. Default to sepia until mounted (site default theme is light).
+  const skin: SkinKey = mounted && resolvedTheme === "dark" ? "night" : "sepia";
   const s = SKINS[skin];
 
   useEffect(() => {
     const root = document.documentElement;
-    root.dataset.eliteTheme = skin;
+    // Only the light reading mode needs an override; dark mode inherits the
+    // site-wide `.dark` night scheme, keeping the chrome consistent.
+    if (skin === "sepia") root.dataset.eliteTheme = "sepia";
+    else delete root.dataset.eliteTheme;
     return () => {
       delete root.dataset.eliteTheme;
     };
@@ -92,36 +102,8 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
 
   return (
     <div style={{ background: s.bg, minHeight: "100vh", transition: "background .3s ease" }}>
-      {/* Elite reading mode */}
-      <div
-        className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 rounded-full border p-1 shadow-2xl md:bottom-auto md:left-auto md:right-6 md:top-24 md:translate-x-0"
-        style={{ background: s.card, borderColor: s.bdr }}
-        role="group"
-        aria-label="Режим чтения"
-      >
-        {([
-          ["sepia", "Сепия", Sun],
-          ["night", "Ночь", Moon],
-        ] as const).map(([key, title, Icon]) => {
-          const active = skin === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSkin(key)}
-              aria-pressed={active}
-              className="flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold transition-colors"
-              style={{
-                background: active ? s.text : "transparent",
-                color: active ? s.bg : s.textM,
-              }}
-            >
-              <Icon className="size-4" />
-              {title}
-            </button>
-          );
-        })}
-      </div>
+      {/* Reading mode (sepia in light / night in dark) follows the site theme
+          toggle in the header — no separate control here. */}
 
       {/* Head */}
       <div style={{ padding: "40px 48px 0", maxWidth: 1080, margin: "0 auto" }}>
@@ -169,36 +151,6 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
           >
             Elite
           </span>
-
-          {/* AEO / SEO / GEO scores — Elite-only */}
-          <div style={{ marginLeft: "auto", display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 }}>
-            {([
-              ["AEO", data.scores.aeo],
-              ["SEO", data.scores.seo],
-              ["GEO", data.scores.geo],
-            ] as const)
-              .filter(([, v]) => typeof v === "number")
-              .map(([label, v]) => (
-                <span
-                  key={label}
-                  title={`${label}-оценка: ${v}/100`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "baseline",
-                    gap: 4,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: s.textM,
-                    border: `1px solid ${s.bdr}`,
-                    borderRadius: 20,
-                    padding: "4px 10px",
-                  }}
-                >
-                  <span style={{ fontSize: 9, letterSpacing: "0.1em", color: s.textF }}>{label}</span>
-                  <span style={{ color: s.accent, fontWeight: 700 }}>{v}</span>
-                </span>
-              ))}
-          </div>
         </div>
 
         <h1
