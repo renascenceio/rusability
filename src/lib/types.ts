@@ -70,6 +70,9 @@ export interface Article {
   excerpt: string;
   /** HTML-ish body split into blocks for the mock renderer */
   body: ArticleBlock[];
+  /** Number of body blocks. Populated by list projections that omit the heavy
+   *  `body` JSONB so editorial scoring still works without transferring it. */
+  bodyLen?: number;
   cover: string;
   category: CategorySlug;
   tags: string[];
