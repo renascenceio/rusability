@@ -89,6 +89,127 @@ export function NewsListSkeleton({ rows = 8 }: { rows?: number }) {
   );
 }
 
+/** Homepage — big hero panel, split feature row, then three category columns. */
+export function HomeSkeleton() {
+  return (
+    <div className="container-editorial py-8 md:py-10">
+      <div className="mx-auto max-w-5xl">
+        {/* HERO */}
+        <div className="mb-7 flex min-h-[440px] flex-col justify-between rounded-[26px] bg-[var(--surface)] p-7 md:min-h-[500px] md:p-10">
+          <Bar className="h-5 w-28" />
+          <div>
+            <Bar className="h-4 w-40" />
+            <Bar className="mt-4 h-9 w-full max-w-2xl md:h-11" />
+            <Bar className="mt-3 h-9 w-2/3 md:h-11" />
+            <div className="mt-7 flex items-center gap-3">
+              <Bar className="h-10 w-10 rounded-full" />
+              <div>
+                <Bar className="h-3.5 w-32" />
+                <Bar className="mt-2 h-3 w-24" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* SPLIT FEATURE ROW */}
+        <div className="mb-6 grid gap-5 lg:grid-cols-[2fr_1fr]">
+          <div className="flex min-h-[240px] flex-col justify-end rounded-[26px] bg-[var(--surface)] p-8">
+            <Bar className="h-3 w-24" />
+            <Bar className="mt-3 h-6 w-4/5" />
+            <Bar className="mt-2 h-6 w-3/5" />
+          </div>
+          <div className="flex min-h-[240px] flex-col justify-end rounded-[26px] bg-[var(--surface)] p-7">
+            <Bar className="h-3 w-20" />
+            <Bar className="mt-3 h-5 w-full" />
+            <Bar className="mt-2 h-5 w-2/3" />
+          </div>
+        </div>
+
+        {/* THREE CATEGORY COLUMNS */}
+        <div className="grid gap-8 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, c) => (
+            <div key={c}>
+              <Bar className="mb-4 h-4 w-28" />
+              <div className="flex flex-col gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i}>
+                    <Bar className="h-4 w-full" />
+                    <Bar className="mt-2 h-4 w-3/4" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Article/news READER skeleton — a narrow single column: meta line, big serif
+ * headline, lede, then paragraph lines. Matches the article & news detail
+ * pages (previously these fell back to the grid skeleton, which looked wrong).
+ */
+export function ArticleReadingSkeleton() {
+  return (
+    <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
+      {/* breadcrumbs */}
+      <Bar className="h-3 w-64 max-w-full" />
+      {/* meta line */}
+      <div className="mt-8 flex items-center gap-3">
+        <Bar className="h-3 w-24" />
+        <Bar className="h-3 w-28" />
+      </div>
+      {/* headline */}
+      <Bar className="mt-4 h-9 w-full md:h-11" />
+      <Bar className="mt-3 h-9 w-4/5 md:h-11" />
+      {/* lede */}
+      <Bar className="mt-6 h-5 w-full" />
+      <Bar className="mt-2 h-5 w-11/12" />
+      {/* cover */}
+      <Bar className="mt-8 aspect-[16/9] w-full rounded-2xl" />
+      {/* body paragraphs */}
+      <div className="mt-8 flex flex-col gap-6">
+        {Array.from({ length: 5 }).map((_, p) => (
+          <div key={p} className="flex flex-col gap-2.5">
+            <Bar className="h-4 w-full" />
+            <Bar className="h-4 w-full" />
+            <Bar className="h-4 w-11/12" />
+            <Bar className="h-4 w-2/3" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Search skeleton — a centered search box then a compact results list, which
+ * is what the page actually renders (not a card grid).
+ */
+export function SearchSkeleton() {
+  return (
+    <div className="container-editorial py-9 md:py-12">
+      <div className="mx-auto max-w-2xl">
+        <Bar className="h-8 w-40 md:h-9" />
+        {/* search input */}
+        <Bar className="mt-6 h-12 w-full rounded-xl" />
+        {/* result rows */}
+        <div className="mt-8 flex flex-col divide-y divide-[var(--border-soft)]">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="py-4">
+              <Bar className="h-3 w-20" />
+              <Bar className="mt-2.5 h-5 w-full max-w-[440px]" />
+              <Bar className="mt-2 h-3 w-3/4" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Grid of author cards — matches the Авторы layout. */
 export function AuthorGridSkeleton({ cards = 8 }: { cards?: number }) {
   return (

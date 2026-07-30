@@ -49,10 +49,16 @@ export function NewsBrowser({
   news,
   popular,
   cta,
+  total,
+  todayCount,
 }: {
   news: NewsItem[];
   popular: NewsItem[];
   cta: SiteCta | null;
+  /** True published total (payload is capped for transfer size). */
+  total: number;
+  /** Items published today, computed server-side over the full set. */
+  todayCount: number;
 }) {
   const [cat, setCat] = useState("all");
   const [query, setQuery] = useState("");
@@ -89,20 +95,6 @@ export function NewsBrowser({
     return [{ slug: "all", label: "Все" }, ...rest.map((t) => ({ slug: t.slug, label: t.label }))];
   }, [news]);
 
-  // Real count of items published today (the header used to label the TOTAL as
-  // "сегодня", which was misleading — e.g. "66 материалов сегодня").
-  const todayCount = useMemo(() => {
-    const now = new Date();
-    return news.filter((n) => {
-      const d = new Date(n.publishedAt);
-      return (
-        d.getFullYear() === now.getFullYear() &&
-        d.getMonth() === now.getMonth() &&
-        d.getDate() === now.getDate()
-      );
-    }).length;
-  }, [news]);
-
   const lead = filtered[0];
   const alsoImportant = filtered.slice(1, 6);
   const keyLines = filtered.slice(6, 11); // one-liner "Коротко" strip
@@ -116,7 +108,7 @@ export function NewsBrowser({
         <div>
           <h1 className="font-serif text-5xl font-black text-[var(--foreground)]">Новости</h1>
           <p className="mt-2 text-[var(--muted-foreground)]">
-            Живая лента · {news.length.toLocaleString("ru-RU")} материалов
+            Живая лента · {total.toLocaleString("ru-RU")} материалов
           </p>
         </div>
         <div className="relative w-full md:w-72">

@@ -9,6 +9,7 @@ import {
   jsonb,
   serial,
   unique,
+  index,
 } from "drizzle-orm/pg-core";
 
 /* ------------------------------------------------------------------ */
@@ -160,7 +161,12 @@ export const articles = pgTable("articles", {
   aiGenerated: boolean("ai_generated").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  // Composite indexes matching the list queries: filter then sort by date.
+  statusPublished: index("articles_status_published_idx").on(t.status, t.publishedAt.desc()),
+  categoryPublished: index("articles_category_published_idx").on(t.category, t.publishedAt.desc()),
+  authorPublished: index("articles_author_published_idx").on(t.authorId, t.publishedAt.desc()),
+}));
 
 export const news = pgTable("news", {
   id: text("id").primaryKey(),
@@ -183,7 +189,10 @@ export const news = pgTable("news", {
   originalTitle: text("original_title"),
   sourceId: text("source_id"),
   fetchedAt: timestamp("fetched_at", { withTimezone: true }),
-});
+}, (t) => ({
+  pipelinePublished: index("news_pipeline_published_idx").on(t.pipeline, t.publishedAt.desc()),
+  pipelineViews: index("news_pipeline_views_idx").on(t.pipeline, t.views.desc()),
+}));
 
 export const events = pgTable("events", {
   id: text("id").primaryKey(),

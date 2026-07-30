@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Heart, Crown } from "lucide-react";
 import type { Article } from "@/lib/types";
-import { heroArticles, publishedArticles } from "@/lib/data/articles";
+import { rankHero, publishedArticles } from "@/lib/data/articles";
 import { latestNews } from "@/lib/data/news";
 import { activeCta } from "@/lib/data/ctas";
 import { CtaBand } from "@/components/site/CtaBand";
@@ -58,13 +58,14 @@ const HERO_FILTERS = [
 ];
 
 export default async function HomePage() {
-  const [featured, published, news, digestCta, eventsCta] = await Promise.all([
-    heroArticles(6),
+  const [published, news, digestCta, eventsCta] = await Promise.all([
     publishedArticles(),
     latestNews(8),
     activeCta("home_digest"),
     activeCta("home_events"),
   ]);
+  // Rank the hero from the SAME published list (no second DB round-trip).
+  const featured = rankHero(published, 6);
   const hero = featured[0];
   const heroAuthor = hero?.author;
 
