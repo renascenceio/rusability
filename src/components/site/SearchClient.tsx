@@ -4,12 +4,39 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
-import type { Article, NewsItem, Author } from "@/lib/types";
 import { Avatar } from "@/components/ui/kit";
 import { categoryName } from "@/lib/taxonomy";
 import { formatDate, formatNumber } from "@/lib/utils";
 
 type Tab = "all" | "articles" | "authors" | "news";
+
+/* Slim, serializable shapes — only the fields the rows actually read. */
+export type ArticleDoc = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  cover: string;
+  category: string;
+  tags: string[];
+  views: number;
+  readingMinutes: number;
+  publishedAt: string;
+  seoScore?: number | null;
+  author?: { name: string; avatar: string; elite?: boolean };
+};
+export type NewsDoc = { id: string; slug: string; title: string; excerpt: string };
+export type AuthorDoc = {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  bio: string;
+  archetype?: string;
+  role: string;
+  elite?: boolean;
+  followers: number;
+};
 
 /* ---- token helpers ---- */
 function tokenize(q: string): string[] {
@@ -62,9 +89,9 @@ export function SearchClient({
   news,
   authors,
 }: {
-  articles: Article[];
-  news: NewsItem[];
-  authors: Author[];
+  articles: ArticleDoc[];
+  news: NewsDoc[];
+  authors: AuthorDoc[];
 }) {
   const params = useSearchParams();
   const router = useRouter();
@@ -222,7 +249,7 @@ export function SearchClient({
   );
 }
 
-function ArticleRow({ article, tokens }: { article: Article; tokens: string[] }) {
+function ArticleRow({ article, tokens }: { article: ArticleDoc; tokens: string[] }) {
   const seo = article.seoScore;
   return (
     <Link
@@ -272,7 +299,7 @@ function ArticleRow({ article, tokens }: { article: Article; tokens: string[] })
   );
 }
 
-function AuthorRow({ author, tokens }: { author: Author; tokens: string[] }) {
+function AuthorRow({ author, tokens }: { author: AuthorDoc; tokens: string[] }) {
   return (
     <div className="border-b border-[var(--border)] py-5">
       <div className="mb-2.5 text-[10px] uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
@@ -299,7 +326,7 @@ function AuthorRow({ author, tokens }: { author: Author; tokens: string[] }) {
   );
 }
 
-function NewsRow({ item, tokens }: { item: NewsItem; tokens: string[] }) {
+function NewsRow({ item, tokens }: { item: NewsDoc; tokens: string[] }) {
   return (
     <Link href={`/news/${item.slug}`} className="border-b border-[var(--border)] py-5">
       <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">

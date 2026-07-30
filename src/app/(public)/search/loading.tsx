@@ -1,5 +1,5 @@
-import { ArticleGridSkeleton } from "@/components/site/ListSkeleton";
+import { SearchSkeleton } from "@/components/site/ListSkeleton";
 
 export default function SearchLoading() {
-  return <ArticleGridSkeleton cards={6} />;
+  return <SearchSkeleton />;
 }
