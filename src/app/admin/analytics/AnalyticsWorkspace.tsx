@@ -115,11 +115,27 @@ export function AnalyticsWorkspace({ data }: { data: AnalyticsData }) {
     minute: "2-digit",
   });
 
+  const ts = data.timeSeries;
+  // GA-style traffic chart: views + a dashed previous-period comparison + an
+  // engagement-rate trendline on a secondary (%) axis, plus per-type traffic
+  // toggles. Only the first three show by default; the rest are one click away.
   const trafficSeries: LineSeries[] = [
-    { key: "views", label: "Просмотры", color: CHART_COLORS.primary, values: data.timeSeries.map((p) => p.views) },
-    { key: "visitors", label: "Посетители", color: CHART_COLORS.gold, values: data.timeSeries.map((p) => p.visitors) },
-    { key: "sessions", label: "Сессии", color: CHART_COLORS.accent, values: data.timeSeries.map((p) => p.sessions) },
+    { key: "views", label: "Просмотры", color: CHART_COLORS.primary, values: ts.map((p) => p.views) },
+    { key: "prev", label: "Пред. период", color: CHART_COLORS.muted, values: ts.map((p) => p.prevViews), dashed: true },
+    {
+      key: "engagement",
+      label: "Вовлечённость",
+      color: CHART_COLORS.success,
+      values: ts.map((p) => p.engagement),
+      axis: "right",
+      valueFormat: (n) => `${Math.round(n)}%`,
+    },
+    { key: "visitors", label: "Посетители", color: CHART_COLORS.gold, values: ts.map((p) => p.visitors) },
+    { key: "sessions", label: "Сессии", color: CHART_COLORS.accent, values: ts.map((p) => p.sessions) },
+    { key: "articleViews", label: "Трафик статей", color: "color-mix(in oklab, var(--primary) 55%, var(--gold))", values: ts.map((p) => p.articleViews) },
+    { key: "newsViews", label: "Трафик новостей", color: "color-mix(in oklab, var(--gold) 55%, var(--danger))", values: ts.map((p) => p.newsViews) },
   ];
+  const trafficHidden = ["visitors", "sessions", "articleViews", "newsViews"];
   const pubSeries: LineSeries[] = [
     { key: "articles", label: "Статьи", color: CHART_COLORS.primary, values: data.publications.map((p) => p.articles) },
     { key: "news", label: "Новости", color: CHART_COLORS.gold, values: data.publications.map((p) => p.news) },
@@ -166,8 +182,11 @@ export function AnalyticsWorkspace({ data }: { data: AnalyticsData }) {
                 <StatCard key={k.key} stat={k} />
               ))}
             </div>
-            <Panel title="Трафик за период">
-              <LineChart labels={labels} series={trafficSeries} height={280} area />
+            <Panel
+              title="Трафик за период"
+              action={<span className="text-xs text-[var(--muted-foreground)]">Нажмите на тег, чтобы показать или скрыть метрику</span>}
+            >
+              <LineChart labels={labels} series={trafficSeries} height={300} area legend initialHidden={trafficHidden} />
             </Panel>
             <div className="grid gap-5 lg:grid-cols-3">
               <Panel title="Публикации: статьи и новости" className="lg:col-span-2">
