@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* ------------------------------------------------------------------ */
 /* Shared helpers                                                      */
@@ -85,7 +85,23 @@ function Tip({
 /* Line / area chart (multi-series, hover crosshair)                   */
 /* ------------------------------------------------------------------ */
 
-export type LineSeries = { key: string; label: string; color: string; values: number[] };
+export type LineSeries = {
+  key: string;
+  label: string;
+  color: string;
+  values: number[];
+  /** Which y-axis this series maps to. Default "left". Use "right" for a
+   *  different-scale metric such as an engagement-rate %. */
+  axis?: "left" | "right";
+  /** Render as a dashed line (used for previous-period comparison). */
+  dashed?: boolean;
+  /** Optional per-series formatter for tooltip/points (defaults to axis format). */
+  valueFormat?: (n: number) => string;
+};
+
+function pctFmt(n: number): string {
+  return `${Math.round(n)}%`;
+}
 
 export function LineChart({
   labels,
@@ -93,31 +109,46 @@ export function LineChart({
   height = 260,
   area = false,
   format = niceCompact,
+  rightFormat = pctFmt,
+  legend = false,
+  initialHidden = [],
 }: {
   labels: string[];
   series: LineSeries[];
   height?: number;
   area?: boolean;
   format?: (n: number) => string;
+  rightFormat?: (n: number) => string;
+  /** Show a clickable legend that toggles each series on/off. */
+  legend?: boolean;
+  /** Series keys hidden by default (still one click away in the legend). */
+  initialHidden?: string[];
 }) {
   const { ref, width } = useMeasure();
   const [hover, setHover] = useState<number | null>(null);
+  const [hidden, setHidden] = useState<Set<string>>(() => new Set(initialHidden));
+
+  const visible = series.filter((s) => !hidden.has(s.key));
+  const hasRight = visible.some((s) => s.axis === "right");
 
   const padL = 44;
-  const padR = 14;
+  const padR = hasRight ? 46 : 14;
   const padT = 14;
   const padB = 26;
   const plotW = Math.max(width - padL - padR, 10);
   const plotH = height - padT - padB;
   const n = labels.length;
 
-  const max = useMemo(() => {
-    const m = Math.max(1, ...series.flatMap((s) => s.values));
-    return m * 1.12;
-  }, [series]);
+  const leftMax =
+    Math.max(1, ...visible.filter((s) => (s.axis ?? "left") === "left").flatMap((s) => s.values)) * 1.12;
+  const rightMax =
+    Math.max(1, ...visible.filter((s) => s.axis === "right").flatMap((s) => s.values)) * 1.12;
 
   const xFor = (i: number) => padL + (n <= 1 ? plotW / 2 : (i / (n - 1)) * plotW);
-  const yFor = (v: number) => padT + (1 - v / max) * plotH;
+  const yForLeft = (v: number) => padT + (1 - v / leftMax) * plotH;
+  const yForRight = (v: number) => padT + (1 - v / rightMax) * plotH;
+  const yFor = (s: LineSeries, v: number) => (s.axis === "right" ? yForRight(v) : yForLeft(v));
+  const fmtFor = (s: LineSeries) => s.valueFormat ?? (s.axis === "right" ? rightFormat : format);
 
   const ticks = [0, 0.25, 0.5, 0.75, 1];
 
@@ -128,92 +159,157 @@ export function LineChart({
     setHover(Math.min(Math.max(idx, 0), n - 1));
   }
 
+  function toggle(key: string) {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      // Never allow hiding the very last visible series.
+      else if (series.length - next.size > 1) next.add(key);
+      return next;
+    });
+  }
+
   // Show a subset of x labels to avoid overlap.
   const labelEvery = Math.max(1, Math.ceil(n / 8));
+  const areaSeries = visible.find((s) => (s.axis ?? "left") === "left");
 
   return (
-    <div ref={ref} className="relative w-full" style={{ height }}>
-      <svg
-        width={width}
-        height={height}
-        className="block touch-none"
-        onPointerMove={onMove}
-        onPointerLeave={() => setHover(null)}
-      >
-        {/* gridlines + y labels */}
-        {ticks.map((t) => {
-          const y = padT + t * plotH;
-          const val = max * (1 - t);
-          return (
-            <g key={t}>
-              <line x1={padL} x2={width - padR} y1={y} y2={y} stroke="var(--border)" strokeDasharray="3 5" />
-              <text x={padL - 8} y={y + 4} textAnchor="end" style={{ fontSize: 10 }} className="fill-[var(--muted-foreground)]">
-                {format(val)}
+    <div className="w-full">
+      <div ref={ref} className="relative w-full" style={{ height }}>
+        <svg
+          width={width}
+          height={height}
+          className="block touch-none"
+          onPointerMove={onMove}
+          onPointerLeave={() => setHover(null)}
+        >
+          {/* gridlines + left y labels */}
+          {ticks.map((t) => {
+            const y = padT + t * plotH;
+            const val = leftMax * (1 - t);
+            return (
+              <g key={t}>
+                <line x1={padL} x2={width - padR} y1={y} y2={y} stroke="var(--border)" strokeDasharray="3 5" />
+                <text x={padL - 8} y={y + 4} textAnchor="end" style={{ fontSize: 10 }} className="fill-[var(--muted-foreground)]">
+                  {format(val)}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* right y labels (secondary axis) */}
+          {hasRight &&
+            ticks.map((t) => {
+              const y = padT + t * plotH;
+              const val = rightMax * (1 - t);
+              return (
+                <text
+                  key={`r${t}`}
+                  x={width - padR + 8}
+                  y={y + 4}
+                  textAnchor="start"
+                  style={{ fontSize: 10 }}
+                  className="fill-[var(--muted-foreground)]"
+                >
+                  {rightFormat(val)}
+                </text>
+              );
+            })}
+
+          {/* area fill for the first visible left-axis series */}
+          {area && areaSeries && n > 1 && (
+            <path
+              d={
+                areaSeries.values.map((v, i) => `${i === 0 ? "M" : "L"}${xFor(i)},${yForLeft(v)}`).join(" ") +
+                ` L${xFor(n - 1)},${padT + plotH} L${xFor(0)},${padT + plotH} Z`
+              }
+              fill={areaSeries.color}
+              opacity={0.12}
+            />
+          )}
+
+          {/* lines */}
+          {visible.map((s) => (
+            <path
+              key={s.key}
+              d={s.values.map((v, i) => `${i === 0 ? "M" : "L"}${xFor(i)},${yFor(s, v)}`).join(" ")}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={s.dashed ? 1.75 : 2.25}
+              strokeDasharray={s.dashed ? "5 4" : undefined}
+              strokeOpacity={s.dashed ? 0.75 : 1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+
+          {/* x labels */}
+          {labels.map((l, i) =>
+            i % labelEvery === 0 || i === n - 1 ? (
+              <text key={i} x={xFor(i)} y={height - 8} textAnchor="middle" style={{ fontSize: 10 }} className="fill-[var(--muted-foreground)]">
+                {l}
               </text>
-            </g>
-          );
-        })}
+            ) : null,
+          )}
 
-        {/* area fill for the first series */}
-        {area && series[0] && n > 1 && (
-          <path
-            d={
-              series[0].values.map((v, i) => `${i === 0 ? "M" : "L"}${xFor(i)},${yFor(v)}`).join(" ") +
-              ` L${xFor(n - 1)},${padT + plotH} L${xFor(0)},${padT + plotH} Z`
-            }
-            fill={series[0].color}
-            opacity={0.12}
-          />
-        )}
+          {/* crosshair + points */}
+          {hover !== null && (
+            <>
+              <line x1={xFor(hover)} x2={xFor(hover)} y1={padT} y2={padT + plotH} stroke="var(--muted-foreground)" strokeOpacity={0.4} />
+              {visible.map((s) => (
+                <circle
+                  key={s.key}
+                  cx={xFor(hover)}
+                  cy={yFor(s, s.values[hover] ?? 0)}
+                  r={4}
+                  fill="var(--surface)"
+                  stroke={s.color}
+                  strokeWidth={2.5}
+                />
+              ))}
+            </>
+          )}
+        </svg>
 
-        {/* lines */}
-        {series.map((s) => (
-          <path
-            key={s.key}
-            d={s.values.map((v, i) => `${i === 0 ? "M" : "L"}${xFor(i)},${yFor(v)}`).join(" ")}
-            fill="none"
-            stroke={s.color}
-            strokeWidth={2.25}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        ))}
-
-        {/* x labels */}
-        {labels.map((l, i) =>
-          i % labelEvery === 0 || i === n - 1 ? (
-            <text key={i} x={xFor(i)} y={height - 8} textAnchor="middle" style={{ fontSize: 10 }} className="fill-[var(--muted-foreground)]">
-              {l}
-            </text>
-          ) : null,
-        )}
-
-        {/* crosshair + points */}
         {hover !== null && (
-          <>
-            <line x1={xFor(hover)} x2={xFor(hover)} y1={padT} y2={padT + plotH} stroke="var(--muted-foreground)" strokeOpacity={0.4} />
-            {series.map((s) => (
-              <circle
-                key={s.key}
-                cx={xFor(hover)}
-                cy={yFor(s.values[hover] ?? 0)}
-                r={4}
-                fill="var(--surface)"
-                stroke={s.color}
-                strokeWidth={2.5}
-              />
-            ))}
-          </>
+          <Tip
+            x={xFor(hover)}
+            containerW={width}
+            title={labels[hover] ?? ""}
+            rows={visible.map((s) => ({ label: s.label, value: fmtFor(s)(s.values[hover] ?? 0), color: s.color }))}
+          />
         )}
-      </svg>
+      </div>
 
-      {hover !== null && (
-        <Tip
-          x={xFor(hover)}
-          containerW={width}
-          title={labels[hover] ?? ""}
-          rows={series.map((s) => ({ label: s.label, value: format(s.values[hover] ?? 0), color: s.color }))}
-        />
+      {legend && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {series.map((s) => {
+            const off = hidden.has(s.key);
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => toggle(s.key)}
+                aria-pressed={!off}
+                className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  off
+                    ? "border-[var(--border)] text-[var(--muted-foreground)] opacity-55"
+                    : "border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]"
+                }`}
+              >
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-full"
+                  style={{
+                    background: off ? "var(--muted-foreground)" : s.color,
+                    ...(s.dashed ? { boxShadow: `inset 0 0 0 1px var(--surface)` } : null),
+                  }}
+                />
+                {s.label}
+                {s.axis === "right" && <span className="text-[var(--muted-foreground)]">%</span>}
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );

@@ -89,6 +89,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
     engRow,
     subsRow,
     seriesRes,
+    prevSeriesRes,
     pubsRes,
     sourcesRes,
     devicesRes,
@@ -143,19 +144,41 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS prev
       FROM subscriptions
     `),
-    // Traffic time series (all + per-kind), bucketed by granularity.
+    // Traffic time series (all + per-kind + engaged sessions), bucketed by
+    // granularity. Engaged sessions (>1 view) come from a per-session rollup so
+    // we can plot an engagement-rate trendline alongside raw traffic.
     db.execute<{
       bucket: string; views: number; visitors: number; sessions: number;
-      art_views: number; news_views: number;
+      engaged: number; art_views: number; news_views: number;
     }>(sql`
-      SELECT to_char(date_trunc(${unit}, created_at), 'YYYY-MM-DD') AS bucket,
-        count(*)::int AS views,
+      WITH per_session AS (
+        SELECT date_trunc(${unit}, created_at) AS b,
+          session_id,
+          visitor_id,
+          count(*) AS c,
+          count(*) FILTER (WHERE kind='article') AS art,
+          count(*) FILTER (WHERE kind='news') AS nws
+        FROM page_views
+        WHERE created_at >= now() - make_interval(days => ${days})
+        GROUP BY 1, 2, 3
+      )
+      SELECT to_char(b, 'YYYY-MM-DD') AS bucket,
+        sum(c)::int AS views,
         count(DISTINCT visitor_id)::int AS visitors,
-        count(DISTINCT session_id)::int AS sessions,
-        count(*) FILTER (WHERE kind='article')::int AS art_views,
-        count(*) FILTER (WHERE kind='news')::int AS news_views
+        count(*)::int AS sessions,
+        count(*) FILTER (WHERE c > 1)::int AS engaged,
+        sum(art)::int AS art_views,
+        sum(nws)::int AS news_views
+      FROM per_session
+      GROUP BY b ORDER BY b
+    `),
+    // Previous-period views, bucketed the same way, for the comparison line.
+    db.execute<{ bucket: string; views: number }>(sql`
+      SELECT to_char(date_trunc(${unit}, created_at), 'YYYY-MM-DD') AS bucket,
+        count(*)::int AS views
       FROM page_views
-      WHERE created_at >= now() - make_interval(days => ${days})
+      WHERE created_at >= now() - make_interval(days => ${days * 2})
+        AND created_at < now() - make_interval(days => ${days})
       GROUP BY 1 ORDER BY 1
     `),
     // Publication cadence: articles vs news, bucketed.
@@ -303,16 +326,24 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
   // Merge series onto a continuous axis.
   const axis = buildAxis(unit, days);
   const seriesByBucket = new Map(seriesRes.rows.map((r) => [r.bucket, r]));
-  const timeSeries: TimePoint[] = axis.map((a) => {
+  // Previous-period buckets are aligned to the current axis by ordinal position
+  // (both windows are `days` long at the same granularity), so bucket i of the
+  // previous period lines up under bucket i of the current period.
+  const prevViewsByIdx = prevSeriesRes.rows.map((r) => r.views);
+  const timeSeries: TimePoint[] = axis.map((a, i) => {
     const r = seriesByBucket.get(a.date);
+    const sessions = r?.sessions ?? 0;
+    const engaged = r?.engaged ?? 0;
     return {
       date: a.date,
       label: a.label,
       views: r?.views ?? 0,
       visitors: r?.visitors ?? 0,
-      sessions: r?.sessions ?? 0,
+      sessions,
       articleViews: r?.art_views ?? 0,
       newsViews: r?.news_views ?? 0,
+      engagement: sessions > 0 ? Math.round((engaged / sessions) * 100) : 0,
+      prevViews: prevViewsByIdx[i] ?? 0,
     };
   });
 
@@ -405,7 +436,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
 export function getAnalytics(input: Partial<AnalyticsFilters>): Promise<AnalyticsData> {
   const filters = normalizeFilters(input);
   const key = `${filters.range}:${filters.granularity}`;
-  return unstable_cache(() => compute(filters), ["admin-analytics-v3", key], {
+  return unstable_cache(() => compute(filters), ["admin-analytics-v4", key], {
     revalidate: 900,
     tags: ["admin-analytics"],
   })();

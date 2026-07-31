@@ -80,6 +80,10 @@ export type TimePoint = {
   sessions: number;
   articleViews: number;
   newsViews: number;
+  /** Engaged-session rate for the bucket (0–100), i.e. % of sessions with >1 view. */
+  engagement: number;
+  /** Views in the aligned bucket of the PREVIOUS period (for comparison line). */
+  prevViews: number;
 };
 
 export type PubPoint = { date: string; label: string; articles: number; news: number };
