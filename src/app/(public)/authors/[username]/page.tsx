@@ -5,6 +5,7 @@ import { getAuthorByUsername } from "@/lib/data/authors";
 import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { SubscribeButton } from "@/components/site/SubscribeButton";
+import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Avatar, Badge } from "@/components/ui/kit";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
@@ -34,6 +35,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
 
   return (
     <div>
+      <AnalyticsBeacon kind="author" contentId={author.id} authorId={author.id} />
       {/* Banner */}
       <div className="relative h-44 w-full overflow-hidden md:h-60">
         {/* eslint-disable-next-line @next/next/no-img-element */}

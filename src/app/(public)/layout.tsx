@@ -1,10 +1,14 @@
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { CookieConsent } from "@/components/site/CookieConsent";
+import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-[var(--background)]">
+      {/* Site-wide pageview tracking. Content detail routes render their own
+          richer beacon, so this one skips them to avoid double counting. */}
+      <AnalyticsBeacon skipContentRoutes />
       {/* ГОСТ Р 52872: keyboard skip link to main content */}
       <a
         href="#main-content"

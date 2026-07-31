@@ -472,3 +472,37 @@ export const newsbotRuns = pgTable("newsbot_runs", {
   message: text("message").notNull().default(""),
   startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/* ------------------------------------------------------------------ */
+/* Web analytics — one row per public pageview.                        */
+/* Powers real traffic trends, unique visitors, sessions, top pages,   */
+/* referrers, and article-vs-news audience splits over time.           */
+/* ------------------------------------------------------------------ */
+export const pageViews = pgTable(
+  "page_views",
+  {
+    id: serial("id").primaryKey(),
+    path: text("path").notNull(),
+    /** 'article' | 'news' | 'author' | 'listing' | 'other' — coarse surface. */
+    kind: text("kind").notNull().default("other"),
+    /** Content id when the path maps to an article/news/author, else null. */
+    contentId: text("content_id"),
+    category: text("category"),
+    authorId: text("author_id"),
+    /** Anonymous, long-lived id (localStorage) — a unique-visitor proxy. */
+    visitorId: text("visitor_id").notNull(),
+    /** Anonymous, per-session id (sessionStorage) — a session proxy. */
+    sessionId: text("session_id").notNull(),
+    /** Coarse referrer bucket: 'direct' | 'search' | 'social' | 'internal' | host. */
+    source: text("source").notNull().default("direct"),
+    referrer: text("referrer"),
+    device: text("device").notNull().default("desktop"), // desktop | mobile | tablet
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    createdIdx: index("page_views_created_idx").on(t.createdAt.desc()),
+    kindCreatedIdx: index("page_views_kind_created_idx").on(t.kind, t.createdAt.desc()),
+    contentIdx: index("page_views_content_idx").on(t.contentId),
+    visitorIdx: index("page_views_visitor_idx").on(t.visitorId),
+  }),
+);
