@@ -4,134 +4,498 @@ import { sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { categoryName } from "@/lib/taxonomy";
 
-export type MetricPoint = { label: string; value: number };
-export type KpiStat = { label: string; value: string; delta: number };
-export type TopPage = { path: string; views: number; delta: number };
+/* ------------------------------------------------------------------ */
+/* Filters                                                             */
+/* ------------------------------------------------------------------ */
 
-export type AdminAnalytics = {
-  kpis: KpiStat[];
-  seriesByPeriod: Record<"7" | "30" | "90", MetricPoint[]>;
-  sources: MetricPoint[];
-  topPages: TopPage[];
+export type RangeKey = "7" | "30" | "90" | "365" | "all";
+export type Granularity = "day" | "week" | "month";
+
+export type AnalyticsFilters = {
+  range: RangeKey;
+  granularity: Granularity;
+};
+
+export const RANGE_DAYS: Record<RangeKey, number> = {
+  "7": 7,
+  "30": 30,
+  "90": 90,
+  "365": 365,
+  all: 4000,
+};
+
+export const RANGE_LABEL: Record<RangeKey, string> = {
+  "7": "7 дней",
+  "30": "30 дней",
+  "90": "90 дней",
+  "365": "12 месяцев",
+  all: "Всё время",
+};
+
+export const GRANULARITY_LABEL: Record<Granularity, string> = {
+  day: "По дням",
+  week: "По неделям",
+  month: "По месяцам",
+};
+
+export function normalizeFilters(f: Partial<AnalyticsFilters>): AnalyticsFilters {
+  const range: RangeKey = (["7", "30", "90", "365", "all"] as const).includes(f.range as RangeKey)
+    ? (f.range as RangeKey)
+    : "90";
+  let granularity: Granularity = (["day", "week", "month"] as const).includes(
+    f.granularity as Granularity,
+  )
+    ? (f.granularity as Granularity)
+    : "day";
+  // Guard against absurd bucket counts (e.g. daily over "all").
+  const days = RANGE_DAYS[range];
+  if (granularity === "day" && days > 120) granularity = "week";
+  if (granularity === "week" && days > 800) granularity = "month";
+  return { range, granularity };
+}
+
+/* ------------------------------------------------------------------ */
+/* Result types                                                        */
+/* ------------------------------------------------------------------ */
+
+export type KpiStat = {
+  key: string;
+  label: string;
+  value: string;
+  raw: number;
+  delta: number | null;
+  hint: string;
+  format?: "int" | "pct" | "ratio";
+};
+
+export type TimePoint = {
+  date: string;
+  label: string;
+  views: number;
+  visitors: number;
+  sessions: number;
+  articleViews: number;
+  newsViews: number;
+};
+
+export type PubPoint = { date: string; label: string; articles: number; news: number };
+export type Slice = { key: string; label: string; value: number };
+export type TopContent = {
+  id: string;
+  kind: "article" | "news";
+  title: string;
+  slug: string;
+  category: string;
+  categoryLabel: string;
+  views: number;
+  visitors: number;
+};
+export type AuthorRow = {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  elite: boolean;
+  role: string;
+  articles: number;
+  views: number;
+  visitors: number;
+  avgViews: number;
+  followers: number;
+};
+export type CategoryRow = {
+  key: string;
+  label: string;
+  articles: number;
+  news: number;
+  views: number;
+  visitors: number;
+  share: number;
+};
+
+export type AnalyticsData = {
+  filters: AnalyticsFilters;
+  overviewKpis: KpiStat[];
+  articleKpis: KpiStat[];
+  newsKpis: KpiStat[];
+  audienceKpis: KpiStat[];
+  timeSeries: TimePoint[];
+  publications: PubPoint[];
+  sources: Slice[];
+  devices: Slice[];
+  topArticles: TopContent[];
+  topNews: TopContent[];
+  authors: AuthorRow[];
+  categories: CategoryRow[];
   generatedAt: string;
 };
 
-function fmt(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")}M`;
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
+
+function fmtInt(n: number): string {
+  return Math.round(n).toLocaleString("ru-RU");
+}
+function fmtCompact(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")} млн`;
+  if (n >= 10_000) return `${(n / 1_000).toFixed(0)}K`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(".", ",")}K`;
-  return String(n);
+  return String(Math.round(n));
+}
+function pctDelta(cur: number, prev: number): number | null {
+  if (prev <= 0) return cur > 0 ? 100 : null;
+  return Math.round(((cur - prev) / prev) * 100);
 }
 
-async function compute(): Promise<AdminAnalytics> {
+/** Monday-anchored week start (matches Postgres date_trunc('week')). */
+function startOfWeek(d: Date): Date {
+  const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const dow = (x.getUTCDay() + 6) % 7; // Mon=0
+  x.setUTCDate(x.getUTCDate() - dow);
+  return x;
+}
+function isoDay(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+function labelFor(d: Date, g: Granularity): string {
+  if (g === "month") return d.toLocaleDateString("ru-RU", { month: "short", year: "numeric" });
+  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+}
+
+/** Continuous bucket axis (fills gaps with zeros) matching date_trunc keys. */
+function buildAxis(g: Granularity, days: number): { date: string; label: string }[] {
+  const now = new Date();
+  const start = new Date(now.getTime() - days * 86_400_000);
+  const axis: { date: string; label: string }[] = [];
+  let cursor: Date;
+  if (g === "month") cursor = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+  else if (g === "week") cursor = startOfWeek(start);
+  else cursor = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
+
+  let guard = 0;
+  while (cursor <= now && guard++ < 400) {
+    axis.push({ date: isoDay(cursor), label: labelFor(cursor, g) });
+    if (g === "month") cursor = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1));
+    else if (g === "week") cursor = new Date(cursor.getTime() + 7 * 86_400_000);
+    else cursor = new Date(cursor.getTime() + 86_400_000);
+  }
+  return axis;
+}
+
+/* ------------------------------------------------------------------ */
+/* Compute                                                             */
+/* ------------------------------------------------------------------ */
+
+async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
+  const days = RANGE_DAYS[filters.range];
+  const unit = filters.granularity; // 'day' | 'week' | 'month' — safe, validated
+
   const [
-    articlesCount,
-    newsCount,
-    viewsRow,
-    subsCount,
-    recentArticles,
-    prevArticles,
-    byCategory,
-    topArticles,
-    topNews,
-    pubSeries,
+    kpiRow,
+    engRow,
+    subsRow,
+    seriesRes,
+    pubsRes,
+    sourcesRes,
+    devicesRes,
+    topRes,
+    authorsRes,
+    authorArtRes,
+    catViewsRes,
+    catContentRes,
   ] = await Promise.all([
-    db.execute<{ n: number }>(
-      sql`SELECT count(*)::int AS n FROM articles WHERE status = 'published'`,
-    ),
-    db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM news`),
-    db.execute<{ n: number }>(
-      sql`SELECT (COALESCE((SELECT sum(views) FROM articles), 0) + COALESCE((SELECT sum(views) FROM news), 0))::int AS n`,
-    ),
-    db.execute<{ n: number }>(sql`SELECT count(*)::int AS n FROM subscriptions`),
-    db.execute<{ n: number }>(
-      sql`SELECT count(*)::int AS n FROM articles WHERE status = 'published' AND published_at >= now() - interval '30 days'`,
-    ),
-    db.execute<{ n: number }>(
-      sql`SELECT count(*)::int AS n FROM articles WHERE status = 'published' AND published_at >= now() - interval '60 days' AND published_at < now() - interval '30 days'`,
-    ),
-    db.execute<{ category: string; n: number }>(
-      sql`SELECT category, count(*)::int AS n FROM articles WHERE status = 'published' GROUP BY category ORDER BY n DESC LIMIT 5`,
-    ),
-    db.execute<{ slug: string; views: number }>(
-      sql`SELECT slug, views FROM articles WHERE status = 'published' ORDER BY views DESC LIMIT 4`,
-    ),
-    db.execute<{ slug: string; views: number }>(
-      sql`SELECT slug, views FROM news ORDER BY views DESC LIMIT 2`,
-    ),
-    // Publications per week for the last 13 weeks (articles + news).
-    db.execute<{ wk: string; n: number }>(
-      sql`
-        SELECT to_char(date_trunc('week', published_at), 'YYYY-MM-DD') AS wk, count(*)::int AS n
-        FROM (
-          SELECT published_at FROM articles WHERE status = 'published' AND published_at >= now() - interval '91 days'
-          UNION ALL
-          SELECT published_at FROM news WHERE published_at >= now() - interval '91 days'
-        ) AS pubs
-        GROUP BY 1 ORDER BY 1
-      `,
-    ),
+    // Core counts: current vs previous window.
+    db.execute<{
+      pv_cur: number; pv_prev: number;
+      vis_cur: number; vis_prev: number;
+      art_cur: number; art_prev: number;
+      news_cur: number; news_prev: number;
+    }>(sql`
+      SELECT
+        count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days}))::int AS pv_cur,
+        count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS pv_prev,
+        count(DISTINCT visitor_id) FILTER (WHERE created_at >= now() - make_interval(days => ${days}))::int AS vis_cur,
+        count(DISTINCT visitor_id) FILTER (WHERE created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS vis_prev,
+        count(*) FILTER (WHERE kind='article' AND created_at >= now() - make_interval(days => ${days}))::int AS art_cur,
+        count(*) FILTER (WHERE kind='article' AND created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS art_prev,
+        count(*) FILTER (WHERE kind='news' AND created_at >= now() - make_interval(days => ${days}))::int AS news_cur,
+        count(*) FILTER (WHERE kind='news' AND created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS news_prev
+      FROM page_views
+      WHERE created_at >= now() - make_interval(days => ${days * 2})
+    `),
+    // Sessions + engaged (multi-page) sessions, current vs previous.
+    db.execute<{
+      sess_cur: number; eng_cur: number; sess_prev: number; eng_prev: number;
+    }>(sql`
+      SELECT
+        count(*) FILTER (WHERE period='cur')::int AS sess_cur,
+        count(*) FILTER (WHERE period='cur' AND c > 1)::int AS eng_cur,
+        count(*) FILTER (WHERE period='prev')::int AS sess_prev,
+        count(*) FILTER (WHERE period='prev' AND c > 1)::int AS eng_prev
+      FROM (
+        SELECT session_id,
+          CASE WHEN created_at >= now() - make_interval(days => ${days}) THEN 'cur' ELSE 'prev' END AS period,
+          count(*) AS c
+        FROM page_views
+        WHERE created_at >= now() - make_interval(days => ${days * 2})
+        GROUP BY 1, 2
+      ) t
+    `),
+    // New subscribers in period vs previous.
+    db.execute<{ cur: number; prev: number }>(sql`
+      SELECT
+        count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days}))::int AS cur,
+        count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS prev
+      FROM subscriptions
+    `),
+    // Traffic time series (all + per-kind), bucketed by granularity.
+    db.execute<{
+      bucket: string; views: number; visitors: number; sessions: number;
+      art_views: number; news_views: number;
+    }>(sql`
+      SELECT to_char(date_trunc(${unit}, created_at), 'YYYY-MM-DD') AS bucket,
+        count(*)::int AS views,
+        count(DISTINCT visitor_id)::int AS visitors,
+        count(DISTINCT session_id)::int AS sessions,
+        count(*) FILTER (WHERE kind='article')::int AS art_views,
+        count(*) FILTER (WHERE kind='news')::int AS news_views
+      FROM page_views
+      WHERE created_at >= now() - make_interval(days => ${days})
+      GROUP BY 1 ORDER BY 1
+    `),
+    // Publication cadence: articles vs news, bucketed.
+    db.execute<{ bucket: string; articles: number; news: number }>(sql`
+      SELECT to_char(date_trunc(${unit}, published_at), 'YYYY-MM-DD') AS bucket,
+        count(*) FILTER (WHERE src='article')::int AS articles,
+        count(*) FILTER (WHERE src='news')::int AS news
+      FROM (
+        SELECT published_at, 'article' AS src FROM articles
+          WHERE status='published' AND published_at >= now() - make_interval(days => ${days})
+        UNION ALL
+        SELECT published_at, 'news' AS src FROM news
+          WHERE (pipeline='published' OR pipeline IS NULL) AND published_at >= now() - make_interval(days => ${days})
+      ) u
+      GROUP BY 1 ORDER BY 1
+    `),
+    // Referrer sources.
+    db.execute<{ source: string; n: number }>(sql`
+      SELECT source, count(*)::int AS n FROM page_views
+      WHERE created_at >= now() - make_interval(days => ${days})
+      GROUP BY source ORDER BY n DESC
+    `),
+    // Devices.
+    db.execute<{ device: string; n: number }>(sql`
+      SELECT device, count(*)::int AS n FROM page_views
+      WHERE created_at >= now() - make_interval(days => ${days})
+      GROUP BY device ORDER BY n DESC
+    `),
+    // Top content (articles + news) with titles.
+    db.execute<{
+      id: string; kind: string; title: string; slug: string; category: string;
+      views: number; visitors: number;
+    }>(sql`
+      SELECT pv.content_id AS id, pv.kind,
+        COALESCE(a.title, n.title, '—') AS title,
+        COALESCE(a.slug, n.slug, pv.content_id) AS slug,
+        COALESCE(a.category, n.category, '') AS category,
+        count(*)::int AS views,
+        count(DISTINCT pv.visitor_id)::int AS visitors
+      FROM page_views pv
+      LEFT JOIN articles a ON pv.kind='article' AND a.id = pv.content_id
+      LEFT JOIN news n ON pv.kind='news' AND n.id = pv.content_id
+      WHERE pv.created_at >= now() - make_interval(days => ${days})
+        AND pv.kind IN ('article','news') AND pv.content_id IS NOT NULL
+      GROUP BY pv.content_id, pv.kind, a.title, a.slug, a.category, n.title, n.slug, n.category
+      ORDER BY views DESC LIMIT 40
+    `),
+    // Author traffic (article reads attributed to author).
+    db.execute<{
+      id: string; name: string; username: string; avatar: string; elite: boolean;
+      role: string; followers: number; views: number; visitors: number;
+    }>(sql`
+      SELECT au.id, au.name, au.username, au.avatar, au.elite, au.role, au.followers,
+        count(pv.id)::int AS views,
+        count(DISTINCT pv.visitor_id)::int AS visitors
+      FROM authors au
+      LEFT JOIN page_views pv
+        ON pv.author_id = au.id AND pv.created_at >= now() - make_interval(days => ${days})
+      GROUP BY au.id, au.name, au.username, au.avatar, au.elite, au.role, au.followers
+      ORDER BY views DESC
+    `),
+    // Published article counts per author.
+    db.execute<{ author_id: string; n: number }>(sql`
+      SELECT author_id, count(*)::int AS n FROM articles
+      WHERE status='published' GROUP BY author_id
+    `),
+    // Category traffic.
+    db.execute<{ category: string; views: number; visitors: number; art: number; nws: number }>(sql`
+      SELECT COALESCE(category,'') AS category,
+        count(*)::int AS views,
+        count(DISTINCT visitor_id)::int AS visitors,
+        count(*) FILTER (WHERE kind='article')::int AS art,
+        count(*) FILTER (WHERE kind='news')::int AS nws
+      FROM page_views
+      WHERE created_at >= now() - make_interval(days => ${days}) AND category IS NOT NULL AND category <> ''
+      GROUP BY category ORDER BY views DESC
+    `),
+    // Content counts per category (published articles + news).
+    db.execute<{ category: string; articles: number; news: number }>(sql`
+      SELECT category,
+        count(*) FILTER (WHERE src='article')::int AS articles,
+        count(*) FILTER (WHERE src='news')::int AS news
+      FROM (
+        SELECT category, 'article' AS src FROM articles WHERE status='published'
+        UNION ALL
+        SELECT category, 'news' AS src FROM news WHERE (pipeline='published' OR pipeline IS NULL)
+      ) u
+      GROUP BY category
+    `),
   ]);
 
-  const totalArticles = articlesCount.rows[0]?.n ?? 0;
-  const totalNews = newsCount.rows[0]?.n ?? 0;
-  const totalViews = viewsRow.rows[0]?.n ?? 0;
-  const totalSubs = subsCount.rows[0]?.n ?? 0;
-  const recent = recentArticles.rows[0]?.n ?? 0;
-  const prev = prevArticles.rows[0]?.n ?? 0;
-  const articleDelta = prev > 0 ? Math.round(((recent - prev) / prev) * 100) : recent > 0 ? 100 : 0;
+  const k = kpiRow.rows[0] ?? ({} as Record<string, number>);
+  const eng = engRow.rows[0] ?? ({} as Record<string, number>);
+  const subs = subsRow.rows[0] ?? { cur: 0, prev: 0 };
 
-  const kpis: KpiStat[] = [
-    { label: "Статей опубликовано", value: fmt(totalArticles), delta: articleDelta },
-    { label: "Новостей", value: fmt(totalNews), delta: 0 },
-    { label: "Просмотров", value: fmt(totalViews), delta: 0 },
-    { label: "Подписчиков", value: fmt(totalSubs), delta: 0 },
+  const pvCur = k.pv_cur ?? 0;
+  const visCur = k.vis_cur ?? 0;
+  const sessCur = eng.sess_cur ?? 0;
+  const sessPrev = eng.sess_prev ?? 0;
+  const ppsCur = sessCur > 0 ? pvCur / sessCur : 0;
+  const ppsPrev = sessPrev > 0 ? (k.pv_prev ?? 0) / sessPrev : 0;
+  const engCur = sessCur > 0 ? (eng.eng_cur ?? 0) / sessCur : 0;
+  const engPrev = sessPrev > 0 ? (eng.eng_prev ?? 0) / sessPrev : 0;
+
+  const overviewKpis: KpiStat[] = [
+    { key: "pv", label: "Просмотры страниц", value: fmtCompact(pvCur), raw: pvCur, delta: pctDelta(pvCur, k.pv_prev ?? 0), hint: "Все просмотры материалов и страниц за период" },
+    { key: "visitors", label: "Уникальные посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "Отдельные посетители (по анонимному идентификатору)" },
+    { key: "sessions", label: "Сессии", value: fmtCompact(sessCur), raw: sessCur, delta: pctDelta(sessCur, sessPrev), hint: "Визиты — серии просмотров одного посетителя" },
+    { key: "pps", label: "Страниц за сессию", value: ppsCur.toFixed(2).replace(".", ","), raw: ppsCur, delta: pctDelta(ppsCur, ppsPrev), hint: "Средняя глубина визита", format: "ratio" },
+    { key: "engagement", label: "Вовлечённость", value: `${Math.round(engCur * 100)}%`, raw: engCur, delta: pctDelta(engCur, engPrev), hint: "Доля сессий с более чем одним просмотром", format: "pct" },
+    { key: "subs", label: "Новые подписки", value: fmtInt(subs.cur), raw: subs.cur, delta: pctDelta(subs.cur, subs.prev), hint: "Новые подписки на авторов за период" },
   ];
 
-  const sources: MetricPoint[] = byCategory.rows.map((r) => ({
-    label: categoryName(r.category),
+  const articleKpis: KpiStat[] = [
+    { key: "art_views", label: "Просмотры статей", value: fmtCompact(k.art_cur ?? 0), raw: k.art_cur ?? 0, delta: pctDelta(k.art_cur ?? 0, k.art_prev ?? 0), hint: "Просмотры страниц статей за период" },
+    { key: "art_share", label: "Доля трафика", value: pvCur > 0 ? `${Math.round(((k.art_cur ?? 0) / pvCur) * 100)}%` : "0%", raw: pvCur > 0 ? (k.art_cur ?? 0) / pvCur : 0, delta: null, hint: "Какую часть всех просмотров дают статьи", format: "pct" },
+  ];
+  const newsKpis: KpiStat[] = [
+    { key: "news_views", label: "Просмотры новостей", value: fmtCompact(k.news_cur ?? 0), raw: k.news_cur ?? 0, delta: pctDelta(k.news_cur ?? 0, k.news_prev ?? 0), hint: "Просмотры страниц новостей за период" },
+    { key: "news_share", label: "Доля трафика", value: pvCur > 0 ? `${Math.round(((k.news_cur ?? 0) / pvCur) * 100)}%` : "0%", raw: pvCur > 0 ? (k.news_cur ?? 0) / pvCur : 0, delta: null, hint: "Какую часть всех просмотров дают новости", format: "pct" },
+  ];
+  const audienceKpis: KpiStat[] = [
+    { key: "visitors2", label: "Посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "Уникальные посетители за период" },
+    { key: "returning", label: "Просмотров на посетителя", value: visCur > 0 ? (pvCur / visCur).toFixed(1).replace(".", ",") : "0", raw: visCur > 0 ? pvCur / visCur : 0, delta: null, hint: "Средняя активность одного посетителя", format: "ratio" },
+    { key: "eng2", label: "Вовлечённость", value: `${Math.round(engCur * 100)}%`, raw: engCur, delta: pctDelta(engCur, engPrev), hint: "Доля сессий с более чем одним просмотром", format: "pct" },
+  ];
+
+  // Merge series onto a continuous axis.
+  const axis = buildAxis(unit, days);
+  const seriesByBucket = new Map(seriesRes.rows.map((r) => [r.bucket, r]));
+  const timeSeries: TimePoint[] = axis.map((a) => {
+    const r = seriesByBucket.get(a.date);
+    return {
+      date: a.date,
+      label: a.label,
+      views: r?.views ?? 0,
+      visitors: r?.visitors ?? 0,
+      sessions: r?.sessions ?? 0,
+      articleViews: r?.art_views ?? 0,
+      newsViews: r?.news_views ?? 0,
+    };
+  });
+
+  const pubsByBucket = new Map(pubsRes.rows.map((r) => [r.bucket, r]));
+  const publications: PubPoint[] = axis.map((a) => {
+    const r = pubsByBucket.get(a.date);
+    return { date: a.date, label: a.label, articles: r?.articles ?? 0, news: r?.news ?? 0 };
+  });
+
+  const SOURCE_LABEL: Record<string, string> = {
+    search: "Поиск", direct: "Прямые", social: "Соцсети", internal: "Внутренние", referral: "Ссылки",
+  };
+  const sources: Slice[] = sourcesRes.rows.map((r) => ({
+    key: r.source,
+    label: SOURCE_LABEL[r.source] ?? r.source,
+    value: r.n,
+  }));
+  const DEVICE_LABEL: Record<string, string> = { desktop: "Компьютер", mobile: "Телефон", tablet: "Планшет" };
+  const devices: Slice[] = devicesRes.rows.map((r) => ({
+    key: r.device,
+    label: DEVICE_LABEL[r.device] ?? r.device,
     value: r.n,
   }));
 
-  const topPages: TopPage[] = [
-    ...topArticles.rows.map((r) => ({ path: `/articles/${r.slug}`, views: r.views, delta: 0 })),
-    ...topNews.rows.map((r) => ({ path: `/news/${r.slug}`, views: r.views, delta: 0 })),
-  ]
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 6);
+  const mapTop = (r: (typeof topRes.rows)[number]): TopContent => ({
+    id: r.id,
+    kind: r.kind === "news" ? "news" : "article",
+    title: r.title,
+    slug: r.slug,
+    category: r.category,
+    categoryLabel: r.category ? categoryName(r.category) : "—",
+    views: r.views,
+    visitors: r.visitors,
+  });
+  const topArticles = topRes.rows.filter((r) => r.kind === "article").map(mapTop).slice(0, 12);
+  const topNews = topRes.rows.filter((r) => r.kind === "news").map(mapTop).slice(0, 12);
 
-  // Build a per-period publications series from the weekly buckets.
-  const weekly = pubSeries.rows.map((r) => ({
-    date: new Date(r.wk),
-    value: r.n,
-  }));
-  function seriesForDays(days: number, points: number): MetricPoint[] {
-    const cutoff = Date.now() - days * 86_400_000;
-    const filtered = weekly.filter((w) => w.date.getTime() >= cutoff);
-    const src = filtered.length ? filtered : weekly;
-    const tail = src.slice(-points);
-    return tail.length
-      ? tail.map((w) => ({
-          label: w.date.toLocaleDateString("ru-RU", { day: "numeric", month: "short" }),
-          value: w.value,
-        }))
-      : [{ label: "—", value: 0 }];
-  }
+  const artCounts = new Map(authorArtRes.rows.map((r) => [r.author_id, r.n]));
+  const authors: AuthorRow[] = authorsRes.rows.map((r) => {
+    const articles = artCounts.get(r.id) ?? 0;
+    return {
+      id: r.id,
+      name: r.name,
+      username: r.username,
+      avatar: r.avatar,
+      elite: r.elite,
+      role: r.role,
+      followers: r.followers,
+      articles,
+      views: r.views,
+      visitors: r.visitors,
+      avgViews: articles > 0 ? Math.round(r.views / articles) : 0,
+    };
+  });
+
+  const contentByCat = new Map(catContentRes.rows.map((r) => [r.category, r]));
+  const totalCatViews = catViewsRes.rows.reduce((s, r) => s + r.views, 0) || 1;
+  const categories: CategoryRow[] = catViewsRes.rows.map((r) => {
+    const c = contentByCat.get(r.category);
+    return {
+      key: r.category,
+      label: categoryName(r.category),
+      articles: c?.articles ?? 0,
+      news: c?.news ?? 0,
+      views: r.views,
+      visitors: r.visitors,
+      share: Math.round((r.views / totalCatViews) * 100),
+    };
+  });
 
   return {
-    kpis,
-    seriesByPeriod: {
-      "7": seriesForDays(7, 7),
-      "30": seriesForDays(30, 5),
-      "90": seriesForDays(90, 13),
-    },
+    filters,
+    overviewKpis,
+    articleKpis,
+    newsKpis,
+    audienceKpis,
+    timeSeries,
+    publications,
     sources,
-    topPages,
+    devices,
+    topArticles,
+    topNews,
+    authors,
+    categories,
     generatedAt: new Date().toISOString(),
   };
 }
 
-/** Real analytics aggregates, cached for one hour to spare the database. */
-export const adminAnalytics = unstable_cache(compute, ["admin-analytics"], {
-  revalidate: 3600,
-  tags: ["admin-analytics"],
-});
+/** Rich analytics, cached per filter signature (15 min). */
+export function getAnalytics(input: Partial<AnalyticsFilters>): Promise<AnalyticsData> {
+  const filters = normalizeFilters(input);
+  const key = `${filters.range}:${filters.granularity}`;
+  return unstable_cache(() => compute(filters), ["admin-analytics-v2", key], {
+    revalidate: 900,
+    tags: ["admin-analytics"],
+  })();
+}

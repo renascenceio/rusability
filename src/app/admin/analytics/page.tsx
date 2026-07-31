@@ -1,23 +1,25 @@
-import { adminAnalytics } from "@/lib/data/analytics";
+import { getAnalytics, type RangeKey, type Granularity } from "@/lib/data/analytics";
 import { AnalyticsWorkspace } from "./AnalyticsWorkspace";
 
 export const metadata = { title: "Аналитика — Rusability" };
 
-// Refresh the cached aggregates at most once per hour.
-export const revalidate = 3600;
+// Server data is cached per filter signature inside getAnalytics (15 min).
+export const dynamic = "force-dynamic";
 
-export default async function AdminAnalyticsPage() {
-  const data = await adminAnalytics();
+export default async function AdminAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string; granularity?: string }>;
+}) {
+  const sp = await searchParams;
+  const data = await getAnalytics({
+    range: sp.range as RangeKey,
+    granularity: sp.granularity as Granularity,
+  });
 
   return (
     <div className="mx-auto max-w-[1180px]">
-      <AnalyticsWorkspace
-        kpis={data.kpis}
-        seriesByPeriod={data.seriesByPeriod}
-        sources={data.sources}
-        topPages={data.topPages}
-        generatedAt={data.generatedAt}
-      />
+      <AnalyticsWorkspace data={data} />
     </div>
   );
 }
