@@ -18,7 +18,7 @@ import {
   type RangeKey,
   type Granularity,
   type KpiStat,
-} from "@/lib/data/analytics";
+} from "@/lib/data/analytics-types";
 
 const RANGES: RangeKey[] = ["7", "30", "90", "365", "all"];
 const GRANS: Granularity[] = ["day", "week", "month"];
