@@ -9,6 +9,7 @@ import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
+import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Avatar, Badge, ButtonLink } from "@/components/ui/kit";
 import { resolveAvatar } from "@/lib/avatar";
@@ -35,6 +36,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   if (isElite) {
     return (
+      <>
+        <AnalyticsBeacon
+          kind="article"
+          contentId={article.id}
+          category={article.category}
+          authorId={author?.id ?? null}
+        />
       <EliteArticle
         data={{
           contentId: article.id,
@@ -79,11 +87,18 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           })),
         }}
       />
+      </>
     );
   }
 
   return (
     <article>
+      <AnalyticsBeacon
+        kind="article"
+        contentId={article.id}
+        category={article.category}
+        authorId={author?.id ?? null}
+      />
       {/* Elite hero band */}
       {isElite && (
         <div className="border-b border-[var(--border)] bg-[var(--ink)] py-3">

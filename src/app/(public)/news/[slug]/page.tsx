@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/utils";
 import { NewsSource } from "@/components/site/NewsShareRow";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
+import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
+      <AnalyticsBeacon kind="news" contentId={news.id} category={news.category} />
       <Breadcrumbs
         items={[
           { label: "Главная", href: "/" },
