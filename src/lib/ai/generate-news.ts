@@ -125,7 +125,7 @@ const newsSchema = z.object({
     .number()
     .min(0)
     .max(100)
-    .describe("AEO (Answer Engine Optimization): насколько легко извлечь из текста прямой ответ (лид-ответ, тезисы, FAQ). 0–100."),
+    .describe("AEO (Answer Engine Optimization): насколько легко извлечь из текста прямой ответ (лид-ответ, те��исы, FAQ). 0–100."),
 });
 
 /**
@@ -190,6 +190,77 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
       .slice(0, 4),
     metaTitle: output.metaTitle?.trim() || output.title.trim(),
     metaDescription: output.metaDescription?.trim() || output.excerpt.trim(),
+    geoScore: clampScore(output.geoScore ?? 0),
+    seoScore: clampScore(output.seoScore ?? 0),
+    aeoScore: clampScore(output.aeoScore ?? 0),
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * AEO/GEO/SEO enrichment for ALREADY-PUBLISHED news (backfill).
+ * Generates only the answer-engine extras from the existing note; it
+ * NEVER rewrites the title/body, so published content is untouched.
+ * Schema is `.pick()`ed from newsSchema so the field specs can't drift.
+ * ------------------------------------------------------------------ */
+const enrichSchema = newsSchema.pick({
+  keyPoints: true,
+  faq: true,
+  metaTitle: true,
+  metaDescription: true,
+  geoScore: true,
+  seoScore: true,
+  aeoScore: true,
+});
+
+export interface NewsAeoExtras {
+  keyPoints: string[];
+  faq: { q: string; a: string }[];
+  metaTitle: string;
+  metaDescription: string;
+  geoScore: number;
+  seoScore: number;
+  aeoScore: number;
+}
+
+export interface EnrichNewsInput {
+  title: string;
+  excerpt: string;
+  body: string[];
+  category?: NewsCategory;
+}
+
+export async function enrichNewsAeo(input: EnrichNewsInput): Promise<NewsAeoExtras> {
+  const system = [
+    "Ты — SEO/AEO-редактор русскоязычного делового медиа Rusability.",
+    "Тебе дают УЖЕ ОПУБЛИКОВАННУЮ новостную заметку. НЕ переписывай, не сокращай и не меняй её текст.",
+    "Твоя задача — на основе этого текста подготовить метаданные и структуру для поисковой и ИИ-оптимизации (AEO/GEO/SEO).",
+    "Используй ТОЛЬКО факты, которые уже есть в тексте. Ничего не выдумывай и не добавляй новых утверждений.",
+    "",
+    AEO_GEO_SEO_POLICY_RU,
+  ].join("\n");
+
+  const { output } = await generateText({
+    model: CONTENT_MODEL,
+    output: Output.object({ schema: enrichSchema }),
+    system,
+    prompt: `Заголовок: «${input.title}».
+Лид: «${input.excerpt}».
+Текст заметки:
+${input.body.join("\n\n")}
+
+Сгенерируй строго на основе этого текста: keyPoints (2–4 самодостаточных тезиса-выжимки), faq (3–4 реальных вопроса с прямыми ответами), metaTitle (≤60 символов), metaDescription (140–160 символов) и честные оценки geoScore / seoScore / aeoScore (0–100).`,
+  });
+
+  const clampScore = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+
+  return {
+    keyPoints: (output.keyPoints ?? []).map((p) => p.trim()).filter(Boolean).slice(0, 4),
+    faq: (output.faq ?? [])
+      .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
+      .filter((f) => f.q && f.a)
+      .slice(0, 4),
+    metaTitle: output.metaTitle?.trim() || input.title.trim(),
+    metaDescription: output.metaDescription?.trim() || input.excerpt.trim(),
     geoScore: clampScore(output.geoScore ?? 0),
     seoScore: clampScore(output.seoScore ?? 0),
     aeoScore: clampScore(output.aeoScore ?? 0),
