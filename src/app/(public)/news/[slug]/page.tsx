@@ -9,6 +9,7 @@ import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const news = await getNews(slug);
   if (!news) return {};
-  return { title: `${news.title} — Rusability`, description: news.excerpt };
+  const title = news.metaTitle?.trim() || news.title;
+  const description = news.metaDescription?.trim() || news.excerpt;
+  const canonical = `${SITE_URL}/news/${news.slug}`;
+  return {
+    title: `${title} — Rusability`,
+    description,
+    keywords: news.tags,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url: canonical,
+      publishedTime: news.publishedAt,
+      siteName: "Rusability",
+    },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 // muted colored bar next to the category label, per news topic
@@ -52,8 +70,60 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   ]);
   const more = moreAll.filter((n) => n.id !== news.id).slice(0, 3);
 
+  const canonical = `${SITE_URL}/news/${news.slug}`;
+  // Structured data so classic search, Google/Yandex answer boxes and
+  // generative engines (AEO/GEO) can parse and cite the note.
+  const jsonLd: Record<string, unknown>[] = [
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      headline: news.title,
+      description: news.metaDescription?.trim() || news.excerpt,
+      articleSection: categoryLabel,
+      datePublished: news.publishedAt,
+      dateModified: news.publishedAt,
+      inLanguage: "ru-RU",
+      keywords: news.tags,
+      mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+      url: canonical,
+      publisher: {
+        "@type": "Organization",
+        name: "Rusability",
+        url: SITE_URL,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Новости", item: `${SITE_URL}/news` },
+        { "@type": "ListItem", position: 3, name: categoryLabel, item: `${SITE_URL}/news?category=${news.category}` },
+        { "@type": "ListItem", position: 4, name: news.title, item: canonical },
+      ],
+    },
+    ...(news.faq && news.faq.length > 0
+      ? [
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: news.faq.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <AnalyticsBeacon kind="news" contentId={news.id} category={news.category} />
       <Breadcrumbs
         items={[
@@ -93,11 +163,54 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{news.excerpt}</p>
 
+          {/* AEO: TL;DR key takeaways answer engines can lift directly */}
+          {news.keyPoints && news.keyPoints.length > 0 && (
+            <aside
+              className="mt-7 rounded-2xl border border-border bg-muted/40 p-5"
+              aria-label="Кратко"
+            >
+              <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-block h-3 w-[3px] rounded-full" style={{ backgroundColor: bar }} />
+                Кратко
+              </div>
+              <ul className="space-y-2">
+                {news.keyPoints.map((kp, i) => (
+                  <li key={i} className="flex gap-2.5 text-[0.98rem] leading-relaxed text-foreground">
+                    <span aria-hidden className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: bar }} />
+                    <span>{kp}</span>
+                  </li>
+                ))}
+              </ul>
+            </aside>
+          )}
+
           <div className="article-prose mt-8 space-y-5 text-[1.05rem] leading-[1.75] text-foreground">
             {news.body.map((p, i) => (
               <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
             ))}
           </div>
+
+          {/* AEO/GEO: FAQ block — visible accordion + FAQPage structured data */}
+          {news.faq && news.faq.length > 0 && (
+            <section className="mt-10" aria-labelledby="news-faq-heading">
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                Вопросы и ответы
+              </div>
+              <h2 id="news-faq-heading" className="mb-4 font-serif text-2xl font-bold leading-snug text-foreground">
+                Часто задаваемые вопросы
+              </h2>
+              <div className="flex flex-col gap-3">
+                {news.faq.map((f, i) => (
+                  <details key={i} className="rounded-2xl border border-border bg-card px-5 py-4">
+                    <summary className="cursor-pointer list-none text-base font-semibold text-foreground">
+                      {f.q}
+                    </summary>
+                    <p className="mt-3 text-[0.98rem] leading-relaxed text-muted-foreground">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* source attribution (nofollow) */}
           <NewsSource source={news.source} sourceUrl={news.sourceUrl} />

@@ -28,6 +28,13 @@ export function mapNews(r: Row): NewsItem {
     likes: r.likes ?? 0,
     pipeline: (r.pipeline as NewsItem["pipeline"]) ?? undefined,
     hot: r.hot,
+    keyPoints: (r.keyPoints as string[]) ?? [],
+    faq: (r.faq as NewsItem["faq"]) ?? [],
+    metaTitle: r.metaTitle ?? undefined,
+    metaDescription: r.metaDescription ?? undefined,
+    geoScore: r.geoScore ?? undefined,
+    seoScore: r.seoScore ?? undefined,
+    aeoScore: r.aeoScore ?? undefined,
   };
 }
 

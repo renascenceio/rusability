@@ -338,6 +338,14 @@ export async function writeQueuedNews(opts?: {
         category: rewritten.category,
         slug: await uniqueSlug(slugify(rewritten.title)),
         publishedAt: new Date(),
+        // AEO/GEO/SEO extras — persisted for every kept note.
+        keyPoints: rewritten.keyPoints,
+        faq: rewritten.faq,
+        metaTitle: rewritten.metaTitle,
+        metaDescription: rewritten.metaDescription,
+        geoScore: rewritten.geoScore,
+        seoScore: rewritten.seoScore,
+        aeoScore: rewritten.aeoScore,
       };
 
       // 4) Borderline format or unclear geo — hold for the editor («Спорные»).

@@ -138,6 +138,14 @@ export interface NewsItem {
   /** admin pipeline status */
   pipeline?: "queued" | "rewriting" | "review" | "published" | "rejected";
   hot?: boolean;
+  /** AEO/GEO/SEO extras generated with the rewrite. */
+  keyPoints?: string[];
+  faq?: FaqItem[];
+  metaTitle?: string;
+  metaDescription?: string;
+  geoScore?: number;
+  seoScore?: number;
+  aeoScore?: number;
 }
 
 export interface EventItem {
