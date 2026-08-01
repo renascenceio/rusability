@@ -23,6 +23,8 @@ export function mapNews(r: Row): NewsItem {
     sourceUrl: r.sourceUrl ?? undefined,
     tags: r.tags ?? [],
     publishedAt: toISO(r.publishedAt),
+    // News has no updated_at column (aggregated notes aren't edited post-publish);
+    // structured data falls back to publishedAt for dateModified.
     timeLabel: r.timeLabel,
     views: r.views,
     likes: r.likes ?? 0,

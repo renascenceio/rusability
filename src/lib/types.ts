@@ -84,6 +84,8 @@ export interface Article {
   claps: number;
   comments: number;
   publishedAt: string;
+  /** Last edit time — drives `dateModified` in structured data (E-E-A-T freshness). */
+  updatedAt?: string;
   /** GEO/AEO/SEO self-assessments — surfaced on Elite articles only */
   geoScore?: number;
   seoScore?: number;
@@ -131,6 +133,8 @@ export interface NewsItem {
   sourceUrl?: string;
   tags: string[];
   publishedAt: string;
+  /** Last edit time — drives `dateModified` in structured data (E-E-A-T freshness). */
+  updatedAt?: string;
   /** relative time label like "2 часа назад" */
   timeLabel: string;
   views: number;

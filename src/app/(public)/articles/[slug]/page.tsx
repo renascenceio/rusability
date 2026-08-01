@@ -15,6 +15,17 @@ import { Avatar, Badge, ButtonLink } from "@/components/ui/kit";
 import { resolveAvatar } from "@/lib/avatar";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { isSubscribed } from "@/app/actions/subscriptions";
+import { SITE_URL } from "@/lib/site";
+import {
+  JsonLd,
+  buildGraph,
+  organizationNode,
+  websiteNode,
+  personNode,
+  articleNode,
+  breadcrumbNode,
+  faqNode,
+} from "@/lib/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +45,38 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const isElite = article.tier === "elite";
   const accent = categoryAccent(article.category);
 
+  // E-E-A-T structured data: publisher + author Person + Article + breadcrumbs + FAQ.
+  const canonical = `${SITE_URL}/articles/${article.slug}`;
+  const authorPerson = author ? personNode(author) : null;
+  const articleGraph = buildGraph([
+    organizationNode(),
+    websiteNode(),
+    authorPerson,
+    articleNode({
+      type: "Article",
+      url: canonical,
+      headline: article.title,
+      description: article.excerpt,
+      image: article.cover,
+      datePublished: article.publishedAt,
+      dateModified: article.updatedAt || article.publishedAt,
+      section: categoryName(article.category),
+      keywords: article.tags,
+      authorRef: authorPerson ? { "@id": (authorPerson as { "@id": string })["@id"] } : undefined,
+    }),
+    breadcrumbNode([
+      { name: "Главная", url: SITE_URL },
+      { name: "Статьи", url: `${SITE_URL}/articles` },
+      { name: categoryName(article.category), url: `${SITE_URL}/articles?category=${article.category}` },
+      { name: article.title, url: canonical },
+    ]),
+    article.faq && article.faq.length > 0 ? faqNode(article.faq) : null,
+  ]);
+
   if (isElite) {
     return (
       <>
+        <JsonLd data={articleGraph} />
         <AnalyticsBeacon
           kind="article"
           contentId={article.id}
@@ -91,8 +131,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     );
   }
 
+  const showUpdated =
+    Boolean(article.updatedAt) &&
+    new Date(article.updatedAt as string).toDateString() !==
+      new Date(article.publishedAt).toDateString();
+
   return (
     <article>
+      <JsonLd data={articleGraph} />
       <AnalyticsBeacon
         kind="article"
         contentId={article.id}
@@ -168,6 +214,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   month: "long",
                 })}
               </span>
+              {showUpdated && (
+                <span className="inline-flex items-center gap-1">
+                  Обновлено{" "}
+                  {new Date(article.updatedAt as string).toLocaleDateString("ru-RU", {
+                    day: "numeric",
+                    month: "long",
+                  })}
+                </span>
+              )}
               <span className="inline-flex items-center gap-1">
                 <Clock className="h-4 w-4" /> {article.readingMinutes} мин
               </span>

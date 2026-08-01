@@ -10,6 +10,15 @@ import { ViewCounter } from "@/components/site/ViewCounter";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SITE_URL } from "@/lib/site";
+import {
+  JsonLd,
+  buildGraph,
+  organizationNode,
+  websiteNode,
+  articleNode,
+  breadcrumbNode,
+  faqNode,
+} from "@/lib/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -71,59 +80,43 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   const more = moreAll.filter((n) => n.id !== news.id).slice(0, 3);
 
   const canonical = `${SITE_URL}/news/${news.slug}`;
-  // Structured data so classic search, Google/Yandex answer boxes and
-  // generative engines (AEO/GEO) can parse and cite the note.
-  const jsonLd: Record<string, unknown>[] = [
-    {
-      "@context": "https://schema.org",
-      "@type": "NewsArticle",
+  const showUpdated =
+    Boolean(news.updatedAt) &&
+    new Date(news.updatedAt as string).toDateString() !==
+      new Date(news.publishedAt).toDateString();
+  // E-E-A-T structured data: authoritative publisher, dated NewsArticle, an
+  // explicit citation of the original source (transparency/Trust for aggregated
+  // news), breadcrumbs and FAQ — so search, answer boxes and generative engines
+  // can attribute and trust the material.
+  const newsGraph = buildGraph([
+    organizationNode(),
+    websiteNode(),
+    articleNode({
+      type: "NewsArticle",
+      url: canonical,
       headline: news.title,
       description: news.metaDescription?.trim() || news.excerpt,
-      articleSection: categoryLabel,
       datePublished: news.publishedAt,
-      dateModified: news.publishedAt,
-      inLanguage: "ru-RU",
+      dateModified: news.updatedAt || news.publishedAt,
+      section: categoryLabel,
       keywords: news.tags,
-      mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
-      url: canonical,
-      publisher: {
-        "@type": "Organization",
-        name: "Rusability",
-        url: SITE_URL,
-      },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Главная", item: SITE_URL },
-        { "@type": "ListItem", position: 2, name: "Новости", item: `${SITE_URL}/news` },
-        { "@type": "ListItem", position: 3, name: categoryLabel, item: `${SITE_URL}/news?category=${news.category}` },
-        { "@type": "ListItem", position: 4, name: news.title, item: canonical },
-      ],
-    },
-    ...(news.faq && news.faq.length > 0
-      ? [
-          {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: news.faq.map((f) => ({
-              "@type": "Question",
-              name: f.q,
-              acceptedAnswer: { "@type": "Answer", text: f.a },
-            })),
-          },
-        ]
-      : []),
-  ];
+      // Aggregated news is attributed to the publisher (editorial team); the
+      // original outlet is cited via isBasedOn/sourceOrganization.
+      isBasedOn: news.sourceUrl,
+      sourceName: news.source || null,
+    }),
+    breadcrumbNode([
+      { name: "Главная", url: SITE_URL },
+      { name: "Новости", url: `${SITE_URL}/news` },
+      { name: categoryLabel, url: `${SITE_URL}/news?category=${news.category}` },
+      { name: news.title, url: canonical },
+    ]),
+    news.faq && news.faq.length > 0 ? faqNode(news.faq) : null,
+  ]);
 
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
-      <script
-        type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={newsGraph} />
       <AnalyticsBeacon kind="news" contentId={news.id} category={news.category} />
       <Breadcrumbs
         items={[
@@ -152,7 +145,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
               {categoryLabel}
             </span>
             <span className="text-muted-foreground">
-              {formatDate(news.publishedAt)} · {minutes} мин
+              {formatDate(news.publishedAt)}
+              {showUpdated && ` · обновлено ${formatDate(news.updatedAt as string)}`} · {minutes} мин
             </span>
             <ViewCounter kind="news" contentId={news.id} initialViews={news.views ?? 0} />
           </div>
