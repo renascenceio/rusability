@@ -276,22 +276,8 @@ export function EliteArticle({ data }: { data: EliteArticleData }) {
                 </details>
               ))}
             </div>
-            {/* Structured data for answer engines */}
-            <script
-              type="application/ld+json"
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                  "@context": "https://schema.org",
-                  "@type": "FAQPage",
-                  mainEntity: data.faq.map((f) => ({
-                    "@type": "Question",
-                    name: f.q,
-                    acceptedAnswer: { "@type": "Answer", text: f.a },
-                  })),
-                }),
-              }}
-            />
+            {/* FAQPage structured data is emitted once at the page level (see
+                the article route's E-E-A-T @graph) to avoid a duplicate entity. */}
           </section>
         )}
 

@@ -100,6 +100,7 @@ export function mapArticle(r: Row): Article {
     claps: r.claps,
     comments: r.comments,
     publishedAt: toISO(r.publishedAt),
+    updatedAt: r.updatedAt ? toISO(r.updatedAt) : undefined,
     geoScore: r.geoScore ?? undefined,
     seoScore: r.seoScore ?? undefined,
     aeoScore: r.aeoScore ?? undefined,

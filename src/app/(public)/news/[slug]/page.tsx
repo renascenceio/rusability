@@ -9,6 +9,16 @@ import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { SITE_URL } from "@/lib/site";
+import {
+  JsonLd,
+  buildGraph,
+  organizationNode,
+  websiteNode,
+  articleNode,
+  breadcrumbNode,
+  faqNode,
+} from "@/lib/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +26,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const news = await getNews(slug);
   if (!news) return {};
-  return { title: `${news.title} — Rusability`, description: news.excerpt };
+  const title = news.metaTitle?.trim() || news.title;
+  const description = news.metaDescription?.trim() || news.excerpt;
+  const canonical = `${SITE_URL}/news/${news.slug}`;
+  return {
+    title,
+    description,
+    keywords: news.tags,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url: canonical,
+      publishedTime: news.publishedAt,
+      siteName: "Rusability",
+    },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 // muted colored bar next to the category label, per news topic
@@ -52,8 +79,44 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   ]);
   const more = moreAll.filter((n) => n.id !== news.id).slice(0, 3);
 
+  const canonical = `${SITE_URL}/news/${news.slug}`;
+  const showUpdated =
+    Boolean(news.updatedAt) &&
+    new Date(news.updatedAt as string).toDateString() !==
+      new Date(news.publishedAt).toDateString();
+  // E-E-A-T structured data: authoritative publisher, dated NewsArticle, an
+  // explicit citation of the original source (transparency/Trust for aggregated
+  // news), breadcrumbs and FAQ — so search, answer boxes and generative engines
+  // can attribute and trust the material.
+  const newsGraph = buildGraph([
+    organizationNode(),
+    websiteNode(),
+    articleNode({
+      type: "NewsArticle",
+      url: canonical,
+      headline: news.title,
+      description: news.metaDescription?.trim() || news.excerpt,
+      datePublished: news.publishedAt,
+      dateModified: news.updatedAt || news.publishedAt,
+      section: categoryLabel,
+      keywords: news.tags,
+      // Aggregated news is attributed to the publisher (editorial team); the
+      // original outlet is cited via isBasedOn/sourceOrganization.
+      isBasedOn: news.sourceUrl,
+      sourceName: news.source || null,
+    }),
+    breadcrumbNode([
+      { name: "Главная", url: SITE_URL },
+      { name: "Новости", url: `${SITE_URL}/news` },
+      { name: categoryLabel, url: `${SITE_URL}/news?category=${news.category}` },
+      { name: news.title, url: canonical },
+    ]),
+    news.faq && news.faq.length > 0 ? faqNode(news.faq) : null,
+  ]);
+
   return (
     <div className="mx-auto max-w-[680px] px-5 py-8 md:py-12">
+      <JsonLd data={newsGraph} />
       <AnalyticsBeacon kind="news" contentId={news.id} category={news.category} />
       <Breadcrumbs
         items={[
@@ -82,7 +145,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
               {categoryLabel}
             </span>
             <span className="text-muted-foreground">
-              {formatDate(news.publishedAt)} · {minutes} мин
+              {formatDate(news.publishedAt)}
+              {showUpdated && ` · обновлено ${formatDate(news.updatedAt as string)}`} · {minutes} мин
             </span>
             <ViewCounter kind="news" contentId={news.id} initialViews={news.views ?? 0} />
           </div>
@@ -93,11 +157,54 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{news.excerpt}</p>
 
+          {/* AEO: TL;DR key takeaways answer engines can lift directly */}
+          {news.keyPoints && news.keyPoints.length > 0 && (
+            <aside
+              className="mt-7 rounded-2xl border border-border bg-muted/40 p-5"
+              aria-label="Кратко"
+            >
+              <div className="mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                <span className="inline-block h-3 w-[3px] rounded-full" style={{ backgroundColor: bar }} />
+                Кратко
+              </div>
+              <ul className="space-y-2">
+                {news.keyPoints.map((kp, i) => (
+                  <li key={i} className="flex gap-2.5 text-[0.98rem] leading-relaxed text-foreground">
+                    <span aria-hidden className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: bar }} />
+                    <span>{kp}</span>
+                  </li>
+                ))}
+              </ul>
+            </aside>
+          )}
+
           <div className="article-prose mt-8 space-y-5 text-[1.05rem] leading-[1.75] text-foreground">
             {news.body.map((p, i) => (
               <p key={i} dangerouslySetInnerHTML={{ __html: p }} />
             ))}
           </div>
+
+          {/* AEO/GEO: FAQ block — visible accordion + FAQPage structured data */}
+          {news.faq && news.faq.length > 0 && (
+            <section className="mt-10" aria-labelledby="news-faq-heading">
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                Вопросы и ответы
+              </div>
+              <h2 id="news-faq-heading" className="mb-4 font-serif text-2xl font-bold leading-snug text-foreground">
+                Часто задаваемые вопросы
+              </h2>
+              <div className="flex flex-col gap-3">
+                {news.faq.map((f, i) => (
+                  <details key={i} className="rounded-2xl border border-border bg-card px-5 py-4">
+                    <summary className="cursor-pointer list-none text-base font-semibold text-foreground">
+                      {f.q}
+                    </summary>
+                    <p className="mt-3 text-[0.98rem] leading-relaxed text-muted-foreground">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* source attribution (nofollow) */}
           <NewsSource source={news.source} sourceUrl={news.sourceUrl} />

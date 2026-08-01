@@ -13,6 +13,23 @@ import type { NewsCategory } from "@/lib/types";
 export type NewsFormat = "news" | "article" | "borderline";
 export type GeoScope = "in_scope" | "out_of_scope" | "unclear";
 
+/**
+ * AEO/GEO/SEO editorial policy injected into every news rewrite so that even
+ * short news notes are structured for answer engines and generative search,
+ * not just classic SEO.
+ */
+const AEO_GEO_SEO_POLICY_RU = [
+  "ОПТИМИЗАЦИЯ ПОД ПОИСК И ИИ-АССИСТЕНТЫ (AEO / GEO / SEO) — обязательна для КАЖДОЙ новости:",
+  "• Лид (excerpt) — это ПРЯМОЙ ОТВЕТ на вопрос «что произошло»: главный факт в первом предложении, без разгона и предыстории (принцип «ответ сначала»).",
+  "• Пиши самодостаточными абзацами: каждый абзац понятен в отрыве от остальных, чтобы ИИ мог процитировать любой фрагмент.",
+  "• Называй конкретные сущности: компании, продукты, суммы, даты, проценты, имена — это то, что извлекают нейропоисковики (ChatGPT, Алиса, Gemini, Perplexity) и Яндекс/Google.",
+  "• keyPoints — короткая выжимка (TL;DR) из 2–4 самодостаточных тезисов для быстрого ответа ассистента.",
+  "• faq — 3–4 реальных вопроса, которые пользователь задаёт по этой теме, с прямыми полными ответами. Это повышает шанс попасть в блок ответов и в featured snippet.",
+  "• metaTitle (≤60 симв.) и metaDescription (140–160 симв.) — с главным ключевым запросом, информативные, без кликбейта.",
+  "• Никакой воды, штампов и «в современном мире»: только факты и польза. Плотность фактов важнее объёма.",
+  "• Оцени материал по шкалам geoScore / seoScore / aeoScore (0–100) честно, исходя из этих критериев.",
+].join("\n");
+
 export interface RewriteNewsInput {
   sourceTitle: string;
   sourceSummary: string;
@@ -32,6 +49,14 @@ export interface RewrittenNews {
   blockReason: string | null;
   format: NewsFormat;
   geoScope: GeoScope;
+  /** AEO/GEO/SEO extras. */
+  keyPoints: string[];
+  faq: { q: string; a: string }[];
+  metaTitle: string;
+  metaDescription: string;
+  geoScore: number;
+  seoScore: number;
+  aeoScore: number;
 }
 
 const newsSchema = z.object({
@@ -70,6 +95,37 @@ const newsSchema = z.object({
     .describe(
       '"in_scope" — про Россию/Казахстан/Узбекистан/Беларусь/Киргизию/Таджикистан ИЛИ глобально релевантная бизнес/тех-новость. "out_of_scope" — привязано к конкретному зарубежному рынку вне этого списка (напр. «топ маркетплейсов США»). "unclear" — не уверен.',
     ),
+  keyPoints: z
+    .array(z.string())
+    .describe(
+      "AEO: 2–4 ключевых тезиса-выжимки (TL;DR). Каждый — законченное самодостаточное утверждение из одного предложения, которое отвечает на вопрос читателя даже вне контекста статьи (для цитирования нейропоисковиками и голосовыми ассистентами). Только факты из текста, без воды.",
+    ),
+  faq: z
+    .array(z.object({ q: z.string(), a: z.string() }))
+    .describe(
+      "AEO/GEO: 3–4 пары «вопрос-ответ». Вопросы — так, как их реально задают люди и вводят в поиск («Что такое…», «Почему…», «Как повлияет…», «Когда…»). Ответы — прямые, полные, самодостаточные, 1–3 предложения, содержат ключевые сущности и цифры. Не повторяй дословно лид.",
+    ),
+  metaTitle: z
+    .string()
+    .describe("SEO title до 60 символов: содержит главный ключевой запрос, отражает суть, без кликбейта."),
+  metaDescription: z
+    .string()
+    .describe("SEO meta description 140–160 символов: краткое информативное описание с ключевыми словами, побуждающее к переходу."),
+  geoScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe("GEO (Generative Engine Optimization): насколько текст пригоден для цитирования генеративными ИИ-поисковиками (структура, факты, сущности, отсутствие воды). 0–100."),
+  seoScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe("SEO: насколько материал оптимизирован для классического поиска (ключевые слова, заголовок, мета, структура). 0–100."),
+  aeoScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe("AEO (Answer Engine Optimization): насколько легко извлечь из текста прямой ответ (лид-ответ, те��исы, FAQ). 0–100."),
 });
 
 /**
@@ -93,6 +149,8 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     RELEVANCE_POLICY_RU,
     "",
     FORMAT_GEO_POLICY_RU,
+    "",
+    AEO_GEO_SEO_POLICY_RU,
     ...(examplesBlock ? ["", examplesBlock] : []),
     "",
     preamble,
@@ -107,11 +165,13 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
 Краткое описание: «${input.sourceSummary || "(нет описания)"}»
 Предполагаемая категория: ${input.category}.
 
-Напиши оригинальную новостную заметку на русском по этому событию: заголовок, лид и 2–4 абзаца. Если данных мало — не выдумывай факты, опиши только то, что известно.`,
+Напиши оригинальную новостную заметку на русском по этому событию: заголовок, лид-ОТВЕТ и 2–4 абзаца. Затем добавь для оптимизации под поиск и ИИ-ассистенты: keyPoints (2–4 тезиса-выжимки), faq (3–4 вопроса-ответа), metaTitle, metaDescription и честные оценки geoScore/seoScore/aeoScore. Если данных мало — не выдумывай факты, опиши только то, что известно.`,
   });
 
   // A low-confidence format call is a borderline item → editor decides.
   const format: NewsFormat = output.formatConfidence === "low" ? "borderline" : output.format;
+
+  const clampScore = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 
   return {
     title: output.title.trim(),
@@ -123,5 +183,86 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     blockReason: output.blockReason?.trim() || null,
     format,
     geoScope: output.geoScope,
+    keyPoints: (output.keyPoints ?? []).map((p) => p.trim()).filter(Boolean).slice(0, 4),
+    faq: (output.faq ?? [])
+      .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
+      .filter((f) => f.q && f.a)
+      .slice(0, 4),
+    metaTitle: output.metaTitle?.trim() || output.title.trim(),
+    metaDescription: output.metaDescription?.trim() || output.excerpt.trim(),
+    geoScore: clampScore(output.geoScore ?? 0),
+    seoScore: clampScore(output.seoScore ?? 0),
+    aeoScore: clampScore(output.aeoScore ?? 0),
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * AEO/GEO/SEO enrichment for ALREADY-PUBLISHED news (backfill).
+ * Generates only the answer-engine extras from the existing note; it
+ * NEVER rewrites the title/body, so published content is untouched.
+ * Schema is `.pick()`ed from newsSchema so the field specs can't drift.
+ * ------------------------------------------------------------------ */
+const enrichSchema = newsSchema.pick({
+  keyPoints: true,
+  faq: true,
+  metaTitle: true,
+  metaDescription: true,
+  geoScore: true,
+  seoScore: true,
+  aeoScore: true,
+});
+
+export interface NewsAeoExtras {
+  keyPoints: string[];
+  faq: { q: string; a: string }[];
+  metaTitle: string;
+  metaDescription: string;
+  geoScore: number;
+  seoScore: number;
+  aeoScore: number;
+}
+
+export interface EnrichNewsInput {
+  title: string;
+  excerpt: string;
+  body: string[];
+  category?: NewsCategory;
+}
+
+export async function enrichNewsAeo(input: EnrichNewsInput): Promise<NewsAeoExtras> {
+  const system = [
+    "Ты — SEO/AEO-редактор русскоязычного делового медиа Rusability.",
+    "Тебе дают УЖЕ ОПУБЛИКОВАННУЮ новостную заметку. НЕ переписывай, не сокращай и не меняй её текст.",
+    "Твоя задача — на основе этого текста подготовить метаданные и структуру для поисковой и ИИ-оптимизации (AEO/GEO/SEO).",
+    "Используй ТОЛЬКО факты, которые уже есть в тексте. Ничего не выдумывай и не добавляй новых утверждений.",
+    "",
+    AEO_GEO_SEO_POLICY_RU,
+  ].join("\n");
+
+  const { output } = await generateText({
+    model: CONTENT_MODEL,
+    output: Output.object({ schema: enrichSchema }),
+    system,
+    prompt: `Заголовок: «${input.title}».
+Лид: «${input.excerpt}».
+Текст заметки:
+${input.body.join("\n\n")}
+
+Сгенерируй строго на основе этого текста: keyPoints (2–4 самодостаточных тезиса-выжимки), faq (3–4 реальных вопроса с прямыми ответами), metaTitle (≤60 символов), metaDescription (140–160 символов) и честные оценки geoScore / seoScore / aeoScore (0–100).`,
+  });
+
+  const clampScore = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+
+  return {
+    keyPoints: (output.keyPoints ?? []).map((p) => p.trim()).filter(Boolean).slice(0, 4),
+    faq: (output.faq ?? [])
+      .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
+      .filter((f) => f.q && f.a)
+      .slice(0, 4),
+    metaTitle: output.metaTitle?.trim() || input.title.trim(),
+    metaDescription: output.metaDescription?.trim() || input.excerpt.trim(),
+    geoScore: clampScore(output.geoScore ?? 0),
+    seoScore: clampScore(output.seoScore ?? 0),
+    aeoScore: clampScore(output.aeoScore ?? 0),
   };
 }

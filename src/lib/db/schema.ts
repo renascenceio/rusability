@@ -184,6 +184,14 @@ export const news = pgTable("news", {
   likes: integer("likes").notNull().default(0),
   pipeline: text("pipeline"),
   hot: boolean("hot").notNull().default(false),
+  /* AEO/GEO/SEO extras generated with the body so answer engines can quote us. */
+  faq: jsonb("faq").notNull().default([]), // [{q,a}]
+  keyPoints: text("key_points").array().notNull().default([]), // TL;DR takeaways
+  metaTitle: text("meta_title"),
+  metaDescription: text("meta_description"),
+  geoScore: integer("geo_score"),
+  seoScore: integer("seo_score"),
+  aeoScore: integer("aeo_score"),
   /* Aggregator provenance + dedupe. originalUrl is unique to prevent re-ingest. */
   originalUrl: text("original_url"),
   originalTitle: text("original_title"),
