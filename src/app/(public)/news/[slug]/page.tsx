@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = news.metaDescription?.trim() || news.excerpt;
   const canonical = `${SITE_URL}/news/${news.slug}`;
   return {
-    title: `${title} — Rusability`,
+    title,
     description,
     keywords: news.tags,
     alternates: { canonical },
