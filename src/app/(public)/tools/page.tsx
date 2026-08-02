@@ -33,6 +33,12 @@ const CAT_STYLE: Record<
     fg: "var(--gold-ink, var(--gold))",
     chip: "color-mix(in srgb, var(--gold) 22%, transparent)",
   },
+  business: {
+    tint: "color-mix(in srgb, var(--success) 9%, var(--tool-surface))",
+    border: "color-mix(in srgb, var(--success) 32%, transparent)",
+    fg: "var(--success)",
+    chip: "color-mix(in srgb, var(--success) 16%, transparent)",
+  },
 };
 
 export default function ToolsHubPage() {
