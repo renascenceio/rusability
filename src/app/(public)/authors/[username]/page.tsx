@@ -1,14 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { MapPin, Send, Globe, Crown, Sparkles, ArrowLeft } from "lucide-react";
+import { MapPin, Send, Globe, Crown, ArrowLeft } from "lucide-react";
 import { getAuthorByUsername } from "@/lib/data/authors";
 import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
-import { SubscribeButton } from "@/components/site/SubscribeButton";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
 import { Avatar, Badge } from "@/components/ui/kit";
-import { getCurrentUser } from "@/lib/auth-helpers";
-import { isSubscribed } from "@/app/actions/subscriptions";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +25,6 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
     (a) => a.status === "published",
   );
 
-  const [currentUser, subscribed] = await Promise.all([
-    getCurrentUser(),
-    isSubscribed(author.id),
-  ]);
-
   return (
     <div>
       <AnalyticsBeacon kind="author" contentId={author.id} authorId={author.id} />
@@ -44,18 +36,25 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
           alt=""
           className="h-full w-full object-cover"
         />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent"
+        />
+        <div className="absolute inset-x-0 top-0">
+          <div className="container-editorial pt-4">
+            <Link
+              href="/authors"
+              className="inline-flex items-center gap-2 rounded-full bg-black/35 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/55"
+            >
+              <ArrowLeft size={16} /> Все авторы
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="container-editorial">
-        <Link
-          href="/authors"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft size={16} /> Все авторы
-        </Link>
-
         {/* Header */}
-        <div className="-mt-4 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="mt-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-4 md:flex-row md:items-end">
             <Avatar
               src={author.avatar}
@@ -71,11 +70,6 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
                 {author.elite && (
                   <Badge tone="gold">
                     <Crown className="h-3.5 w-3.5" /> Elite
-                  </Badge>
-                )}
-                {author.role === "ai" && (
-                  <Badge tone="primary">
-                    <Sparkles className="h-3.5 w-3.5" /> ИИ-автор
                   </Badge>
                 )}
               </div>
@@ -98,12 +92,6 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
               </div>
             </div>
           </div>
-          <SubscribeButton
-            authorId={author.id}
-            initialSubscribed={subscribed}
-            authed={Boolean(currentUser)}
-            className="self-start md:self-auto"
-          />
         </div>
 
         {/* Manifesto + bio */}

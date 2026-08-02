@@ -1,16 +1,19 @@
 /*
   Cover-art direction for AI authors.
 
-  The house aesthetic is ARTSY, DREAMY and ABSTRACT — closer to a creative-agency
-  art director (Ogilvy / Leo Burnett) or a modern painter than to stock business
-  photography. Covers should feel like editorial magazine art: cinematic, painterly,
-  surreal, macro, hyperreal — never literal.
+  The house aesthetic spans a deliberate SPECTRUM — from grounded, real-to-life
+  editorial photography, through painterly illustration, to dreamy abstraction.
+  Think creative-agency art director (Ogilvy / Leo Burnett): some covers are
+  authentic real-world photographs, some are artful abstractions. Each article is
+  seeded to one "lens" (by title + author) so the feed MIXES realism with
+  abstraction instead of always looking surreal or futuristic.
 
-  HARD RULES baked into every prompt:
+  HARD RULES baked into every prompt (all modes):
     - NO text, letters, numbers, words, captions, labels, logos or watermarks;
     - NO charts, graphs, diagrams, dashboards, infographics, UI, gauges or arrows;
     - NO corny business clichés (handshakes, suits at laptops, lightbulbs, gears,
       rocket ships, glowing brains-as-circuit-boards, generic "growth" arrows);
+    - "realistic" NEVER means corporate stock photography;
     - editorial magazine-cover quality, 16:9, tasteful, a single clear focal point.
 */
 
@@ -23,24 +26,77 @@ export type AuthorImageStyle = {
   bw: boolean;
 };
 
+/** Where a lens sits on the realism↔abstraction spectrum. */
+export type LensMode = "real" | "painterly" | "abstract";
+
 /**
- * A rotating pool of art-direction "lenses" inspired by striking, non-obvious
- * photographic and illustrative styles. One is chosen per article (seeded by
- * the title) so covers stay varied and never settle into a corporate template.
+ * A rotating pool of art-direction "lenses" spanning a deliberate SPECTRUM:
+ * grounded real-to-life photography (`real`), stylised illustration
+ * (`painterly`), and dreamy abstraction (`abstract`). One is chosen per article
+ * (seeded by title + author) so the feed mixes realism with abstraction and
+ * never settles into a uniformly surreal / futuristic template. The pool leans
+ * toward grounded and painterly, with abstraction used more sparingly.
  */
-export const ART_LENSES: string[] = [
-  "extreme macro photograph with breathtaking natural iridescence (soap-film swirls, butterfly-wing scales, oil-on-water spectra), very shallow depth of field, painterly abstraction of colour and light",
-  "dreamy surreal magical-realism scene with a single impossible element (levitating object, floating room, endless field), soft luminous haze, muted pastel palette, poetic and serene",
-  "bold flat graphic illustration in the spirit of a contemporary fashion poster — crisp outlines, completely flat high-saturation colour shapes, no gradients, confident and playful",
-  "strict nadir (top-down) aerial abstraction of a vast patterned landscape (salt ponds, terraced fields, tidal flats), intense unnatural colour blocks reading as pure geometric art",
-  "cinematic photorealistic film still with nostalgic warmth, shallow depth of field, soft grain, evocative and quietly emotional lighting",
-  "retro-futuristic poster artwork with bold colour blocking, sweeping arches and dramatic sunset gradients, sleek and optimistic",
-  "ukiyo-e / Japanese woodblock-inspired stylisation with bold graphic outlines, flat harmonious colour planes and subtle texture, elegant and decorative",
-  "whimsical textured illustration or playful pixel-art vignette, super-saturated joyful colours, bouncy hand-drawn energy, charming and surreal",
-  "ethereal blue-hour photograph of an enchanted natural scene (luminous orbs, glowing flora, misty orchard), soft cool glow, magical and inspiring",
-  "hyperreal paper-craft / origami still life staged in a sunlit space, delicate folded forms catching soft light, joyful and tactile",
-  "painterly homage to a modern master — Rothko-like floating colour fields, Hockney pool light, or Kandinsky-esque abstract rhythm — gallery-grade and emotive",
-  "ultra-macro study of an organic natural structure (leaf veins, coral, mineral crystals, feather barbs) as pure abstract pattern, hyperreal clarity",
+export const ART_LENSES: { lens: string; mode: LensMode }[] = [
+  // --- grounded, real-to-life ------------------------------------------
+  {
+    mode: "real",
+    lens: "grounded real-to-life editorial photograph of an evocative everyday scene, natural available light, honest documentary realism, shallow depth of field, true-to-life colour and authentic texture",
+  },
+  {
+    mode: "real",
+    lens: "photorealistic still life of real, tactile objects and materials arranged on a real surface, soft directional daylight from a window, honest shadows and crisp true-to-life detail",
+  },
+  {
+    mode: "real",
+    lens: "atmospheric real-world environmental photograph of a characterful place — a quiet workshop, a rain-washed street at dusk, a sunlit library corner, a market stall — shot like reportage with natural light, candid and authentic",
+  },
+  {
+    mode: "real",
+    lens: "cinematic slice-of-life photograph with naturalistic colour grading, believable depth, gentle film grain and an authentic, quietly emotional real moment",
+  },
+  {
+    mode: "real",
+    lens: "golden-hour photograph of a real landscape or cityscape, true natural light, believable atmospheric haze and crisp realistic detail",
+  },
+  {
+    mode: "real",
+    lens: "macro photograph of a real natural material — weathered wood grain, woven fabric, stone, water droplets, moss — in true colour with honest, tactile texture",
+  },
+  // --- painterly / graphic ---------------------------------------------
+  {
+    mode: "painterly",
+    lens: "bold flat graphic illustration in the spirit of a contemporary fashion poster — crisp outlines, completely flat high-saturation colour shapes, no gradients, confident and playful",
+  },
+  {
+    mode: "painterly",
+    lens: "ukiyo-e / Japanese woodblock-inspired stylisation with bold graphic outlines, flat harmonious colour planes and subtle texture, elegant and decorative",
+  },
+  {
+    mode: "painterly",
+    lens: "painterly homage to a modern master — Rothko-like floating colour fields, Hockney pool light, or Kandinsky-esque abstract rhythm — gallery-grade and emotive",
+  },
+  {
+    mode: "painterly",
+    lens: "hyperreal paper-craft / origami still life staged in a sunlit space, delicate folded forms catching soft light, joyful and tactile",
+  },
+  // --- dreamy / abstract (used sparingly; a little futuristic is fine) ---
+  {
+    mode: "abstract",
+    lens: "dreamy surreal magical-realism scene with a single impossible element (levitating object, floating room, endless field), soft luminous haze, muted pastel palette, poetic and serene",
+  },
+  {
+    mode: "abstract",
+    lens: "extreme macro photograph with breathtaking natural iridescence (soap-film swirls, butterfly-wing scales, oil-on-water spectra), very shallow depth of field, painterly abstraction of colour and light",
+  },
+  {
+    mode: "abstract",
+    lens: "strict nadir (top-down) aerial abstraction of a vast patterned landscape (salt ponds, terraced fields, tidal flats), intense colour blocks reading as pure geometric art",
+  },
+  {
+    mode: "abstract",
+    lens: "retro-futuristic poster artwork with bold colour blocking, sweeping arches and dramatic sunset gradients, sleek and optimistic",
+  },
 ];
 
 export const AUTHOR_IMAGE_STYLES: Record<string, AuthorImageStyle> = {
@@ -227,6 +283,15 @@ function hash(s: string): number {
 }
 
 /**
+ * Seeded art-lens choice — stable per article, so a given title always gets the
+ * same lens while the corpus as a whole mixes realism with abstraction. Shared
+ * by both the LLM prompt-writer and the deterministic fallback so they agree.
+ */
+export function pickArtLens(seed: string): { lens: string; mode: LensMode } {
+  return ART_LENSES[hash(seed) % ART_LENSES.length];
+}
+
+/**
  * Bare comma-separated terms for the image model's dedicated `negativePrompt`
  * parameter. IMPORTANT: banned objects must ONLY live here — naming them in the
  * positive prompt actually makes the model draw them.
@@ -262,15 +327,21 @@ export function buildImagePrompt(args: {
 }): string {
   const s = AUTHOR_IMAGE_STYLES[args.authorId] ?? DEFAULT_IMAGE_STYLE;
   const motif = CATEGORY_MOTIF[args.category] ?? "modern business";
-  const lens = ART_LENSES[hash(args.title) % ART_LENSES.length];
+  const { lens, mode } = pickArtLens(args.title);
   const colour = s.bw ? "monochrome black and white, rich tonal range, no colour" : s.palette;
 
-  return [
-    `Wordless, artsy editorial magazine-cover artwork, abstract and dreamy, loosely evoking the theme of ${motif}.`,
-    `Art lens: ${lens}.`,
-    `Author's visual signature: ${s.style}.`,
-    `Colour: ${colour}.`,
-    `Widescreen composition, high detail, tasteful.`,
-    POSITIVE_TAIL,
-  ].join(" ");
+  const framing =
+    mode === "real"
+      ? `Grounded, real-to-life editorial magazine-cover photograph — authentic and believable, NOT corporate stock (no offices, suits, handshakes, laptops or devices), loosely evoking the theme of ${motif}.`
+      : mode === "painterly"
+        ? `Artful editorial magazine-cover illustration, painterly and graphic, loosely evoking the theme of ${motif}.`
+        : `Wordless, artsy editorial magazine-cover artwork, abstract and dreamy, loosely evoking the theme of ${motif}.`;
+
+  const lines = [`${framing}`, `Art lens: ${lens}.`];
+  // The author signatures are written in abstract terms, so only fold them in
+  // for the artful modes; on a realistic lens use the palette as a light touch.
+  if (mode === "real") lines.push(`Palette influence only: ${colour}.`);
+  else lines.push(`Author's visual signature: ${s.style}.`, `Colour: ${colour}.`);
+  lines.push(`Widescreen composition, high detail, tasteful.`, POSITIVE_TAIL);
+  return lines.join(" ");
 }
