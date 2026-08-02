@@ -1,7 +1,7 @@
 import { CAMPAIGNS } from "@/lib/mock";
 import { NewsletterWorkspace } from "./NewsletterWorkspace";
 
-export const metadata = { title: "Рассылки — Rusability" };
+export const metadata = { title: "Рассылки" };
 
 export default function AdminNewsletterPage() {
   return (

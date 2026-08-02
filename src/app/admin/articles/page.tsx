@@ -6,7 +6,7 @@ import { allArticles } from "@/lib/data/articles";
 import { categoryName } from "@/lib/taxonomy";
 import { formatNumber, formatDate } from "@/lib/utils";
 
-export const metadata = { title: "Статьи — Rusability" };
+export const metadata = { title: "Статьи" };
 
 const STATUS_TONE = {
   published: "success",

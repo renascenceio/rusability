@@ -16,7 +16,7 @@ import { getSetting } from "@/lib/data/settings";
 
 type CronTick = { at: string; due: number; ran: number; created: number };
 
-export const metadata = { title: "Генерация статей — Rusability" };
+export const metadata = { title: "Генерация статей" };
 export const dynamic = "force-dynamic";
 
 export default async function ArticleCronsPage() {

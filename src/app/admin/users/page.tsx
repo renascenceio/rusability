@@ -5,7 +5,7 @@ import { asc, eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth-helpers";
 import { UsersWorkspace } from "./UsersWorkspace";
 
-export const metadata = { title: "Пользователи — Rusability" };
+export const metadata = { title: "Пользователи" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {

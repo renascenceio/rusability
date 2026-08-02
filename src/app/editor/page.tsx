@@ -4,7 +4,7 @@ import { requireRole, AUTHOR_ROLES } from "@/lib/auth-helpers";
 import { fetchCredits } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Редактор — Rusability",
+  title: "Редактор",
   robots: { index: false },
 };
 

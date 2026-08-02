@@ -4,7 +4,7 @@ import { allAuthors } from "@/lib/data/authors";
 import { Avatar, Badge, Card } from "@/components/ui/kit";
 
 export const metadata = {
-  title: "Авторы — Rusability",
+  title: "Авторы",
   description: "Эксперты, исследователи и практики, которые пишут для Rusability.",
 };
 

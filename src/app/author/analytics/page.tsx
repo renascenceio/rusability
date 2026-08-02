@@ -1,7 +1,7 @@
 import { TRAFFIC_SERIES, TRAFFIC_SOURCES } from "@/lib/mock";
 import { AreaChart, Donut, BarChart } from "@/components/ui/charts";
 
-export const metadata = { title: "Аналитика — Rusability" };
+export const metadata = { title: "Аналитика" };
 
 const TOP = [
   { title: "Интерфейс как язык", reads: 12480, seo: 87 },

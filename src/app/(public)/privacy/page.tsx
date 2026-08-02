@@ -1,7 +1,7 @@
 import { LegalDoc } from "@/components/site/LegalDoc";
 
 export const metadata = {
-  title: "Политика конфиденциальности — Rusability",
+  title: "Политика конфиденциальности",
   description:
     "Как Rusability обрабатывает и защищает персональные данные пользователей в соответствии с Федеральным законом № 152-ФЗ «О персональных данных».",
 };

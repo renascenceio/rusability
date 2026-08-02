@@ -6,7 +6,7 @@ import { fetchCredits } from "@/app/editor/actions";
 import { glyphAvatar } from "@/lib/avatar";
 import { Sparkles, Crown } from "lucide-react";
 
-export const metadata = { title: "Профиль — Rusability" };
+export const metadata = { title: "Профиль" };
 
 function Field({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (

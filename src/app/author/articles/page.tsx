@@ -4,7 +4,7 @@ import { articlesByAuthor } from "@/lib/data/articles";
 import { categoryName } from "@/lib/taxonomy";
 import { formatNumber, formatDate } from "@/lib/utils";
 
-export const metadata = { title: "Мои статьи — Rusability" };
+export const metadata = { title: "Мои статьи" };
 
 const AUTHOR_ID = "au-3";
 

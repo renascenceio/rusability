@@ -4,7 +4,7 @@ import { connections } from "@/lib/db/schema";
 import { ConnectionsWorkspace } from "./ConnectionsWorkspace";
 import type { ConnectionRow } from "./actions";
 
-export const metadata = { title: "Подключения — Rusability" };
+export const metadata = { title: "Подключения" };
 export const dynamic = "force-dynamic";
 
 function timeAgo(d: Date | null): string | null {

@@ -4,6 +4,7 @@ import { gateway } from "@ai-sdk/gateway";
 import { CONTENT_MODEL } from "./model";
 import {
   buildImagePrompt,
+  pickArtLens,
   AUTHOR_IMAGE_STYLES,
   DEFAULT_IMAGE_STYLE,
   POSITIVE_TAIL,
@@ -38,23 +39,34 @@ export interface GenerateCoverInput {
 async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
   const sig = AUTHOR_IMAGE_STYLES[input.authorId] ?? DEFAULT_IMAGE_STYLE;
   const colour = sig.bw ? "monochrome black and white, rich tonal range" : sig.palette;
+  const { lens, mode } = pickArtLens(input.title);
+
+  const modeDirection =
+    mode === "real"
+      ? "MODE — grounded, real-to-life. Write a genuinely PHOTOREALISTIC, believable editorial photograph: true to life, natural light, authentic texture and honest colour. Realistic does NOT mean corporate stock — absolutely avoid offices, business people, suits, handshakes, laptops, phones and devices. Choose an authentic real-world scene, place, still life or natural texture instead."
+      : mode === "painterly"
+        ? "MODE — painterly / graphic. Write an artful illustration or painterly composition: stylised, confident, gallery-grade, with deliberate shapes, colour and texture."
+        : "MODE — dreamy abstraction. Write a surreal, abstract, painterly or hyperreal visual metaphor: artful, evocative and non-literal.";
 
   const system = [
-    "You are an award-winning creative-agency art director (think Ogilvy, Leo Burnett) writing a single prompt for an AI image generator to produce an editorial magazine COVER.",
-    "House aesthetic: ARTSY, DREAMY, ABSTRACT — cinematic, painterly, surreal, ultra-macro or hyperreal nature, iridescent textures, dramatic light, or a bold flat graphic illustration in the language of fine-art photography and modern painters.",
-    "Walk AWAY from the obvious, literal image a person would first expect for the topic. Translate the topic into a pure VISUAL METAPHOR from nature, light, material, colour or abstract form.",
-    "Describe ONLY beautiful, gallery-grade imagery. Do NOT mention people in business settings, offices, devices, or any diagram/chart/text — simply don't reference them at all; instead describe an evocative abstract scene.",
-    "Never put the article's literal title or any quoted phrase into the image. Keep it wordless and symbolic.",
-    "This is a WEBSITE HERO ASSET, not a poster or print. The generated scene itself must occupy 100% of the canvas, with subject, environment, texture, colour and light extending naturally through every corner and beyond all four crop edges.",
+    "You are an award-winning creative-agency art director (think Ogilvy, Leo Burnett) writing a single prompt for an AI image generator to produce an editorial magazine COVER for a website hero.",
+    "The house aesthetic spans a SPECTRUM — from grounded, real-to-life editorial photography, through painterly illustration, to dreamy abstraction. Follow the MODE and ART LENS you are given EXACTLY; never drift toward abstraction when a realistic mode is requested.",
+    modeDirection,
+    "Translate the topic into an evocative visual idea; skip the single most obvious literal cliché, but a clear, real, human scene is welcome and encouraged when the mode is realistic.",
+    "Never depict any diagram, chart, dashboard, gauge, arrow, UI or text of any kind, and never the corny business clichés (handshakes, suits at laptops, lightbulbs, gears, rockets, glowing brains, circuit boards).",
+    "Never put the article's literal title or any quoted phrase into the image. Keep it wordless.",
+    "This is a WEBSITE HERO ASSET, not a poster or print. The scene itself must occupy 100% of the canvas, with subject, environment, texture, colour and light extending naturally through every corner and beyond all four crop edges.",
     "Reject any concept that places a smaller rectangular artwork, card, print, canvas, photograph or isolated vignette onto a plain backdrop. Avoid broad empty bands at the top or bottom. The result must be immediately crop-ready with visually active outer edges.",
-    "Output ONE single English prompt of 65–110 words describing: medium/style, abstract subject, immersive edge-to-edge environment, active outer edges, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
+    "Output ONE single English prompt of 65–110 words describing: medium/style, subject, immersive edge-to-edge environment, active outer edges, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
   ].join("\n");
 
   const prompt = [
     `Article topic (Russian): «${input.title}». Theme area: ${input.category}.`,
-    `Lean toward this author's visual signature: ${sig.style}.`,
-    `Preferred colour direction: ${colour}.`,
-    "Give me an abstract, dreamy, artful visual metaphor — surprising, not literal. Write the image prompt now.",
+    `ART LENS to follow: ${lens}.`,
+    mode === "real"
+      ? `Use this author's palette/mood only as a subtle influence: ${colour}.`
+      : `Lean toward this author's visual signature: ${sig.style}. Preferred colour direction: ${colour}.`,
+    "Write the image prompt now.",
   ].join("\n");
 
   try {

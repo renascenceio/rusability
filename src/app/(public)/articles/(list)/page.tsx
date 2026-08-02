@@ -3,7 +3,7 @@ import { publishedArticles } from "@/lib/data/articles";
 import { ArticlesBrowser } from "@/components/site/ArticlesBrowser";
 
 export const metadata = {
-  title: "Статьи — Rusability",
+  title: "Статьи",
   description: "Аналитика, практика и мнения о маркетинге, дизайне и технологиях.",
 };
 

@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 
-export const metadata = { title: "Персонализация — Rusability" };
+export const metadata = { title: "Персонализация" };
 
 const TONES = ["Экспертный", "Дружелюбный", "Провокационный", "Академический"];
 const FORMATS = ["Лонгриды", "Гайды", "Мнения", "Разборы кейсов", "Новостные заметки"];

@@ -4,7 +4,7 @@ import { PageHeader, Panel, Tag, AdminButton, KpiCard } from "@/components/admin
 import { BLOCKED_TOPICS, MODERATION_QUEUE } from "@/lib/mock";
 import { ArticleTabs } from "@/components/admin/ArticleTabs";
 
-export const metadata = { title: "ИИ-фильтр РКН — Rusability" };
+export const metadata = { title: "ИИ-фильтр РКН" };
 
 export default function AiFilterPage() {
   return (

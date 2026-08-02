@@ -2,7 +2,7 @@ import { ButtonLink, Card } from "@/components/ui/kit";
 import { Sparkles, ShieldCheck, Newspaper, Users } from "lucide-react";
 
 export const metadata = {
-  title: "О нас — Rusability",
+  title: "О нас",
   description:
     "Rusability — независимое издание о маркетинге, технологиях и бизнесе. Рассказываем о том, что меняет индустрию, простым и точным языком.",
 };

@@ -3,7 +3,7 @@ import { activeCta } from "@/lib/data/ctas";
 import { NewsBrowser } from "@/components/site/NewsBrowser";
 
 export const metadata = {
-  title: "Новости — Rusability",
+  title: "Новости",
   description: "Живая лента индустрии: технологии, маркетинг, бизнес и наука.",
 };
 

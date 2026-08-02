@@ -4,7 +4,7 @@ import { allAuthors } from "@/lib/data/authors";
 import { CATEGORIES } from "@/lib/taxonomy";
 import { AdminEditorForm } from "./AdminEditorForm";
 
-export const metadata = { title: "Редактор — Rusability" };
+export const metadata = { title: "Редактор" };
 
 export default async function AdminEditorPage() {
   const authors = await allAuthors();

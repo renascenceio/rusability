@@ -1,6 +1,6 @@
 import { ShieldCheck, Smartphone, LogOut } from "lucide-react";
 
-export const metadata = { title: "Безопасность — Rusability" };
+export const metadata = { title: "Безопасность" };
 
 export default function AuthorSecurityPage() {
   return (
