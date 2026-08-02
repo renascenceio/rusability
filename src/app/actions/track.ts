@@ -1,7 +1,9 @@
 "use server";
 
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { pageViews } from "@/lib/db/schema";
+import { isBotUserAgent } from "@/lib/analytics/bot-detection";
 
 export type TrackKind = "article" | "news" | "author" | "listing" | "other";
 
@@ -45,6 +47,11 @@ export async function trackPageView(input: TrackInput): Promise<void> {
   try {
     if (!input?.visitorId || !input?.sessionId || !input?.path) return;
 
+    // Drop bots/crawlers/scrapers/monitors so first-party analytics count real
+    // humans only (Google Analytics filters these automatically; we now match it).
+    const userAgent = (await headers()).get("user-agent");
+    if (isBotUserAgent(userAgent)) return;
+
     const kind: TrackKind = KNOWN_KINDS.includes(input.kind as TrackKind)
       ? (input.kind as TrackKind)
       : "other";
@@ -63,6 +70,7 @@ export async function trackPageView(input: TrackInput): Promise<void> {
       source: source.slice(0, 128),
       referrer: input.referrer ? input.referrer.slice(0, 512) : null,
       device: input.device ?? "desktop",
+      userAgent: userAgent ? userAgent.slice(0, 512) : null,
     });
   } catch (err) {
     console.log("[v0] trackPageView failed:", (err as Error)?.message);
