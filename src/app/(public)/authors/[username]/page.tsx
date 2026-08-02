@@ -5,6 +5,7 @@ import { getAuthorByUsername } from "@/lib/data/authors";
 import { articlesByAuthor } from "@/lib/data/articles";
 import { ArticleCard } from "@/components/site/ArticleCard";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
+import { AuthorSky } from "@/components/site/AuthorSky";
 import { Avatar, Badge } from "@/components/ui/kit";
 
 export const dynamic = "force-dynamic";
@@ -28,34 +29,25 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
   return (
     <div>
       <AnalyticsBeacon kind="author" contentId={author.id} authorId={author.id} />
-      {/* Starry aurora header band */}
-      <div className="relative h-28 w-full overflow-hidden md:h-36">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/covers/author-aurora.png"
-          alt=""
-          className="h-full w-full object-cover"
-        />
-        {/* Fade the starfield down into the page background for a seamless blend */}
+      {/* Hero with interactive, theme-aware night sky (stars + aurora) */}
+      <section className="relative overflow-hidden">
+        <AuthorSky seed={skySeed(username)} className="absolute inset-0 z-0" />
+        {/* Gentle fade into the page background just above the details splitter */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-transparent to-[var(--background)]"
+          className="absolute inset-x-0 bottom-0 z-0 h-24 bg-gradient-to-b from-transparent to-[var(--background)]"
         />
-        <div className="absolute inset-x-0 top-0">
-          <div className="container-editorial pt-4">
-            <Link
-              href="/authors"
-              className="inline-flex items-center gap-2 rounded-full bg-black/35 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/55"
-            >
-              <ArrowLeft size={16} /> Все авторы
-            </Link>
-          </div>
-        </div>
-      </div>
 
-      <div className="container-editorial">
-        {/* Header — pulled up to overlap the aurora band */}
-        <div className="-mt-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="relative z-10 container-editorial pb-6 pt-4">
+          <Link
+            href="/authors"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
+          >
+            <ArrowLeft size={16} /> Все авторы
+          </Link>
+
+          {/* Header — avatar sits cleanly on the sky, nothing overlapping it */}
+          <div className="mt-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-4 md:flex-row md:items-end">
             <Avatar
               src={author.avatar}
@@ -111,8 +103,11 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
             <Stat value={String(author.articlesCount)} label="Материалы" />
           </div>
         </div>
+        </div>
+      </section>
 
-        {/* Articles */}
+      {/* Articles */}
+      <div className="container-editorial">
         <section className="py-10">
           <h2 className="mb-6 font-serif text-2xl font-bold text-[var(--foreground)]">
             Материалы автора
@@ -130,6 +125,16 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
       </div>
     </div>
   );
+}
+
+/** Stable small integer seed from the username so each author gets a distinct sky. */
+function skySeed(username: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < username.length; i++) {
+    h ^= username.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (Math.abs(h) % 100000) + 1;
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
