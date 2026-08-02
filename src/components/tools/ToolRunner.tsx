@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, Check, Loader2, Sparkles, ChevronDown } from "lucide-react";
-import { runTool, type ToolRunResult } from "@/app/actions/tools";
+import { runTool, getToolQuota, type ToolRunResult, type ToolQuota } from "@/app/actions/tools";
 import type { ToolField, ToolOutput, ToolValues } from "@/lib/tools/registry";
 
 type SerializableTool = {
@@ -13,10 +13,21 @@ type SerializableTool = {
   output: ToolOutput;
 };
 
+/** Human-friendly "resets in ~N h" hint from an ISO reset timestamp. */
+function resetHint(resetAt: string | null): string {
+  if (!resetAt) return "";
+  const ms = new Date(resetAt).getTime() - Date.now();
+  if (ms <= 0) return "";
+  const hours = Math.ceil(ms / (60 * 60 * 1000));
+  if (hours >= 2) return `Лимит обновится через ~${hours} ч.`;
+  const mins = Math.max(1, Math.ceil(ms / (60 * 1000)));
+  return `Лимит обновится через ~${mins} мин.`;
+}
+
 const FIELD_CLASS =
   "w-full rounded-[var(--tool-radius-inner)] bg-[var(--tool-field)] px-4 text-[15px] text-[var(--tool-text)] outline-none transition-shadow placeholder:text-[var(--tool-muted)] focus:ring-2 focus:ring-[var(--tool-accent)]";
 
-export function ToolRunner({ tool }: { tool: SerializableTool }) {
+export function ToolRunner({ tool, token }: { tool: SerializableTool; token: string }) {
   const [values, setValues] = useState<ToolValues>(() =>
     Object.fromEntries(
       tool.fields.map((f) => [
@@ -29,6 +40,20 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ToolRunResult | null>(null);
+  const [quota, setQuota] = useState<ToolQuota | null>(null);
+
+  // Show how many free attempts are left today (per anonymous visitor).
+  useEffect(() => {
+    let active = true;
+    getToolQuota()
+      .then((q) => active && setQuota(q))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const exhausted = quota != null && quota.remaining <= 0;
 
   function setField(name: string, value: string) {
     setValues((v) => ({ ...v, [name]: value }));
@@ -36,12 +61,13 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (loading) return;
+    if (loading || exhausted) return;
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      const res = await runTool({ slug: tool.slug, values, company });
+      const res = await runTool({ slug: tool.slug, values, company, token });
+      if (res.quota) setQuota(res.quota);
       if (res.ok) setResult(res);
       else setError(res.error);
     } catch {
@@ -143,22 +169,40 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
         <div className="mt-1 flex flex-col gap-2">
           <button
             type="submit"
-            disabled={loading}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--tool-radius-inner)] bg-[var(--primary)] px-5 text-sm font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:opacity-60"
+            disabled={loading || exhausted}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--tool-radius-inner)] bg-[var(--primary)] px-5 text-sm font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" /> Генерируем…
               </>
+            ) : exhausted ? (
+              "Лимит на сегодня исчерпан"
             ) : (
               <>
                 <Sparkles className="h-4 w-4" /> Сгенерировать
               </>
             )}
           </button>
-          <p className="text-xs text-[var(--tool-muted)]">
-            Бесплатно и без регистрации. Проверяйте результат перед публикацией.
-          </p>
+
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-[var(--tool-muted)]">
+              Бесплатно и без регистрации.
+            </p>
+            {quota && (
+              <p
+                className={`shrink-0 text-xs font-semibold tabular-nums ${
+                  exhausted ? "text-[var(--tool-accent)]" : "text-[var(--tool-muted)]"
+                }`}
+                aria-live="polite"
+              >
+                Осталось сегодня: {quota.remaining} из {quota.limit}
+              </p>
+            )}
+          </div>
+          {exhausted && quota?.resetAt && (
+            <p className="text-xs text-[var(--tool-muted)]">{resetHint(quota.resetAt)}</p>
+          )}
         </div>
       </form>
 
