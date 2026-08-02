@@ -28,17 +28,18 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
   return (
     <div>
       <AnalyticsBeacon kind="author" contentId={author.id} authorId={author.id} />
-      {/* Banner */}
-      <div className="relative h-44 w-full overflow-hidden md:h-60">
+      {/* Starry aurora header band */}
+      <div className="relative h-28 w-full overflow-hidden md:h-36">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/covers/author-banner.png"
+          src="/images/covers/author-aurora.png"
           alt=""
           className="h-full w-full object-cover"
         />
+        {/* Fade the starfield down into the page background for a seamless blend */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent"
+          className="absolute inset-0 bg-gradient-to-b from-transparent to-[var(--background)]"
         />
         <div className="absolute inset-x-0 top-0">
           <div className="container-editorial pt-4">
@@ -53,8 +54,8 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
       </div>
 
       <div className="container-editorial">
-        {/* Header */}
-        <div className="mt-6 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        {/* Header — pulled up to overlap the aurora band */}
+        <div className="-mt-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-4 md:flex-row md:items-end">
             <Avatar
               src={author.avatar}
