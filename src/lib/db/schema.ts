@@ -531,6 +531,8 @@ export const toolRuns = pgTable(
     status: text("status").notNull().default("ok"),
     /** Client IP (first x-forwarded-for hop) for rate limiting. */
     ip: text("ip").notNull().default("unknown"),
+    /** Stable anonymous visitor id (signed `rt_vid` cookie) — primary per-user rate-limit key. */
+    visitorId: text("visitor_id"),
     /** Which Gateway model actually produced the output (kimi / gemini fallback). */
     model: text("model"),
     inputChars: integer("input_chars").notNull().default(0),
@@ -544,5 +546,6 @@ export const toolRuns = pgTable(
     createdIdx: index("tool_runs_created_idx").on(t.createdAt.desc()),
     slugCreatedIdx: index("tool_runs_slug_created_idx").on(t.slug, t.createdAt.desc()),
     ipCreatedIdx: index("tool_runs_ip_created_idx").on(t.ip, t.createdAt.desc()),
+    visitorCreatedIdx: index("tool_runs_visitor_created_idx").on(t.visitorId, t.createdAt.desc()),
   }),
 );

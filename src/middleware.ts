@@ -16,6 +16,13 @@ import { matchRedirect } from "@/lib/archive/redirects-edge";
 const CANONICAL_HOSTS = new Set(["rusability.ru", "www.rusability.ru"]);
 
 /**
+ * Anonymous visitor-id cookie for the free tools' per-user rate limiting.
+ * Kept as a literal here (not imported from the server-only identity module)
+ * so this edge middleware never pulls in Node `crypto`.
+ */
+const VISITOR_COOKIE = "rt_vid";
+
+/**
  * The previous Rusability site had thousands of /articles/<slug> and
  * /news/<slug> pages that no longer exist. Those slugs collide with the new
  * URL structure, so a blanket redirect is impossible. Instead we detect links
@@ -133,7 +140,35 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next();
+  // Stable anonymous visitor id — the primary per-user key for the free tools'
+  // rate limiting and a lightweight bot signal. Minted here (edge) so it exists
+  // before the tool page renders and can be baked into a signed run token.
+  let vid = request.cookies.get(VISITOR_COOKIE)?.value;
+  const freshVid = !vid || vid.length < 8;
+  if (freshVid) vid = crypto.randomUUID();
+
+  const requestHeaders = new Headers(request.headers);
+  if (freshVid) {
+    // Expose the freshly-minted id to THIS same render pass so the tool page's
+    // server component (cookies()) can sign a token with it on first visit.
+    const cookieHeader = requestHeaders.get("cookie");
+    requestHeaders.set(
+      "cookie",
+      cookieHeader ? `${cookieHeader}; ${VISITOR_COOKIE}=${vid}` : `${VISITOR_COOKIE}=${vid}`,
+    );
+  }
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  if (freshVid) {
+    response.cookies.set(VISITOR_COOKIE, vid!, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      path: "/",
+    });
+  }
 
   // localhost / preview / *.vercel.app → keep out of the search index.
   if (!CANONICAL_HOSTS.has(host)) {

@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import { ToolIcon } from "@/components/tools/tool-icon";
 import { ToolRunner } from "@/components/tools/ToolRunner";
 import { getTool, TOOLS } from "@/lib/tools/registry";
+import { getVisitorId, issueToolToken } from "@/lib/tools/identity";
 
 export function generateStaticParams() {
   return TOOLS.map((t) => ({ slug: t.slug }));
@@ -35,6 +36,11 @@ export default async function ToolPage({
   const tool = getTool(slug);
   if (!tool) notFound();
 
+  // Bind a short-lived anti-bot token to this visitor at render time. Reading
+  // the visitor cookie opts this route into per-request dynamic rendering.
+  const visitorId = await getVisitorId();
+  const token = issueToolToken(visitorId);
+
   return (
     <div className="container-editorial py-8 md:py-12">
       <Link
@@ -60,6 +66,7 @@ export default async function ToolPage({
 
       <div className="mt-10">
         <ToolRunner
+          token={token}
           tool={{
             slug: tool.slug,
             title: tool.title,
