@@ -45,12 +45,14 @@ export default async function ToolPage({
       </Link>
 
       <header className="mt-6 max-w-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
-          <ToolIcon name={tool.icon} className="h-6 w-6" />
-        </span>
-        <h1 className="mt-4 text-balance font-serif text-3xl font-bold text-[var(--foreground)] md:text-4xl">
-          {tool.title}
-        </h1>
+        <div className="flex items-center gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--primary-soft)] text-[var(--primary)]">
+            <ToolIcon name={tool.icon} className="h-6 w-6" />
+          </span>
+          <h1 className="text-balance font-serif text-3xl font-bold text-[var(--foreground)] md:text-4xl">
+            {tool.title}
+          </h1>
+        </div>
         <p className="mt-3 text-pretty leading-relaxed text-[var(--muted-foreground)]">
           {tool.intro}
         </p>
