@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, Loader2, Sparkles } from "lucide-react";
+import { Copy, Check, Loader2, Sparkles, ChevronDown } from "lucide-react";
 import { runTool, type ToolRunResult } from "@/app/actions/tools";
 import type { ToolField, ToolOutput, ToolValues } from "@/lib/tools/registry";
 
@@ -12,6 +12,9 @@ type SerializableTool = {
   fields: ToolField[];
   output: ToolOutput;
 };
+
+const FIELD_CLASS =
+  "w-full rounded-[var(--tool-radius-inner)] border border-[var(--tool-border)] bg-[var(--tool-field)] px-4 text-[15px] text-[var(--tool-text)] outline-none transition-colors placeholder:text-[var(--tool-muted)] focus:border-[var(--tool-accent)]";
 
 export function ToolRunner({ tool }: { tool: SerializableTool }) {
   const [values, setValues] = useState<ToolValues>(() =>
@@ -49,17 +52,24 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
-      {/* Input form */}
-      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+    <div className="grid items-stretch gap-6 lg:grid-cols-2">
+      {/* Input panel */}
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col gap-5 rounded-[var(--tool-radius)] border border-[var(--tool-border)] bg-[var(--tool-surface)] p-6"
+      >
+        <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-[var(--tool-muted)]">
+          Ваши данные
+        </h2>
+
         {tool.fields.map((f) => (
           <div key={f.name} className="flex flex-col gap-1.5">
             <label
               htmlFor={`f-${f.name}`}
-              className="text-sm font-semibold text-[var(--foreground)]"
+              className="text-sm font-semibold text-[var(--tool-text)]"
             >
               {f.label}
-              {f.required && <span className="text-[var(--accent)]"> *</span>}
+              {f.required && <span className="text-[var(--tool-accent)]"> *</span>}
             </label>
 
             {f.type === "textarea" ? (
@@ -69,22 +79,28 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
                 onChange={(e) => setField(f.name, e.target.value)}
                 placeholder={f.placeholder}
                 maxLength={f.maxLength}
-                rows={5}
-                className="w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm text-[var(--foreground)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)]"
+                rows={6}
+                className={`${FIELD_CLASS} min-h-[150px] resize-y py-3 leading-relaxed`}
               />
             ) : f.type === "select" ? (
-              <select
-                id={`f-${f.name}`}
-                value={values[f.name] ?? ""}
-                onChange={(e) => setField(f.name, e.target.value)}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm text-[var(--foreground)] outline-none transition-colors focus:border-[var(--primary)]"
-              >
-                {f.options?.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  id={`f-${f.name}`}
+                  value={values[f.name] ?? ""}
+                  onChange={(e) => setField(f.name, e.target.value)}
+                  className={`${FIELD_CLASS} h-12 cursor-pointer appearance-none pr-11`}
+                >
+                  {f.options?.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden
+                  className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--tool-muted)]"
+                />
+              </div>
             ) : (
               <input
                 id={`f-${f.name}`}
@@ -93,15 +109,15 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
                 onChange={(e) => setField(f.name, e.target.value)}
                 placeholder={f.placeholder}
                 maxLength={f.maxLength}
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm text-[var(--foreground)] outline-none transition-colors placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)]"
+                className={`${FIELD_CLASS} h-12`}
               />
             )}
 
             {(f.help || f.maxLength) && (
-              <div className="flex justify-between text-xs text-[var(--muted-foreground)]">
+              <div className="flex justify-between gap-3 text-xs text-[var(--tool-muted)]">
                 <span>{f.help}</span>
                 {f.maxLength && (
-                  <span>
+                  <span className="shrink-0 tabular-nums">
                     {(values[f.name] ?? "").length}/{f.maxLength}
                   </span>
                 )}
@@ -124,46 +140,48 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
           </label>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:opacity-60"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Генерируем…
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4" /> Сгенерировать
-            </>
-          )}
-        </button>
-        <p className="text-xs text-[var(--muted-foreground)]">
-          Бесплатно и без регистрации. Проверяйте результат перед публикацией.
-        </p>
+        <div className="mt-1 flex flex-col gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--tool-radius-inner)] bg-[var(--primary)] px-5 text-sm font-semibold text-[var(--primary-foreground)] transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Генерируем…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" /> Сгенерировать
+              </>
+            )}
+          </button>
+          <p className="text-xs text-[var(--tool-muted)]">
+            Бесплатно и без регистрации. Проверяйте результат перед публикацией.
+          </p>
+        </div>
       </form>
 
-      {/* Output */}
-      <div className="flex flex-col">
-        <div className="mb-3 text-sm font-semibold text-[var(--foreground)]">
+      {/* Output panel — same padding/radius/border so its top edge aligns with the form */}
+      <div className="flex flex-col rounded-[var(--tool-radius)] border border-[var(--tool-border)] bg-[var(--tool-surface)] p-6">
+        <h2 className="mb-5 text-sm font-bold uppercase tracking-[0.1em] text-[var(--tool-muted)]">
           {tool.output.label}
-        </div>
+        </h2>
 
         {error && (
-          <div className="rounded-lg border border-[var(--accent)] bg-[var(--accent-soft,var(--surface-2))] px-4 py-3 text-sm text-[var(--foreground)]">
+          <div className="rounded-[var(--tool-radius-inner)] border border-[var(--tool-border-strong)] bg-[var(--tool-result-bg)] px-4 py-3 text-sm text-[var(--tool-text)]">
             {error}
           </div>
         )}
 
         {!error && !result && !loading && (
-          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-[var(--border)] px-4 py-12 text-center text-sm text-[var(--muted-foreground)]">
+          <div className="flex flex-1 items-center justify-center rounded-[var(--tool-radius-inner)] border border-dashed border-[var(--tool-border-strong)] px-4 py-12 text-center text-sm text-[var(--tool-muted)]">
             Заполните поля слева и нажмите «Сгенерировать» — результат появится здесь.
           </div>
         )}
 
         {loading && (
-          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-[var(--border)] px-4 py-12 text-sm text-[var(--muted-foreground)]">
+          <div className="flex flex-1 items-center justify-center rounded-[var(--tool-radius-inner)] border border-dashed border-[var(--tool-border-strong)] px-4 py-12 text-sm text-[var(--tool-muted)]">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Готовим варианты…
           </div>
         )}
@@ -196,15 +214,21 @@ function useCopy() {
 function ResultRow({ text }: { text: string }) {
   const { copied, copy } = useCopy();
   return (
-    <li className="flex items-start justify-between gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-1,var(--background))] px-4 py-3">
-      <span className="text-sm leading-relaxed text-[var(--foreground)]">{text}</span>
+    <li className="flex items-start justify-between gap-3 rounded-[var(--tool-radius-inner)] border border-[var(--tool-border)] bg-[var(--tool-result-bg)] px-4 py-3">
+      <span className="text-[13px] leading-relaxed text-[var(--tool-result-text)]">
+        {text}
+      </span>
       <button
         type="button"
         onClick={() => copy(text)}
         aria-label="Скопировать"
-        className="mt-0.5 shrink-0 text-[var(--muted-foreground)] transition-colors hover:text-[var(--primary)]"
+        className="mt-0.5 shrink-0 text-[var(--tool-muted)] transition-colors hover:text-[var(--tool-accent)]"
       >
-        {copied ? <Check className="h-4 w-4 text-[var(--primary)]" /> : <Copy className="h-4 w-4" />}
+        {copied ? (
+          <Check className="h-4 w-4 text-[var(--tool-accent)]" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        )}
       </button>
     </li>
   );
@@ -213,16 +237,16 @@ function ResultRow({ text }: { text: string }) {
 function ResultBlock({ text }: { text: string }) {
   const { copied, copy } = useCopy();
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-1,var(--background))] p-4">
+    <div className="rounded-[var(--tool-radius-inner)] border border-[var(--tool-border)] bg-[var(--tool-result-bg)] p-4">
       <div className="mb-2 flex justify-end">
         <button
           type="button"
           onClick={() => copy(text)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--muted-foreground)] transition-colors hover:text-[var(--primary)]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--tool-muted)] transition-colors hover:text-[var(--tool-accent)]"
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-[var(--primary)]" /> Скопировано
+              <Check className="h-3.5 w-3.5 text-[var(--tool-accent)]" /> Скопировано
             </>
           ) : (
             <>
@@ -231,7 +255,9 @@ function ResultBlock({ text }: { text: string }) {
           )}
         </button>
       </div>
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--foreground)]">{text}</p>
+      <p className="whitespace-pre-wrap text-[13px] leading-relaxed text-[var(--tool-result-text)]">
+        {text}
+      </p>
     </div>
   );
 }
