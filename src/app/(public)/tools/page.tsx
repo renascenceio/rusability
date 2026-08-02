@@ -65,8 +65,8 @@ export default function ToolsHubPage() {
                 {group.tools.map((tool) => (
                   <Link key={tool.slug} href={`/tools/${tool.slug}`} className="group block">
                     <article
-                      className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border p-6 transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-[var(--shadow-lift)]"
-                      style={{ background: cs.tint, borderColor: cs.border }}
+                      className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] p-6 transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-[var(--shadow-lift)]"
+                      style={{ background: cs.tint }}
                     >
                       {/* Oversized watermark icon — subtle but visible */}
                       <ToolIcon
