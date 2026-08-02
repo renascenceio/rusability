@@ -11,6 +11,7 @@ const NAV = [
   { href: "/", label: "Лента", exact: true },
   { href: "/articles", label: "Статьи" },
   { href: "/news", label: "Новости" },
+  { href: "/tools", label: "Инструменты" },
 ];
 
 export function SiteHeader() {
