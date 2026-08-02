@@ -8,7 +8,7 @@ import { getBlockedTerms } from "@/lib/data/news-blocklist";
 /** Matches the public site's definition of "published" (pipeline published OR null). */
 const isPublished = or(eq(news.pipeline, "published"), isNull(news.pipeline));
 
-export const metadata = { title: "Новости — Rusability" };
+export const metadata = { title: "Новости" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminNewsPage() {

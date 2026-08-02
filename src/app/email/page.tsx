@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { NewsletterDigest } from "@/components/email/NewsletterDigest";
 
 export const metadata: Metadata = {
-  title: "Дайджест — Rusability",
+  title: "Дайджест",
   robots: { index: false },
 };
 

@@ -3,7 +3,7 @@ import { ArticleTabs } from "@/components/admin/ArticleTabs";
 import { getHumanizerConfig } from "@/lib/ai/humanizer";
 import { HumanizerWorkspace } from "./HumanizerWorkspace";
 
-export const metadata = { title: "Гуманизатор — Rusability" };
+export const metadata = { title: "Гуманизатор" };
 export const dynamic = "force-dynamic";
 
 export default async function HumanizerPage() {

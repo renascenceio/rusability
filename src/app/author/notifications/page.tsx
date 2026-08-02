@@ -1,4 +1,4 @@
-export const metadata = { title: "Уведомления — Rusability" };
+export const metadata = { title: "Уведомления" };
 
 const SETTINGS = [
   { title: "Новые комментарии", desc: "Когда кто-то отвечает на ваши статьи", on: true },

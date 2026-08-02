@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { aiAuthors, authors as authorsTable } from "@/lib/db/schema";
 import { AiAuthorsGrid } from "./AiAuthorsGrid";
 
-export const metadata = { title: "ИИ-авторы — Rusability" };
+export const metadata = { title: "ИИ-авторы" };
 export const dynamic = "force-dynamic";
 
 export default async function AiAuthorsPage() {

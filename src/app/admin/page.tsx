@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PenLine, Newspaper, Mail, ShieldAlert, ChevronRight } from "lucide-react";
 
-export const metadata = { title: "Обзор платформы — Rusability" };
+export const metadata = { title: "Обзор платформы" };
 
 type Stat = {
   label: string;

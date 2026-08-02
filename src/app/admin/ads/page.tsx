@@ -2,7 +2,7 @@ import { AD_SLOTS } from "@/lib/mock";
 import { allCtas } from "@/lib/data/ctas";
 import { AdsWorkspace } from "./AdsWorkspace";
 
-export const metadata = { title: "Реклама — Rusability" };
+export const metadata = { title: "Реклама" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminAdsPage() {

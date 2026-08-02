@@ -5,7 +5,7 @@ import { DEFAULT_REQUIREMENTS } from "@/lib/ai/requirements-defaults";
 import { RequirementsEditor } from "./RequirementsEditor";
 import { ArticleTabs } from "@/components/admin/ArticleTabs";
 
-export const metadata = { title: "ИИ-требования — Rusability" };
+export const metadata = { title: "ИИ-требования" };
 export const dynamic = "force-dynamic";
 
 export default async function AiRequirementsPage() {

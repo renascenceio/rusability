@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { RknPrintTrigger } from "@/components/admin/RknPrintTrigger";
 
-export const metadata = { title: "Отчёт о соответствии РКН — Rusability" };
+export const metadata = { title: "Отчёт о соответствии РКН" };
 
 type Row = { req: string; status: "ok" | "warn" | "todo"; note: string };
 

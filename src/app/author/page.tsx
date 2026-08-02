@@ -4,7 +4,7 @@ import { articlesByAuthor } from "@/lib/data/articles";
 import { formatNumber, formatDate } from "@/lib/utils";
 import { fetchCredits } from "@/app/editor/actions";
 
-export const metadata = { title: "Дашборд — Rusability" };
+export const metadata = { title: "Дашборд" };
 
 const AUTHOR_ID = "au-3";
 

@@ -1,7 +1,7 @@
 import { LegalDoc } from "@/components/site/LegalDoc";
 
 export const metadata = {
-  title: "Политика в отношении cookie — Rusability",
+  title: "Политика в отношении cookie",
   description:
     "Какие файлы cookie использует Rusability, для чего они нужны и как управлять их настройками.",
 };

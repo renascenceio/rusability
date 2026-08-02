@@ -9,7 +9,7 @@ import { listRedirects, type SeoMeta, type RobotsSettings } from "./actions";
 // Number of static routes listed in app/sitemap.ts (keep in sync with it).
 const STATIC_ROUTE_COUNT = 11;
 
-export const metadata = { title: "SEO / AEO / GEO — Rusability" };
+export const metadata = { title: "SEO / AEO / GEO" };
 export const dynamic = "force-dynamic";
 
 const DEFAULT_META: SeoMeta = {

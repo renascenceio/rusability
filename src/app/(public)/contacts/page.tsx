@@ -2,7 +2,7 @@ import { Mail, MessageSquare, Newspaper } from "lucide-react";
 import { ContactForm } from "@/components/site/ContactForm";
 
 export const metadata = {
-  title: "Контакты — Rusability",
+  title: "Контакты",
   description:
     "Свяжитесь с редакцией Rusability: вопросы, предложения о сотрудничестве, темы для материалов и обратная связь.",
 };

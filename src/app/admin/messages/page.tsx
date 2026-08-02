@@ -4,7 +4,7 @@ import { contactMessages } from "@/lib/db/schema";
 import { requireRole } from "@/lib/auth-helpers";
 import { MessagesWorkspace, type ContactMessage } from "@/components/admin/MessagesWorkspace";
 
-export const metadata = { title: "Сообщения — Rusability Admin" };
+export const metadata = { title: "Сообщения" };
 export const dynamic = "force-dynamic";
 
 export default async function MessagesPage() {

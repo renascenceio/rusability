@@ -3,7 +3,7 @@ import { listThreads } from "@/lib/mail/store";
 import { isMailConfigured, MAIL_FROM } from "@/lib/mail/resend";
 import { InboxWorkspace } from "@/components/admin/InboxWorkspace";
 
-export const metadata = { title: "Почта — Rusability Admin" };
+export const metadata = { title: "Почта" };
 export const dynamic = "force-dynamic";
 
 export default async function InboxPage() {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PenLine, Clock } from "lucide-react";
 
-export const metadata = { title: "Черновики — Rusability" };
+export const metadata = { title: "Черновики" };
 
 const DRAFTS = [
   { id: "d1", title: "Микровзаимодействия: как анимация влияет на доверие", words: 1240, updated: "2 часа назад", progress: 62 },

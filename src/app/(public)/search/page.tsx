@@ -5,7 +5,7 @@ import { allAuthors } from "@/lib/data/authors";
 import { SearchClient } from "@/components/site/SearchClient";
 
 export const metadata = {
-  title: "Поиск — Rusability",
+  title: "Поиск",
 };
 
 // Reads live published content from the DB — render at request time.

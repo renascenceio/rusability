@@ -1,7 +1,7 @@
 import { LegalDoc } from "@/components/site/LegalDoc";
 
 export const metadata = {
-  title: "Пользовательское соглашение — Rusability",
+  title: "Пользовательское соглашение",
   description:
     "Условия использования сайта Rusability: права и обязанности пользователей, интеллектуальная собственность и ограничение ответственности.",
 };

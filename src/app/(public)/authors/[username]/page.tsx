@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   const { username } = await params;
   const author = await getAuthorByUsername(username);
   if (!author) return {};
-  return { title: `${author.name} — Rusability`, description: author.bio };
+  return { title: author.name, description: author.bio };
 }
 
 export default async function AuthorPage({ params }: { params: Promise<{ username: string }> }) {

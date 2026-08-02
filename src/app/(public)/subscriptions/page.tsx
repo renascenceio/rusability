@@ -7,7 +7,7 @@ import { Avatar, Badge, Card, ButtonLink } from "@/components/ui/kit";
 import { formatNumber } from "@/lib/utils";
 
 export const metadata = {
-  title: "Мои подписки — Rusability",
+  title: "Мои подписки",
   description: "Авторы, на которых вы подписаны.",
 };
 

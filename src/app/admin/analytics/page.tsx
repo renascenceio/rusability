@@ -1,7 +1,7 @@
 import { getAnalytics, type RangeKey, type Granularity } from "@/lib/data/analytics";
 import { AnalyticsWorkspace } from "./AnalyticsWorkspace";
 
-export const metadata = { title: "Аналитика — Rusability" };
+export const metadata = { title: "Аналитика" };
 
 // Server data is cached per filter signature inside getAnalytics (15 min).
 export const dynamic = "force-dynamic";
