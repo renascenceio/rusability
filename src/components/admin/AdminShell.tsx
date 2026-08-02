@@ -17,6 +17,7 @@ import {
   ListChecks,
   Inbox,
   Mailbox,
+  Wrench,
   Menu,
   X,
   Sun,
@@ -55,6 +56,7 @@ const NAV: NavGroup[] = [
     title: "ИИ-система",
     items: [
       { href: "/admin/seo", label: "SEO / AEO / GEO", icon: Activity },
+      { href: "/admin/tools", label: "Инструменты", icon: Wrench },
       { href: "/admin/ads", label: "Реклама", icon: Megaphone },
       { href: "/admin/connections", label: "Подключения", icon: Plug },
       { href: "/admin/recommendations", label: "Рекомендации", icon: ListChecks },
