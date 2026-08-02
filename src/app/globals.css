@@ -57,6 +57,19 @@
   --elite: #1a1410;
   --elite-foreground: #f0ebe3;
 
+  /* Writing tools — warm Elite-reading palette (light = sepia) */
+  --tool-surface: #f2e7cf;
+  --tool-field: #e8d8b8;
+  --tool-border: rgba(86, 57, 25, 0.18);
+  --tool-border-strong: rgba(86, 57, 25, 0.4);
+  --tool-text: #332418;
+  --tool-muted: rgba(51, 36, 24, 0.62);
+  --tool-accent: #945b24;
+  --tool-result-bg: #ede0c5;
+  --tool-result-text: rgba(51, 36, 24, 0.88);
+  --tool-radius: 16px;
+  --tool-radius-inner: 10px;
+
   /* Component aliases */
   --surface: #ffffff;
   --surface-2: #f0ede8;
@@ -110,6 +123,17 @@
 
   --elite: #0d0e10;
   --elite-foreground: #f2ede3;
+
+  /* Writing tools — warm Elite-reading palette (dark = night) */
+  --tool-surface: #17181b;
+  --tool-field: #1e1f23;
+  --tool-border: rgba(245, 239, 225, 0.14);
+  --tool-border-strong: rgba(245, 239, 225, 0.3);
+  --tool-text: #f2ede3;
+  --tool-muted: rgba(242, 237, 227, 0.62);
+  --tool-accent: #d9a34a;
+  --tool-result-bg: #212227;
+  --tool-result-text: rgba(242, 237, 227, 0.9);
 
   /* Component aliases */
   --surface: #17181b;
