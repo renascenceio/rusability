@@ -57,6 +57,7 @@ const NEW_SITE_SEGMENTS = new Set([
   "search",
   "subscriptions",
   "terms",
+  "tools",
   // (auth)
   "sign-in",
   "sign-up",

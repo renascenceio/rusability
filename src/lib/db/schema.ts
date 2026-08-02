@@ -516,3 +516,33 @@ export const pageViews = pgTable(
     visitorIdx: index("page_views_visitor_idx").on(t.visitorId),
   }),
 );
+
+/* ------------------------------------------------------------------ */
+/* Free AI writing tools (public /tools) — one row per invocation.      */
+/* Powers both per-IP rate limiting and the admin usage dashboard.      */
+/* ------------------------------------------------------------------ */
+export const toolRuns = pgTable(
+  "tool_runs",
+  {
+    id: serial("id").primaryKey(),
+    /** Tool registry slug, e.g. 'zagolovki' | 'meta-opisanie'. */
+    slug: text("slug").notNull(),
+    /** 'ok' | 'error' — rate-limited attempts are short-circuited, not stored. */
+    status: text("status").notNull().default("ok"),
+    /** Client IP (first x-forwarded-for hop) for rate limiting. */
+    ip: text("ip").notNull().default("unknown"),
+    /** Which Gateway model actually produced the output (kimi / gemini fallback). */
+    model: text("model"),
+    inputChars: integer("input_chars").notNull().default(0),
+    outputChars: integer("output_chars").notNull().default(0),
+    durationMs: integer("duration_ms").notNull().default(0),
+    /** Error message when status='error' (truncated). */
+    error: text("error"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    createdIdx: index("tool_runs_created_idx").on(t.createdAt.desc()),
+    slugCreatedIdx: index("tool_runs_slug_created_idx").on(t.slug, t.createdAt.desc()),
+    ipCreatedIdx: index("tool_runs_ip_created_idx").on(t.ip, t.createdAt.desc()),
+  }),
+);
