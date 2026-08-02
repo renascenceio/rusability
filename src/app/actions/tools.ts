@@ -12,8 +12,8 @@ import { getVisitorId, verifyToolToken } from "@/lib/tools/identity";
 const BURST_WINDOW_MS = 60 * 1000; // 1 minute
 const BURST_MAX = 5;
 const DAY_WINDOW_MS = 24 * 60 * 60 * 1000;
-const DAY_MAX = 25; // successful runs per visitor per rolling 24h — shown to the user
-const IP_DAY_MAX = 120; // backstop across ALL visitors sharing one IP (anti cookie-rotation)
+  const DAY_MAX = 10; // successful runs per visitor per rolling 24h — shown to the user
+  const IP_DAY_MAX = 60; // backstop across ALL visitors sharing one IP (anti cookie-rotation)
 
 /** Per-user daily quota surfaced in the UI ("attempts left today"). */
 export type ToolQuota = {
