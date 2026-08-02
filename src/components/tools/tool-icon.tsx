@@ -12,7 +12,17 @@ import {
   Languages,
   Quote,
   Sparkles,
+  Share2,
+  Network,
+  HelpCircle,
+  ListTree,
   Wand2,
+  Scissors,
+  SpellCheck,
+  Feather,
+  CalendarDays,
+  BadgePercent,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -31,6 +41,17 @@ const ICONS: Record<string, LucideIcon> = {
   Languages,
   Quote,
   Sparkles,
+  Share2,
+  Network,
+  HelpCircle,
+  ListTree,
+  Wand2,
+  Scissors,
+  SpellCheck,
+  Feather,
+  CalendarDays,
+  BadgePercent,
+  Send,
 };
 
 export function ToolIcon({
