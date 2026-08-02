@@ -14,7 +14,7 @@ type SerializableTool = {
 };
 
 const FIELD_CLASS =
-  "w-full rounded-[var(--tool-radius-inner)] border border-[var(--tool-border)] bg-[var(--tool-field)] px-4 text-[15px] text-[var(--tool-text)] outline-none transition-colors placeholder:text-[var(--tool-muted)] focus:border-[var(--tool-accent)]";
+  "w-full rounded-[var(--tool-radius-inner)] bg-[var(--tool-field)] px-4 text-[15px] text-[var(--tool-text)] outline-none transition-shadow placeholder:text-[var(--tool-muted)] focus:ring-2 focus:ring-[var(--tool-accent)]";
 
 export function ToolRunner({ tool }: { tool: SerializableTool }) {
   const [values, setValues] = useState<ToolValues>(() =>
@@ -56,7 +56,7 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
       {/* Input panel */}
       <form
         onSubmit={onSubmit}
-        className="flex flex-col gap-5 rounded-[var(--tool-radius)] border border-[var(--tool-border)] bg-[var(--tool-surface)] p-6"
+        className="flex flex-col gap-5 rounded-[var(--tool-radius)] bg-[var(--tool-surface)] p-6"
       >
         <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-[var(--tool-muted)]">
           Ваши данные
@@ -162,14 +162,14 @@ export function ToolRunner({ tool }: { tool: SerializableTool }) {
         </div>
       </form>
 
-      {/* Output panel — same padding/radius/border so its top edge aligns with the form */}
-      <div className="flex flex-col rounded-[var(--tool-radius)] border border-[var(--tool-border)] bg-[var(--tool-surface)] p-6">
+      {/* Output panel — same padding/radius so its top edge aligns with the form */}
+      <div className="flex flex-col rounded-[var(--tool-radius)] bg-[var(--tool-surface)] p-6">
         <h2 className="mb-5 text-sm font-bold uppercase tracking-[0.1em] text-[var(--tool-muted)]">
           {tool.output.label}
         </h2>
 
         {error && (
-          <div className="rounded-[var(--tool-radius-inner)] border border-[var(--tool-border-strong)] bg-[var(--tool-result-bg)] px-4 py-3 text-sm text-[var(--tool-text)]">
+          <div className="rounded-[var(--tool-radius-inner)] bg-[var(--tool-result-bg)] px-4 py-3 text-sm text-[var(--tool-text)]">
             {error}
           </div>
         )}
@@ -214,7 +214,7 @@ function useCopy() {
 function ResultRow({ text }: { text: string }) {
   const { copied, copy } = useCopy();
   return (
-    <li className="flex items-start justify-between gap-3 rounded-[var(--tool-radius-inner)] border border-[var(--tool-border)] bg-[var(--tool-result-bg)] px-4 py-3">
+    <li className="flex items-start justify-between gap-3 rounded-[var(--tool-radius-inner)] bg-[var(--tool-result-bg)] px-4 py-3">
       <span className="text-[13px] leading-relaxed text-[var(--tool-result-text)]">
         {text}
       </span>
@@ -237,7 +237,7 @@ function ResultRow({ text }: { text: string }) {
 function ResultBlock({ text }: { text: string }) {
   const { copied, copy } = useCopy();
   return (
-    <div className="rounded-[var(--tool-radius-inner)] border border-[var(--tool-border)] bg-[var(--tool-result-bg)] p-4">
+    <div className="rounded-[var(--tool-radius-inner)] bg-[var(--tool-result-bg)] p-4">
       <div className="mb-2 flex justify-end">
         <button
           type="button"

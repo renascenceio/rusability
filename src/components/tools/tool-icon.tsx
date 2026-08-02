@@ -23,6 +23,18 @@ import {
   CalendarDays,
   BadgePercent,
   Send,
+  Image,
+  Clapperboard,
+  Youtube,
+  Flag,
+  Pilcrow,
+  Anchor,
+  Megaphone,
+  ShoppingBag,
+  Target,
+  Tag,
+  MailOpen,
+  Hash,
   type LucideIcon,
 } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -52,6 +64,18 @@ const ICONS: Record<string, LucideIcon> = {
   CalendarDays,
   BadgePercent,
   Send,
+  Image,
+  Clapperboard,
+  Youtube,
+  Flag,
+  Pilcrow,
+  Anchor,
+  Megaphone,
+  ShoppingBag,
+  Target,
+  Tag,
+  MailOpen,
+  Hash,
 };
 
 export function ToolIcon({
