@@ -505,6 +505,8 @@ export const pageViews = pgTable(
     source: text("source").notNull().default("direct"),
     referrer: text("referrer"),
     device: text("device").notNull().default("desktop"), // desktop | mobile | tablet
+    /** Raw request User-Agent — retained so the bot filter can be audited/refined. */
+    userAgent: text("user_agent"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
