@@ -19,6 +19,7 @@ import { SITE_URL } from "@/lib/site";
 import {
   JsonLd,
   buildGraph,
+  authorInline,
   organizationNode,
   websiteNode,
   personNode,
@@ -62,7 +63,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       dateModified: article.updatedAt || article.publishedAt,
       section: categoryName(article.category),
       keywords: article.tags,
-      authorRef: authorPerson ? { "@id": (authorPerson as { "@id": string })["@id"] } : undefined,
+      authorRef: authorPerson ? authorInline(authorPerson) : undefined,
     }),
     breadcrumbNode([
       { name: "Главная", url: SITE_URL },
