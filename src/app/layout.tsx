@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { YandexMetrika } from "@/components/analytics/YandexMetrika";
+import { getAnalyticsConfig } from "@/lib/data/analytics-config";
 import { SITE_URL } from "@/lib/site";
 
 // Manrope ships full Cyrillic + Latin, so Russian body/UI text renders in one
@@ -50,9 +51,10 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const analytics = await getAnalyticsConfig();
   return (
     <html
       lang="ru"
@@ -63,8 +65,14 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>
-        <GoogleAnalytics />
-        <YandexMetrika />
+        <GoogleAnalytics
+          enabled={analytics.ga.enabled}
+          measurementId={analytics.ga.id}
+        />
+        <YandexMetrika
+          enabled={analytics.metrika.enabled}
+          counterId={analytics.metrika.id}
+        />
       </body>
     </html>
   );

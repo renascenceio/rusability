@@ -10,7 +10,8 @@ import { Suspense, useEffect } from "react";
  * The measurement ID is read from NEXT_PUBLIC_GA_MEASUREMENT_ID and falls back
  * to the site's known GA4 ID so tracking works even before the env var is set.
  * We only inject the tag in production so local/preview traffic never pollutes
- * the analytics property.
+ * the analytics property, and only when the admin has enabled it (the `enabled`
+ * prop, sourced from the admin-editable analytics config).
  *
  * ★ Why this is more than the default snippet ★
  * rusability is a Next.js App Router SPA. The stock `gtag('config')` snippet
@@ -21,9 +22,6 @@ import { Suspense, useEffect } from "react";
  * engagement. So we disable the automatic pageview (`send_page_view: false`)
  * and dispatch exactly one `page_view` per route change ourselves below.
  */
-const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-Q2617VM2JJ";
-
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
@@ -54,15 +52,23 @@ function PageviewTracker({ measurementId }: { measurementId: string }) {
   return null;
 }
 
-export function GoogleAnalytics() {
-  if (process.env.NODE_ENV !== "production" || !GA_MEASUREMENT_ID) return null;
+export function GoogleAnalytics({
+  enabled = true,
+  measurementId,
+}: {
+  enabled?: boolean;
+  measurementId: string;
+}) {
+  if (process.env.NODE_ENV !== "production" || !enabled || !measurementId) {
+    return null;
+  }
 
   return (
     <>
       {/* First-party paths (rewritten to Google in next.config.ts) so ad
           blockers and RKN throttling of Google domains don't drop the tag. */}
       <Script
-        src={`/_rmetric/js?id=${GA_MEASUREMENT_ID}`}
+        src={`/_rmetric/js?id=${measurementId}`}
         strategy="afterInteractive"
       />
       <Script id="ga4-init" strategy="afterInteractive">
@@ -73,14 +79,14 @@ export function GoogleAnalytics() {
           // send_page_view:false — pageviews are dispatched per route change
           // by PageviewTracker so soft navigations are counted too.
           // transport_url routes collect hits through our own origin.
-          gtag('config', '${GA_MEASUREMENT_ID}', {
+          gtag('config', '${measurementId}', {
             send_page_view: false,
             transport_url: window.location.origin + '/_rmetric',
           });
         `}
       </Script>
       <Suspense fallback={null}>
-        <PageviewTracker measurementId={GA_MEASUREMENT_ID} />
+        <PageviewTracker measurementId={measurementId} />
       </Suspense>
     </>
   );

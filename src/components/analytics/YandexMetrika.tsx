@@ -10,9 +10,9 @@ import { Suspense, useEffect, useRef } from "react";
  * Metrika is the primary analytics for a Russian audience: mc.yandex.ru is a
  * Russian domain, so it is NOT throttled by Roskomnadzor the way Google's
  * analytics domains are, and it captures far more of our real traffic than GA4.
- * The id is read from NEXT_PUBLIC_YANDEX_METRIKA_ID with a hard fallback so
- * tracking works even before the env var is set, and the whole tag is only
- * injected in production so local/preview traffic never pollutes the counter.
+ * The counter id and on/off state come from the admin-editable analytics
+ * config (props), and the whole tag is only injected in production so
+ * local/preview traffic never pollutes the counter.
  *
  * ★ SPA hit tracking ★
  * Like GA4, the default snippet only registers ONE hit on the initial hard
@@ -22,10 +22,6 @@ import { Suspense, useEffect, useRef } from "react";
  * each SUBSEQUENT client-side navigation (skipping the first run so the initial
  * pageview is not double-counted).
  */
-const METRIKA_ID = Number(
-  process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID || "15892276",
-);
-
 declare global {
   interface Window {
     ym?: (
@@ -60,8 +56,17 @@ function HitTracker({ counterId }: { counterId: number }) {
   return null;
 }
 
-export function YandexMetrika() {
-  if (process.env.NODE_ENV !== "production" || !METRIKA_ID) return null;
+export function YandexMetrika({
+  enabled = true,
+  counterId,
+}: {
+  enabled?: boolean;
+  counterId: string;
+}) {
+  const METRIKA_ID = Number(counterId);
+  if (process.env.NODE_ENV !== "production" || !enabled || !METRIKA_ID) {
+    return null;
+  }
 
   return (
     <>

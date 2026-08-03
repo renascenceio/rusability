@@ -19,6 +19,7 @@ import { SITE_URL } from "@/lib/site";
 
 const ORG_ID = `${SITE_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
+const PUBLISHER_NAME = "Rusability";
 
 function absUrl(u?: string | null): string | undefined {
   if (!u) return undefined;
@@ -40,7 +41,7 @@ export function organizationNode() {
   return {
     "@type": "NewsMediaOrganization",
     "@id": ORG_ID,
-    name: "Rusability",
+    name: PUBLISHER_NAME,
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
@@ -84,13 +85,33 @@ export function personNode(author: Author) {
   return {
     "@type": "Person",
     "@id": `${url}#person`,
-    name: author.name,
+    // Fall back so the name is never absent/"undefined" — some parsers
+    // (e.g. Yandex Metrika content analytics) render a missing name literally.
+    name: author.name?.trim() || "Редакция Rusability",
     url,
     ...(image ? { image } : {}),
     ...(author.bio ? { description: author.bio } : {}),
     jobTitle: author.elite ? "Elite-автор" : "Автор",
     worksFor: { "@id": ORG_ID },
     ...(sameAs.length ? { sameAs } : {}),
+  };
+}
+
+/**
+ * A compact INLINE author for an Article's `author` property.
+ *
+ * The article must carry the author's `name` inline (not only a bare
+ * `{ "@id" }` reference), because some structured-data parsers — notably
+ * Yandex Metrika's content analytics — do not dereference `@id` links across
+ * the `@graph` and would otherwise read the author name as "undefined". The
+ * `@id` is kept so Google still merges this with the full top-level Person.
+ */
+export function authorInline(person: ReturnType<typeof personNode>) {
+  return {
+    "@id": person["@id"],
+    "@type": person["@type"],
+    name: person.name,
+    url: person.url,
   };
 }
 
@@ -128,7 +149,11 @@ export type ArticleNodeInput = {
   dateModified?: string;
   section?: string;
   keywords?: string[];
-  /** `{ "@id": personId }` for a bylined author; omit to attribute to the publisher. */
+  /**
+   * INLINE author object (use `authorInline(personNode(...))`) for a bylined
+   * author; omit to attribute to the publisher Organization. Must carry `name`
+   * inline — a bare `{ "@id" }` ref makes Metrika read the author as "undefined".
+   */
   authorRef?: object;
   /** Original source URL for aggregated news (transparency). */
   isBasedOn?: string | null;
@@ -148,7 +173,13 @@ export function articleNode(a: ArticleNodeInput) {
     inLanguage: "ru-RU",
     ...(a.section ? { articleSection: a.section } : {}),
     ...(a.keywords && a.keywords.length ? { keywords: a.keywords } : {}),
-    author: a.authorRef ?? { "@id": ORG_ID },
+    // Inline (not a bare "@id" ref) so parsers that don't dereference the graph
+    // still read the author name; falls back to the publisher Organization.
+    author: a.authorRef ?? {
+      "@type": "Organization",
+      "@id": ORG_ID,
+      name: PUBLISHER_NAME,
+    },
     publisher: { "@id": ORG_ID },
     mainEntityOfPage: { "@type": "WebPage", "@id": a.url },
     url: a.url,

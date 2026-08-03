@@ -10,6 +10,7 @@ import {
   Newspaper,
   Mail,
   BarChart3,
+  Gauge,
   Plug,
   Users,
   Activity,
@@ -50,6 +51,7 @@ const NAV: NavGroup[] = [
       { href: "/admin/news", label: "Новости", icon: Newspaper },
       { href: "/admin/newsletter", label: "Рассылки", icon: Mail },
       { href: "/admin/analytics", label: "Аналитика", icon: BarChart3 },
+      { href: "/admin/analytics-settings", label: "Счётчики", icon: Gauge },
     ],
   },
   {
