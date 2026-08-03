@@ -59,8 +59,10 @@ export function GoogleAnalytics() {
 
   return (
     <>
+      {/* First-party paths (rewritten to Google in next.config.ts) so ad
+          blockers and RKN throttling of Google domains don't drop the tag. */}
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+        src={`/_rmetric/js?id=${GA_MEASUREMENT_ID}`}
         strategy="afterInteractive"
       />
       <Script id="ga4-init" strategy="afterInteractive">
@@ -70,7 +72,11 @@ export function GoogleAnalytics() {
           gtag('js', new Date());
           // send_page_view:false — pageviews are dispatched per route change
           // by PageviewTracker so soft navigations are counted too.
-          gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
+          // transport_url routes collect hits through our own origin.
+          gtag('config', '${GA_MEASUREMENT_ID}', {
+            send_page_view: false,
+            transport_url: window.location.origin + '/_rmetric',
+          });
         `}
       </Script>
       <Suspense fallback={null}>

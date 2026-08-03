@@ -49,6 +49,34 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  /**
+   * First-party proxy for Google Analytics 4.
+   *
+   * rusability.ru serves a Russian audience, where GA4's third-party domains
+   * (googletagmanager.com / google-analytics.com) are heavily lost to ad-block
+   * lists and Roskomnadzor throttling of Google infrastructure — which is why
+   * GA4 reads ~10x lower than our first-party server-side beacon. Routing both
+   * the gtag script and the collect hits through our OWN origin turns them into
+   * same-origin requests that domain-based blockers and Google-domain
+   * throttling no longer catch.
+   *
+   * The GA tag loads its script from `/_rmetric/js` and sets `transport_url`
+   * to `/_rmetric`, so GA sends measurement hits to `/_rmetric/g/collect`.
+   * These rewrites forward those to the real Google endpoints server-side.
+   */
+  async rewrites() {
+    return [
+      {
+        source: "/_rmetric/js",
+        destination: "https://www.googletagmanager.com/gtag/js",
+      },
+      {
+        source: "/_rmetric/g/:path*",
+        destination: "https://www.google-analytics.com/g/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
