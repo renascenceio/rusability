@@ -42,15 +42,24 @@ export const DEFAULT_ANALYTICS_CONFIG: AnalyticsConfig = {
 
 /** Raw read (no cache) — used by the admin form so it always shows the latest saved values. */
 export async function readAnalyticsConfig(): Promise<AnalyticsConfig> {
-  const stored = await getSetting<AnalyticsConfig>(
-    ANALYTICS_SETTINGS_KEY,
-    DEFAULT_ANALYTICS_CONFIG,
-  );
-  // getSetting shallow-merges, so re-normalise the nested providers defensively.
-  return {
-    ga: { ...DEFAULT_ANALYTICS_CONFIG.ga, ...stored.ga },
-    metrika: { ...DEFAULT_ANALYTICS_CONFIG.metrika, ...stored.metrika },
-  };
+  try {
+    const stored = await getSetting<AnalyticsConfig>(
+      ANALYTICS_SETTINGS_KEY,
+      DEFAULT_ANALYTICS_CONFIG,
+    );
+    // getSetting shallow-merges, so re-normalise the nested providers defensively.
+    return {
+      ga: { ...DEFAULT_ANALYTICS_CONFIG.ga, ...stored.ga },
+      metrika: { ...DEFAULT_ANALYTICS_CONFIG.metrika, ...stored.metrika },
+    };
+  } catch (err) {
+    // The root layout awaits this on EVERY page, including static ones prerendered
+    // at build time. Analytics config is non-critical chrome, so a DB hiccup
+    // (e.g. ETIMEDOUT during build/prerender) must never fail a page render —
+    // fall back to defaults instead of throwing.
+    console.log("[v0] readAnalyticsConfig failed, using defaults:", (err as Error)?.message);
+    return DEFAULT_ANALYTICS_CONFIG;
+  }
 }
 
 /**
