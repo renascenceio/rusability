@@ -1,20 +1,23 @@
 /*
   Cover-art direction for AI authors.
 
-  The house aesthetic spans a deliberate SPECTRUM — from grounded, real-to-life
-  editorial photography, through painterly illustration, to dreamy abstraction.
-  Think creative-agency art director (Ogilvy / Leo Burnett): some covers are
-  authentic real-world photographs, some are artful abstractions. Each article is
-  seeded to one "lens" (by title + author) so the feed MIXES realism with
-  abstraction instead of always looking surreal or futuristic.
+  The house aesthetic is GROUNDED, PHOTOREALISTIC editorial imagery: every cover
+  should make a reader instantly recognise what the article is about. Think a
+  quality magazine photo desk, NOT an "AI tech" render. The subject is driven by
+  the ARTICLE TOPIC — a real person, place, object, tool or material that belongs
+  to it — and each article is seeded to one photographic "lens" so the feed stays
+  varied (mostly real photography with a little editorial illustration) instead of
+  every article by one author looking like the same abstract render.
 
   HARD RULES baked into every prompt (all modes):
+    - the image must CONCRETELY depict the real subject of the article;
+    - NO abstract 3D renders, glowing orbs/spheres, floating geometric shapes,
+      swirling ribbons, metallic discs, particle/cosmic or neon sci-fi backgrounds;
     - NO text, letters, numbers, words, captions, labels, logos or watermarks;
     - NO charts, graphs, diagrams, dashboards, infographics, UI, gauges or arrows;
-    - NO corny business clichés (handshakes, suits at laptops, lightbulbs, gears,
-      rocket ships, glowing brains-as-circuit-boards, generic "growth" arrows);
-    - "realistic" NEVER means corporate stock photography;
-    - editorial magazine-cover quality, 16:9, tasteful, a single clear focal point.
+    - NO corny corporate stock (handshakes, suits at laptops, lightbulbs, gears,
+      rocket ships, glowing brains, circuit boards, generic "growth" arrows);
+    - editorial magazine quality, 16:9, tasteful, a single clear focal point.
 */
 
 export type AuthorImageStyle = {
@@ -26,76 +29,51 @@ export type AuthorImageStyle = {
   bw: boolean;
 };
 
-/** Where a lens sits on the realism↔abstraction spectrum. */
-export type LensMode = "real" | "painterly" | "abstract";
+/** Where a lens sits on the realism↔illustration spectrum. */
+export type LensMode = "real" | "painterly";
 
 /**
- * A rotating pool of art-direction "lenses" spanning a deliberate SPECTRUM:
- * grounded real-to-life photography (`real`), stylised illustration
- * (`painterly`), and dreamy abstraction (`abstract`). One is chosen per article
- * (seeded by title + author) so the feed mixes realism with abstraction and
- * never settles into a uniformly surreal / futuristic template. The pool leans
- * toward grounded and painterly, with abstraction used more sparingly.
+ * A rotating pool of photographic "lenses". Each describes the photographic
+ * TREATMENT only — the SUBJECT always comes from the article topic. One lens is
+ * chosen per article (seeded by title + author) so the feed stays varied. The
+ * pool is dominated by real photography, with a little concrete editorial
+ * illustration; there is deliberately NO dreamy/abstract/3D-render mode, because
+ * those produced interchangeable, topic-agnostic covers.
  */
 export const ART_LENSES: { lens: string; mode: LensMode }[] = [
-  // --- grounded, real-to-life ------------------------------------------
+  // --- real photography (dominant) -------------------------------------
   {
     mode: "real",
-    lens: "grounded real-to-life editorial photograph of an evocative everyday scene, natural available light, honest documentary realism, shallow depth of field, true-to-life colour and authentic texture",
+    lens: "photorealistic documentary photograph of a real person genuinely engaged in the actual activity the topic is about, natural available light, candid reportage realism, shallow depth of field, true-to-life colour and authentic texture",
   },
   {
     mode: "real",
-    lens: "photorealistic still life of real, tactile objects and materials arranged on a real surface, soft directional daylight from a window, honest shadows and crisp true-to-life detail",
+    lens: "photorealistic still life of the real, tactile objects, tools or materials that literally belong to the topic, arranged on a real surface, soft directional daylight from a window, honest shadows and crisp true-to-life detail",
   },
   {
     mode: "real",
-    lens: "atmospheric real-world environmental photograph of a characterful place — a quiet workshop, a rain-washed street at dusk, a sunlit library corner, a market stall — shot like reportage with natural light, candid and authentic",
+    lens: "atmospheric real-world location photograph of an authentic place where this topic actually happens, shot like reportage with natural light, candid, specific and true to life",
   },
   {
     mode: "real",
-    lens: "cinematic slice-of-life photograph with naturalistic colour grading, believable depth, gentle film grain and an authentic, quietly emotional real moment",
+    lens: "photorealistic close-up of real human hands working with the real tools or materials of the topic, tactile texture, natural light, honest colour, shallow depth of field",
   },
   {
     mode: "real",
-    lens: "golden-hour photograph of a real landscape or cityscape, true natural light, believable atmospheric haze and crisp realistic detail",
+    lens: "cinematic documentary photograph capturing a believable real moment directly connected to the topic, naturalistic colour grading, believable depth, gentle film grain, quietly human",
   },
   {
     mode: "real",
-    lens: "macro photograph of a real natural material — weathered wood grain, woven fabric, stone, water droplets, moss — in true colour with honest, tactile texture",
+    lens: "clean, modern real-world photograph of the actual setting or subject of the topic in a bright, characterful space, honest natural light and specific real detail — emphatically not generic corporate stock",
   },
-  // --- painterly / graphic ---------------------------------------------
+  // --- concrete editorial illustration (minority) ----------------------
   {
     mode: "painterly",
-    lens: "bold flat graphic illustration in the spirit of a contemporary fashion poster — crisp outlines, completely flat high-saturation colour shapes, no gradients, confident and playful",
-  },
-  {
-    mode: "painterly",
-    lens: "ukiyo-e / Japanese woodblock-inspired stylisation with bold graphic outlines, flat harmonious colour planes and subtle texture, elegant and decorative",
+    lens: "bold editorial spot illustration that clearly and literally depicts the topic with recognisable real-world elements, crisp confident shapes and a limited palette, like a quality magazine illustration — never an abstract pattern, texture or render",
   },
   {
     mode: "painterly",
-    lens: "painterly homage to a modern master — Rothko-like floating colour fields, Hockney pool light, or Kandinsky-esque abstract rhythm — gallery-grade and emotive",
-  },
-  {
-    mode: "painterly",
-    lens: "hyperreal paper-craft / origami still life staged in a sunlit space, delicate folded forms catching soft light, joyful and tactile",
-  },
-  // --- dreamy / abstract (used sparingly; a little futuristic is fine) ---
-  {
-    mode: "abstract",
-    lens: "dreamy surreal magical-realism scene with a single impossible element (levitating object, floating room, endless field), soft luminous haze, muted pastel palette, poetic and serene",
-  },
-  {
-    mode: "abstract",
-    lens: "extreme macro photograph with breathtaking natural iridescence (soap-film swirls, butterfly-wing scales, oil-on-water spectra), very shallow depth of field, painterly abstraction of colour and light",
-  },
-  {
-    mode: "abstract",
-    lens: "strict nadir (top-down) aerial abstraction of a vast patterned landscape (salt ponds, terraced fields, tidal flats), intense colour blocks reading as pure geometric art",
-  },
-  {
-    mode: "abstract",
-    lens: "retro-futuristic poster artwork with bold colour blocking, sweeping arches and dramatic sunset gradients, sleek and optimistic",
+    lens: "warm painterly gouache editorial illustration concretely portraying a real, recognisable scene from the topic, human, specific and gallery-grade",
   },
 ];
 
@@ -297,6 +275,8 @@ export function pickArtLens(seed: string): { lens: string; mode: LensMode } {
  * positive prompt actually makes the model draw them.
  */
 export const NEGATIVE_TERMS =
+  "abstract 3d render, glowing orb, glowing sphere, floating geometric shapes, swirling ribbons, " +
+  "metallic discs, particle cloud, cosmic background, nebula, neon sci-fi gradient, holographic, futuristic render, " +
   "text, letters, words, numbers, captions, labels, logos, watermark, signage, typography, UI, " +
   "chart, graph, diagram, dashboard, infographic, gauge, data grid, arrows, " +
   "businessman, business people, suit and tie, office worker, handshake, laptop, computer screen, " +
@@ -309,10 +289,11 @@ export const NEGATIVE_TERMS =
  * toward the desired aesthetic without naming any banned object.
  */
 export const POSITIVE_TAIL =
-  "Purely visual, symbolic and artful — convey the idea through imagery, colour, texture, light and metaphor only. " +
-  "Completely wordless and text-free, with one clear focal point and rich visual detail distributed across the full canvas. " +
-  "Compose this as immersive edge-to-edge photography or artwork, never as a poster, print, card or artwork placed on a background. " +
-  "Every corner and every outermost pixel must contain a natural continuation of the scene; foreground, texture, colour and light must visibly continue beyond all four crop edges. " +
+  "True to life and immediately legible: real, recognisable, tangible subject matter with authentic materials, natural light and honest colour — a genuine editorial photograph (or a concrete illustration only when an illustration is specified). " +
+  "The subject clearly conveys what the article is about. " +
+  "Completely wordless and text-free, with one clear focal point and rich real-world detail distributed across the full canvas. " +
+  "Compose this immersive and edge-to-edge, never as a poster, print, card or artwork placed on a plain background. " +
+  "Every corner and every outermost pixel must contain a natural continuation of the real scene; foreground, texture, colour and light must visibly continue beyond all four crop edges. " +
   "The scene occupies 100% of the widescreen canvas and is immediately crop-ready for a website hero without padding or cleanup.";
 
 /**
@@ -332,16 +313,18 @@ export function buildImagePrompt(args: {
 
   const framing =
     mode === "real"
-      ? `Grounded, real-to-life editorial magazine-cover photograph — authentic and believable, NOT corporate stock (no offices, suits, handshakes, laptops or devices), loosely evoking the theme of ${motif}.`
-      : mode === "painterly"
-        ? `Artful editorial magazine-cover illustration, painterly and graphic, loosely evoking the theme of ${motif}.`
-        : `Wordless, artsy editorial magazine-cover artwork, abstract and dreamy, loosely evoking the theme of ${motif}.`;
+      ? `Photorealistic, true-to-life editorial photograph that concretely depicts the real subject of an article about ${motif} — authentic and believable, natural light; NOT corporate stock (no offices, suits, handshakes, laptops or devices).`
+      : `Concrete editorial illustration that clearly and recognisably depicts the real subject of an article about ${motif}, gallery-grade — never an abstract pattern or render.`;
 
-  const lines = [`${framing}`, `Art lens: ${lens}.`];
-  // The author signatures are written in abstract terms, so only fold them in
-  // for the artful modes; on a realistic lens use the palette as a light touch.
-  if (mode === "real") lines.push(`Palette influence only: ${colour}.`);
-  else lines.push(`Author's visual signature: ${s.style}.`, `Colour: ${colour}.`);
-  lines.push(`Widescreen composition, high detail, tasteful.`, POSITIVE_TAIL);
+  // The author signature is deliberately NOT used as the composition (it is
+  // abstract and made every cover by one author look identical); only the
+  // palette is folded in, as a subtle grade that must not override true colour.
+  const lines = [
+    framing,
+    `Art lens: ${lens}.`,
+    `Use this colour direction only as a subtle grade, keeping colour natural and true to life: ${colour}.`,
+    `Widescreen composition, high detail, tasteful.`,
+    POSITIVE_TAIL,
+  ];
   return lines.join(" ");
 }
