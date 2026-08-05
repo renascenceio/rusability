@@ -30,6 +30,82 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+/**
+ * Legacy WordPress → landing-page redirects.
+ *
+ * The old rusability.ru (WordPress) exposed thousands of URLs that no longer
+ * exist and now only generate Search-Console "not found" noise: /wp-content
+ * media, /home?p=… pagination and search, /users & /members author profiles,
+ * the old XML sitemaps, WP auth pages, dead section roots, PDF downloads and a
+ * legacy REST endpoint. We permanently (308) redirect every one of those
+ * families to the landing page so the link equity consolidates on `/` and the
+ * stale URLs de-index.
+ *
+ * These live here (not in the DB-backed `redirects` table) because they are
+ * PATTERN redirects (`:path*`) — the edge `matchRedirect` only does exact-path
+ * lookups. next.config redirects also run BEFORE the middleware, whose matcher
+ * deliberately skips any path ending in a file extension (so /wp-content/*.jpg,
+ * *-sitemap.xml, *.pdf would otherwise never be handled at all).
+ *
+ * Deliberately NOT touched: our own /sitemap.xml and /robots.txt (different
+ * names from the old /author-sitemap.xml & /post-sitemap*.xml), and the live
+ * /tools and /tools/[slug] pages (only the old /tools/templatemonster/<id>
+ * affiliate subtree is redirected, via `:path+` which requires a 3rd segment).
+ */
+// Whole legacy subtrees: `:path*` also matches the bare root (e.g. /wp-content).
+const LEGACY_PREFIXES = [
+  "/wp-content",
+  "/wp-includes",
+  "/wp-admin",
+  "/wp-json",
+  "/users",
+  "/members",
+  "/downloads",
+  "/api/posts",
+  "/internet-marketing",
+];
+// Exact legacy paths (query strings are ignored by the matcher, so /home also
+// catches /home?p=123, /home?s=…, etc.).
+const LEGACY_EXACT = [
+  "/home",
+  "/login",
+  "/register",
+  "/logout",
+  "/lost-password",
+  "/404",
+  "/contactus",
+  "/infographics",
+  "/events",
+  "/updates",
+  "/reklama",
+  "/contentmarketing",
+  "/interne",
+  "/ads.txt",
+  "/apple-app-site-association",
+  "/author-sitemap.xml",
+  // old Cyrillic "услуги/сервисы" section, raw + percent-encoded forms
+  "/сервисы",
+  "/%D1%81%D0%B5%D1%80%D0%B2%D0%B8%D1%81%D1%8B",
+];
+
+const legacyRedirects = [
+  ...LEGACY_PREFIXES.map((source) => ({
+    source: `${source}/:path*`,
+    destination: "/",
+    permanent: true,
+  })),
+  ...LEGACY_EXACT.map((source) => ({
+    source,
+    destination: "/",
+    permanent: true,
+  })),
+  // Old WP XML sitemaps: /post-sitemap.xml and /post-sitemap1.xml … 7.xml.
+  { source: "/post-sitemap:n(\\d*).xml", destination: "/", permanent: true },
+  // Old TemplateMonster affiliate widget: /tools/templatemonster/<mongo-id>.
+  // `:path+` (one-or-more) keeps the real /tools/templatemonster slug free.
+  { source: "/tools/templatemonster/:path+", destination: "/", permanent: true },
+];
+
 const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
@@ -48,6 +124,10 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
     ];
+  },
+
+  async redirects() {
+    return legacyRedirects;
   },
 
   /**
