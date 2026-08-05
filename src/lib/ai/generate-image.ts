@@ -104,13 +104,14 @@ export async function generateArticleCover(input: GenerateCoverInput): Promise<s
     });
     const bytes = image.uint8Array;
     if (!bytes || bytes.length === 0) return null;
-    // Prompt compliance is not trusted: Imagen occasionally returns a smaller
-    // artwork baked onto a white canvas. Strip any detected matte before the
-    // cover reaches Blob so every generated hero is structurally full-bleed.
+    // Prompt compliance is not trusted: Imagen sometimes returns a smaller
+    // artwork baked onto a solid (white OR black OR coloured) canvas. Strip any
+    // detected matte and force an exact 16:9 crop before the cover reaches Blob,
+    // so every stored hero is structurally full-bleed with no frame or bars.
     return await storeWebp(bytes, {
       prefix: "covers",
       name: input.title,
-      removeLightMatte: true,
+      normalizeCover: true,
     });
   } catch (err) {
     console.log("[v0] generateArticleCover failed:", err instanceof Error ? err.message : String(err));
