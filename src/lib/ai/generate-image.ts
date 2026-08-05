@@ -16,7 +16,7 @@ import { storeWebp } from "@/lib/media/to-webp";
  *  - `fast`   → imagen-4 fast: cheap, used for bulk backfill of old articles;
  *  - default  → imagen-4: higher fidelity, used for freshly generated articles.
  * Output is always transcoded to WebP and stored on the public Blob store.
- * The article title is used only to steer the abstract subject and is NEVER
+ * The article title steers the concrete, topic-relevant subject and is NEVER
  * drawn as text; the rendered <img> alt equals the article title at render.
  */
 export const IMAGE_MODEL_FAST = "google/imagen-4.0-fast-generate-001";
@@ -31,10 +31,10 @@ export interface GenerateCoverInput {
 }
 
 /**
- * Ask the content model to craft ONE vivid, abstract art-direction prompt for
- * this specific article — creative-agency quality, dreamy and artful, never a
- * literal business scene, chart or piece of text. Falls back to the
- * deterministic template builder if the model call fails.
+ * Ask the content model to craft ONE photorealistic, topic-relevant
+ * art-direction prompt for this specific article — magazine photo-desk quality
+ * that concretely depicts the real subject, never the generic abstract "AI tech"
+ * render. Falls back to the deterministic template builder if the call fails.
  */
 async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
   const sig = AUTHOR_IMAGE_STYLES[input.authorId] ?? DEFAULT_IMAGE_STYLE;
@@ -43,29 +43,27 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
 
   const modeDirection =
     mode === "real"
-      ? "MODE — grounded, real-to-life. Write a genuinely PHOTOREALISTIC, believable editorial photograph: true to life, natural light, authentic texture and honest colour. Realistic does NOT mean corporate stock — absolutely avoid offices, business people, suits, handshakes, laptops, phones and devices. Choose an authentic real-world scene, place, still life or natural texture instead."
-      : mode === "painterly"
-        ? "MODE — painterly / graphic. Write an artful illustration or painterly composition: stylised, confident, gallery-grade, with deliberate shapes, colour and texture."
-        : "MODE — dreamy abstraction. Write a surreal, abstract, painterly or hyperreal visual metaphor: artful, evocative and non-literal.";
+      ? "MODE — photorealistic editorial photograph. Write a genuinely PHOTOREALISTIC, believable photograph that clearly shows the REAL subject of THIS specific article — real people, a real place, or the real objects, tools and materials that literally belong to this topic. Natural light, authentic texture and honest colour. This is NOT corporate stock (no offices, suits, handshakes, laptops-as-props) and absolutely NOT an abstract render."
+      : "MODE — concrete editorial illustration. Write a confident, gallery-grade illustration that still clearly and recognisably DEPICTS the real subject of THIS article — a quality magazine spot illustration with real, identifiable elements, never an abstract pattern, texture or render.";
 
   const system = [
-    "You are an award-winning creative-agency art director (think Ogilvy, Leo Burnett) writing a single prompt for an AI image generator to produce an editorial magazine COVER for a website hero.",
-    "The house aesthetic spans a SPECTRUM — from grounded, real-to-life editorial photography, through painterly illustration, to dreamy abstraction. Follow the MODE and ART LENS you are given EXACTLY; never drift toward abstraction when a realistic mode is requested.",
+    "You are an award-winning magazine photo editor writing a single prompt for an AI image generator to produce an editorial COVER for a website hero.",
+    "YOUR #1 JOB: the cover must make a reader instantly recognise WHAT THIS SPECIFIC ARTICLE IS ABOUT. Read the topic, decide the concrete real-world thing it is really about, and depict THAT. Two different articles must never be interchangeable.",
+    "The house style is grounded, photorealistic editorial imagery. Follow the MODE and ART LENS you are given EXACTLY.",
     modeDirection,
-    "Translate the topic into an evocative visual idea; skip the single most obvious literal cliché, but a clear, real, human scene is welcome and encouraged when the mode is realistic.",
+    "NEVER produce the generic 'AI tech' look: no abstract 3D renders, no glowing orbs or spheres, no floating geometric shapes, no swirling ribbons, no metallic discs, no particle or cosmic backgrounds, no neon sci-fi gradients, no holographic surfaces.",
     "Never depict any diagram, chart, dashboard, gauge, arrow, UI or text of any kind, and never the corny business clichés (handshakes, suits at laptops, lightbulbs, gears, rockets, glowing brains, circuit boards).",
     "Never put the article's literal title or any quoted phrase into the image. Keep it wordless.",
     "This is a WEBSITE HERO ASSET, not a poster or print. The scene itself must occupy 100% of the canvas, with subject, environment, texture, colour and light extending naturally through every corner and beyond all four crop edges.",
     "Reject any concept that places a smaller rectangular artwork, card, print, canvas, photograph or isolated vignette onto a plain backdrop. Avoid broad empty bands at the top or bottom. The result must be immediately crop-ready with visually active outer edges.",
-    "Output ONE single English prompt of 65–110 words describing: medium/style, subject, immersive edge-to-edge environment, active outer edges, lighting, colour palette and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
+    "Output ONE single English prompt of 65–110 words describing: medium/style, the concrete real subject, immersive edge-to-edge environment, active outer edges, lighting, colour and mood. No preamble, no lists, no quotes — just the prompt sentence(s).",
   ].join("\n");
 
   const prompt = [
-    `Article topic (Russian): «${input.title}». Theme area: ${input.category}.`,
-    `ART LENS to follow: ${lens}.`,
-    mode === "real"
-      ? `Use this author's palette/mood only as a subtle influence: ${colour}.`
-      : `Lean toward this author's visual signature: ${sig.style}. Preferred colour direction: ${colour}.`,
+    `Article title (Russian): «${input.title}». Theme area: ${input.category}.`,
+    "First silently identify the concrete, real-world subject a reader would expect this article to be about, then art-direct a photograph/illustration of THAT.",
+    `ART LENS to follow (photographic treatment only — the subject still comes from the article): ${lens}.`,
+    `Colour direction as a SUBTLE grade only, never overriding natural true-to-life colour: ${colour}.`,
     "Write the image prompt now.",
   ].join("\n");
 
@@ -88,8 +86,8 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
  * failure (e.g. AI Gateway out of credits) so callers degrade gracefully.
  */
 export async function generateArticleCover(input: GenerateCoverInput): Promise<string | null> {
-  // Craft a bespoke, abstract art-direction prompt from the topic (LLM), with
-  // the deterministic template as a safe fallback inside craftImagePrompt.
+  // Craft a bespoke, photorealistic, topic-relevant art-direction prompt from
+  // the topic (LLM), with the deterministic template as a safe fallback.
   const prompt = await craftImagePrompt(input);
   const modelId = input.fast ? IMAGE_MODEL_FAST : IMAGE_MODEL_QUALITY;
 
