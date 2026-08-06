@@ -41,6 +41,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ru_RU",
     url: SITE_URL,
+    siteName: "Rusability",
+    // Explicit image alongside the dynamic app/opengraph-image.tsx: some social
+    // and search parsers (e.g. Yandex's microdata checker) read the og:image
+    // tag directly and flag it as an error when it is missing/empty.
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Rusability — редакционная платформа нового поколения",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rusability",
+    description: "Русскоязычная редакционная платформа нового поколения",
+    images: ["/opengraph-image"],
   },
 };
 
