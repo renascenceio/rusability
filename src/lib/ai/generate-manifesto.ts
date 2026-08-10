@@ -1,6 +1,7 @@
 import "server-only";
 import { generateText } from "ai";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
+import { recordTextUsage } from "./usage";
 
 const SYSTEM = `Ты пишешь короткое личное кредо (манифест) автора русскоязычного медиа Rusability о бизнесе, маркетинге и технологиях.
 
@@ -27,11 +28,13 @@ export async function generateManifesto(input: {
     .filter(Boolean)
     .join("\n");
 
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: CONTENT_MODEL,
+    providerOptions: CONTENT_PROVIDER_OPTIONS,
     system: SYSTEM,
     prompt: `Автор Rusability.\n${parts || "Автор пишет о бизнесе и маркетинге."}\n\nНапиши манифест:`,
   });
+  await recordTextUsage({ workload: "manifesto", model: CONTENT_MODEL, usage });
 
   return text
     .trim()

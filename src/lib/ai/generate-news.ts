@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
+import { recordTextUsage } from "./usage";
 import {
   SAFETY_POLICY_RU,
   RELEVANCE_POLICY_RU,
@@ -156,7 +157,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     preamble,
   ].join("\n");
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model: CONTENT_MODEL,
     providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema: newsSchema }),
@@ -168,6 +169,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
 
 Напиши оригинальную новостную заметку на русском по этому событию: заголовок, лид-ОТВЕТ и 2–4 абзаца. Затем добавь для оптимизации под поиск и ИИ-ассистенты: keyPoints (2–4 тезиса-выжимки), faq (3–4 вопроса-ответа), metaTitle, metaDescription и честные оценки geoScore/seoScore/aeoScore. Если данных мало — не выдумывай факты, опиши только то, что известно.`,
   });
+  await recordTextUsage({ workload: "news-rewrite", model: CONTENT_MODEL, usage, contentKind: "news" });
 
   // A low-confidence format call is a borderline item → editor decides.
   const format: NewsFormat = output.formatConfidence === "low" ? "borderline" : output.format;
@@ -240,7 +242,7 @@ export async function enrichNewsAeo(input: EnrichNewsInput): Promise<NewsAeoExtr
     AEO_GEO_SEO_POLICY_RU,
   ].join("\n");
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model: CONTENT_MODEL,
     providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema: enrichSchema }),
@@ -252,6 +254,7 @@ ${input.body.join("\n\n")}
 
 Сгенерируй строго на основе этого текста: keyPoints (2–4 самодостаточных тезиса-выжимки), faq (3–4 реальных вопроса с прямыми ответами), metaTitle (≤60 символов), metaDescription (140–160 символов) и честные оценки geoScore / seoScore / aeoScore (0–100).`,
   });
+  await recordTextUsage({ workload: "news-enrich", model: CONTENT_MODEL, usage, contentKind: "news" });
 
   const clampScore = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 

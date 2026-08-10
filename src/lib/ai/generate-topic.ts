@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
+import { recordTextUsage } from "./usage";
 import type { aiAuthors } from "@/lib/db/schema";
 
 type AiAuthorRow = typeof aiAuthors.$inferSelect;
@@ -66,7 +67,7 @@ export async function generateTopic(input: {
     : "";
 
   const askModel = async (extra: string) => {
-    const { output } = await generateText({
+    const { output, usage } = await generateText({
       model: CONTENT_MODEL,
       providerOptions: CONTENT_PROVIDER_OPTIONS,
       output: Output.object({ schema: topicSchema }),
@@ -75,6 +76,7 @@ export async function generateTopic(input: {
 ${keywords.length ? `Ориентируйся на запросы: ${keywords.join(", ")}.` : ""}
 Предложи ОДНУ свежую, конкретную и практическую тему для экспертной статьи в категории «${category}». Избегай общих формулировок — тема должна отвечать на конкретный вопрос аудитории. Тема должна быть актуальной для ${year} года; не упоминай прошедшие годы (${year - 1} и ранее).${avoidBlock}${extra}`,
     });
+    await recordTextUsage({ workload: "article-topic", model: CONTENT_MODEL, usage, contentKind: "article" });
     return {
       topic: output.topic.trim(),
       keywords: output.keywords.map((k) => k.toLowerCase().trim()).filter(Boolean).slice(0, 5),

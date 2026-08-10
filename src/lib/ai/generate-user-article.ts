@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
+import { recordTextUsage } from "./usage";
 import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
 import { normalizeList } from "@/lib/article-list";
 import type { ArticleBlock } from "@/lib/types";
@@ -110,7 +111,7 @@ export async function generateUserArticle(input: UserArticleInput): Promise<Gene
     .filter(Boolean)
     .join("\n");
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model: CONTENT_MODEL,
     providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema }),
@@ -124,6 +125,7 @@ ${materials.slice(0, 8000)}
 
 Напиши цельную статью на 700–1100 слов на основе этих материалов.`,
   });
+  await recordTextUsage({ workload: "user-article", model: CONTENT_MODEL, usage, contentKind: "article" });
 
   const body = toBlocks(output.body);
   const humanizer = await getHumanizerConfig();

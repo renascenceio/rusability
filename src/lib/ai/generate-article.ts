@@ -2,6 +2,7 @@ import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
+import { recordTextUsage } from "./usage";
 import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
 import { normalizeList } from "@/lib/article-list";
 import type { aiAuthors } from "@/lib/db/schema";
@@ -120,7 +121,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
   const kw = keywords.length ? `Ключевые запросы для SEO: ${keywords.join(", ")}.` : "";
   const toneHint = input.tone ? `Дополнительный тон для этого материала: ${input.tone}.` : "";
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model: CONTENT_MODEL,
     providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema: articleSchema }),
@@ -129,6 +130,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
 Категория: ${category}. ${kw} ${toneHint}
 Соблюдай структуру AEO/SEO/GEO: прямой ответ в начале, содержательные подзаголовки, конкретный кейс, список выводов в конце.`,
   });
+  await recordTextUsage({ workload: "article-body", model: CONTENT_MODEL, usage, contentKind: "article" });
 
   // Normalise flat blocks → ArticleBlock, dropping empty/invalid ones.
   const body: ArticleBlock[] = [];
@@ -160,7 +162,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
         .map((b) => ("text" in b ? b.text : ""))
         .filter(Boolean)
         .join("; ");
-      const { output: extra } = await generateText({
+      const { output: extra, usage: extraUsage } = await generateText({
         model: CONTENT_MODEL,
         providerOptions: CONTENT_PROVIDER_OPTIONS,
         output: Output.object({ schema: z.object({ body: z.array(blockSchema) }) }),
@@ -171,6 +173,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
           minWords - have + 150
         } слов. Верни только новые блоки.`,
       });
+      await recordTextUsage({ workload: "article-expand", model: CONTENT_MODEL, usage: extraUsage, contentKind: "article" });
       for (const b of extra.body) {
         if (b.type === "list") {
           const raw = (b.items ?? []).map((x) => x.trim()).filter(Boolean);

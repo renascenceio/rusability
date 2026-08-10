@@ -10,6 +10,7 @@ import {
   POSITIVE_TAIL,
 } from "./author-image-styles";
 import { storeWebp } from "@/lib/media/to-webp";
+import { recordTextUsage, recordImageUsage } from "./usage";
 
 /**
  * Cover-image generation via the Vercel AI Gateway (Google Imagen).
@@ -68,12 +69,13 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
   ].join("\n");
 
   try {
-    const { text } = await generateText({
+    const { text, usage } = await generateText({
       model: CONTENT_MODEL,
       providerOptions: CONTENT_PROVIDER_OPTIONS,
       system,
       prompt,
     });
+    await recordTextUsage({ workload: "image-prompt", model: CONTENT_MODEL, usage, contentKind: "article" });
     const crafted = text.trim().replace(/^["'\s]+|["'\s]+$/g, "");
     if (crafted.length < 40) return buildImagePrompt(input);
     // Positive reinforcement only. NEVER put "16:9" or any ratio/number/word in
@@ -109,6 +111,8 @@ export async function generateArticleCover(input: GenerateCoverInput): Promise<s
     });
     const bytes = image.uint8Array;
     if (!bytes || bytes.length === 0) return null;
+    // Record the image spend only once we have a real image back.
+    await recordImageUsage({ workload: "article-cover", model: modelId, images: 1, contentKind: "article" });
     // Prompt compliance is not trusted: Imagen sometimes returns a smaller
     // artwork baked onto a solid (white OR black OR coloured) canvas. Strip any
     // detected matte and force an exact 16:9 crop before the cover reaches Blob,
