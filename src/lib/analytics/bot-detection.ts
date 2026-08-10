@@ -62,6 +62,18 @@ const BOT_UA_TOKENS: string[] = [
   "site24x7",
   // Search / social / AI crawlers (named)
   "googlebot",
+  // GoogleOther + the rest of Google's crawler family: these execute JS and ride
+  // Google's standard "Nexus 5X; Android 6.0.1 … (compatible; GoogleOther)"
+  // reference UA, which carries NO "bot" token — so they were the single largest
+  // leak into first-party analytics (measured ~48% of captured traffic).
+  "googleother",
+  "google-safety",
+  "storebot-google",
+  "google-read-aloud",
+  "feedfetcher-google",
+  "google-cloudvertexbot",
+  "googleweblight",
+  "googleusercontent",
   "google-inspectiontool",
   "adsbot",
   "mediapartners",

@@ -507,6 +507,13 @@ export const pageViews = pgTable(
     device: text("device").notNull().default("desktop"), // desktop | mobile | tablet
     /** Raw request User-Agent — retained so the bot filter can be audited/refined. */
     userAgent: text("user_agent"),
+    /**
+     * True when this row was classified as bot/crawler traffic. New rows are
+     * only inserted for humans (bots are dropped at write time), so this is
+     * meaningful mainly for historical rows backfilled by the bot heuristic.
+     * All analytics reads filter on `is_bot = false`.
+     */
+    isBot: boolean("is_bot").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
@@ -514,6 +521,7 @@ export const pageViews = pgTable(
     kindCreatedIdx: index("page_views_kind_created_idx").on(t.kind, t.createdAt.desc()),
     contentIdx: index("page_views_content_idx").on(t.contentId),
     visitorIdx: index("page_views_visitor_idx").on(t.visitorId),
+    botCreatedIdx: index("page_views_bot_created_idx").on(t.isBot, t.createdAt.desc()),
   }),
 );
 
