@@ -1,7 +1,7 @@
 import "server-only";
 import { generateImage, generateText } from "ai";
 import { gateway } from "@ai-sdk/gateway";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
 import {
   buildImagePrompt,
   pickArtLens,
@@ -68,7 +68,12 @@ async function craftImagePrompt(input: GenerateCoverInput): Promise<string> {
   ].join("\n");
 
   try {
-    const { text } = await generateText({ model: CONTENT_MODEL, system, prompt });
+    const { text } = await generateText({
+      model: CONTENT_MODEL,
+      providerOptions: CONTENT_PROVIDER_OPTIONS,
+      system,
+      prompt,
+    });
     const crafted = text.trim().replace(/^["'\s]+|["'\s]+$/g, "");
     if (crafted.length < 40) return buildImagePrompt(input);
     // Positive reinforcement only. NEVER put "16:9" or any ratio/number/word in

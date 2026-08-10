@@ -1,7 +1,7 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
 import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
 import { normalizeList } from "@/lib/article-list";
 import type { ArticleBlock } from "@/lib/types";
@@ -112,6 +112,7 @@ export async function generateUserArticle(input: UserArticleInput): Promise<Gene
 
   const { output } = await generateText({
     model: CONTENT_MODEL,
+    providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema }),
     system,
     prompt: `${topic ? `Тема/угол статьи: «${topic}».\n` : ""}Категория: ${category}.

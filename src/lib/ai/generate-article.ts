@@ -1,7 +1,7 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
 import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
 import { normalizeList } from "@/lib/article-list";
 import type { aiAuthors } from "@/lib/db/schema";
@@ -122,6 +122,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
 
   const { output } = await generateText({
     model: CONTENT_MODEL,
+    providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema: articleSchema }),
     system,
     prompt: `Напиши развёрнутую экспертную статью по теме: «${topic}».
@@ -161,6 +162,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
         .join("; ");
       const { output: extra } = await generateText({
         model: CONTENT_MODEL,
+        providerOptions: CONTENT_PROVIDER_OPTIONS,
         output: Output.object({ schema: z.object({ body: z.array(blockSchema) }) }),
         system,
         prompt: `Статья по теме «${topic}» пока слишком короткая (${have} слов, нужно не меньше ${minWords}).

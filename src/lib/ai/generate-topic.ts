@@ -1,7 +1,7 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
 import type { aiAuthors } from "@/lib/db/schema";
 
 type AiAuthorRow = typeof aiAuthors.$inferSelect;
@@ -68,6 +68,7 @@ export async function generateTopic(input: {
   const askModel = async (extra: string) => {
     const { output } = await generateText({
       model: CONTENT_MODEL,
+      providerOptions: CONTENT_PROVIDER_OPTIONS,
       output: Output.object({ schema: topicSchema }),
       system: `Ты — контент-стратег русскоязычного медиа Rusability. Придумываешь темы, которые реально ищут в поиске и задают ИИ-ассистентам. Сейчас ${year} год: НИКОГДА не указывай прошедшие годы в теме. Год добавляй в формулировку только если он реально важен для темы, и тогда используй ${year} (не ${year - 1} и не более ранние).`,
       prompt: `Автор «${author.name}» (${author.archetype}) пишет о: ${beats}.

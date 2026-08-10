@@ -13,6 +13,21 @@ import {
 export const CONTENT_MODEL = "google/gemini-2.5-flash";
 
 /**
+ * Provider options applied to EVERY content generation call.
+ *
+ * gemini-2.5-flash is a *thinking* model: by default it emits internal
+ * reasoning ("thinking") tokens that are billed as OUTPUT tokens ($2.50/M) but
+ * never appear in the article. For cron-scale structured generation this was
+ * pure waste — measured ~2,300 reasoning tokens on a single article call
+ * (~+80% output cost, ~+70% latency) with no quality benefit for our schema-
+ * constrained output. Setting `thinkingBudget: 0` disables it. Spread this into
+ * every `generateText` that uses CONTENT_MODEL so the setting can't drift.
+ */
+export const CONTENT_PROVIDER_OPTIONS = {
+  google: { thinkingConfig: { thinkingBudget: 0 } },
+} as const;
+
+/**
  * Build the governance preamble injected into every AI job.
  * Always includes `global`, plus the area-specific block ('articles' | 'news'),
  * then the editable humanizer-ru directive when enabled for this area.

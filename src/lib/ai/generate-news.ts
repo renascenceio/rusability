@@ -1,7 +1,7 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL, buildRequirementsPreamble } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
 import {
   SAFETY_POLICY_RU,
   RELEVANCE_POLICY_RU,
@@ -103,7 +103,7 @@ const newsSchema = z.object({
   faq: z
     .array(z.object({ q: z.string(), a: z.string() }))
     .describe(
-      "AEO/GEO: 3–4 пары «вопрос-ответ». Вопросы — так, как их реально задают люди и вводят в поиск («Что такое…», «Почему…», «Как повлияет…», «Когда…»). Ответы — прямые, полные, самодостаточные, 1–3 предложения, содержат ключевые сущности и цифры. Не повторяй дословно лид.",
+      "AEO/GEO: 3–4 пары «вопрос-ответ». Вопросы — так, как их реально задают люди и вводят в поиск («Что такое…», «Почему…», «Как повлияет…», «Когда…»). Ответы — прямые, полные, самодостаточные, 1–3 предложен��я, содержат ключевые сущности и цифры. Не повторяй дословно лид.",
     ),
   metaTitle: z
     .string()
@@ -158,6 +158,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
 
   const { output } = await generateText({
     model: CONTENT_MODEL,
+    providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema: newsSchema }),
     system,
     prompt: `Источник: ${input.sourceName}.
@@ -241,6 +242,7 @@ export async function enrichNewsAeo(input: EnrichNewsInput): Promise<NewsAeoExtr
 
   const { output } = await generateText({
     model: CONTENT_MODEL,
+    providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema: enrichSchema }),
     system,
     prompt: `Заголовок: «${input.title}».

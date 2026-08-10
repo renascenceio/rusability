@@ -1,7 +1,7 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
 import { buildHumanizerDirective, mergeHumanizer, type HumanizerConfig } from "./humanizer-config";
 import { getSetting } from "@/lib/data/settings";
 import type { ArticleBlock } from "@/lib/types";
@@ -60,6 +60,7 @@ export async function humanizeBlocks(
   try {
     const { output } = await generateText({
       model: CONTENT_MODEL,
+      providerOptions: CONTENT_PROVIDER_OPTIONS,
       output: Output.object({ schema: rewriteSchema }),
       system: [
         directive,
