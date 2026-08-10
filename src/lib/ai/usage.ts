@@ -62,7 +62,7 @@ export async function recordTextUsage(params: {
   try {
     const input = params.usage?.inputTokens ?? 0;
     const output = params.usage?.outputTokens ?? 0;
-    const reasoning = params.usage?.reasoningTokens ?? 0;
+    const reasoning = params.usage?.outputTokenDetails?.reasoningTokens ?? 0;
     const { cost, priced } = priceText(params.model, input, output);
     await db.insert(aiUsageEvents).values({
       workload: params.workload,
