@@ -507,6 +507,13 @@ export const pageViews = pgTable(
     device: text("device").notNull().default("desktop"), // desktop | mobile | tablet
     /** Raw request User-Agent — retained so the bot filter can be audited/refined. */
     userAgent: text("user_agent"),
+    /**
+     * True when this row was classified as bot/crawler traffic. New rows are
+     * only inserted for humans (bots are dropped at write time), so this is
+     * meaningful mainly for historical rows backfilled by the bot heuristic.
+     * All analytics reads filter on `is_bot = false`.
+     */
+    isBot: boolean("is_bot").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
@@ -514,6 +521,7 @@ export const pageViews = pgTable(
     kindCreatedIdx: index("page_views_kind_created_idx").on(t.kind, t.createdAt.desc()),
     contentIdx: index("page_views_content_idx").on(t.contentId),
     visitorIdx: index("page_views_visitor_idx").on(t.visitorId),
+    botCreatedIdx: index("page_views_bot_created_idx").on(t.isBot, t.createdAt.desc()),
   }),
 );
 
@@ -547,5 +555,43 @@ export const toolRuns = pgTable(
     slugCreatedIdx: index("tool_runs_slug_created_idx").on(t.slug, t.createdAt.desc()),
     ipCreatedIdx: index("tool_runs_ip_created_idx").on(t.ip, t.createdAt.desc()),
     visitorCreatedIdx: index("tool_runs_visitor_created_idx").on(t.visitorId, t.createdAt.desc()),
+  }),
+);
+
+/**
+ * Per-call AI Gateway spend log. One row per model call (text or image) so
+ * spend is attributable by workload (article body, news rewrite, cover, …),
+ * model and day. Cost is computed at write time from the rate card in
+ * `lib/ai/usage.ts`; `priced=false` marks a call whose model has no rate entry
+ * (so a missing rate reads as "unpriced", never a fake $0). Writes are
+ * fire-and-forget and must never block or fail a generation.
+ */
+export const aiUsageEvents = pgTable(
+  "ai_usage_events",
+  {
+    id: serial("id").primaryKey(),
+    /** Logical workload label, e.g. 'article-body', 'news-rewrite', 'article-cover'. */
+    workload: text("workload").notNull(),
+    /** Gateway model id, e.g. 'google/gemini-2.5-flash'. */
+    model: text("model").notNull(),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    /** Total output tokens as billed (INCLUDES reasoning/thinking tokens). */
+    outputTokens: integer("output_tokens").notNull().default(0),
+    /** Reasoning/thinking subset of output tokens — for visibility, NOT re-billed. */
+    reasoningTokens: integer("reasoning_tokens").notNull().default(0),
+    /** Number of images generated (for image models; token fields are 0 then). */
+    images: integer("images").notNull().default(0),
+    /** Computed USD cost for this call. */
+    costUsd: numeric("cost_usd", { precision: 12, scale: 6 }).notNull().default("0"),
+    /** False when the model had no rate-card entry (cost is a floor, not exact). */
+    priced: boolean("priced").notNull().default(true),
+    /** 'article' | 'news' | null — coarse bucket for reporting. */
+    contentKind: text("content_kind"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    createdIdx: index("ai_usage_created_idx").on(t.createdAt.desc()),
+    workloadCreatedIdx: index("ai_usage_workload_created_idx").on(t.workload, t.createdAt.desc()),
+    modelCreatedIdx: index("ai_usage_model_created_idx").on(t.model, t.createdAt.desc()),
   }),
 );

@@ -1,7 +1,8 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
+import { recordTextUsage } from "./usage";
 import { buildHumanizerDirective, mergeHumanizer, type HumanizerConfig } from "./humanizer-config";
 import { getSetting } from "@/lib/data/settings";
 import type { ArticleBlock } from "@/lib/types";
@@ -58,8 +59,9 @@ export async function humanizeBlocks(
   if (!directive) return blocks;
 
   try {
-    const { output } = await generateText({
+    const { output, usage } = await generateText({
       model: CONTENT_MODEL,
+      providerOptions: CONTENT_PROVIDER_OPTIONS,
       output: Output.object({ schema: rewriteSchema }),
       system: [
         directive,
@@ -69,6 +71,7 @@ export async function humanizeBlocks(
       ].join("\n"),
       prompt: JSON.stringify({ segments }),
     });
+    await recordTextUsage({ workload: "humanizer", model: CONTENT_MODEL, usage });
 
     const byIndex = new Map(output.segments.map((s) => [s.i, s.text]));
     // Require full coverage; otherwise keep the safe original.

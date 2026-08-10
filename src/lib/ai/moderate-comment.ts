@@ -1,7 +1,8 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
+import { recordTextUsage } from "./usage";
 import { blockReason } from "./content-filter";
 
 export type ModerationVerdict =
@@ -54,12 +55,14 @@ export async function moderateComment(text: string): Promise<ModerationVerdict> 
 
   // Layer 2 — LLM moderator.
   try {
-    const { output } = await generateText({
+    const { output, usage } = await generateText({
       model: CONTENT_MODEL,
+      providerOptions: CONTENT_PROVIDER_OPTIONS,
       output: Output.object({ schema }),
       system: SYSTEM,
       prompt: `Проверь комментарий:\n"""${clean.slice(0, 2000)}"""`,
     });
+    await recordTextUsage({ workload: "moderate-comment", model: CONTENT_MODEL, usage });
     if (output && output.allowed === false) {
       return {
         allowed: false,

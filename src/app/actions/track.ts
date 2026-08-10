@@ -71,6 +71,9 @@ export async function trackPageView(input: TrackInput): Promise<void> {
       referrer: input.referrer ? input.referrer.slice(0, 512) : null,
       device: input.device ?? "desktop",
       userAgent: userAgent ? userAgent.slice(0, 512) : null,
+      // Only humans reach this insert (bots are dropped above), so every stored
+      // row is a human hit. The column exists mainly for the historical backfill.
+      isBot: false,
     });
   } catch (err) {
     console.log("[v0] trackPageView failed:", (err as Error)?.message);

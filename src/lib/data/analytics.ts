@@ -117,7 +117,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         count(*) FILTER (WHERE kind='news' AND created_at >= now() - make_interval(days => ${days}))::int AS news_cur,
         count(*) FILTER (WHERE kind='news' AND created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS news_prev
       FROM page_views
-      WHERE created_at >= now() - make_interval(days => ${days * 2})
+      WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days * 2})
     `),
     // Sessions + engaged (multi-page) sessions, current vs previous.
     db.execute<{
@@ -133,7 +133,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
           CASE WHEN created_at >= now() - make_interval(days => ${days}) THEN 'cur' ELSE 'prev' END AS period,
           count(*) AS c
         FROM page_views
-        WHERE created_at >= now() - make_interval(days => ${days * 2})
+        WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days * 2})
         GROUP BY 1, 2
       ) t
     `),
@@ -159,7 +159,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
           count(*) FILTER (WHERE kind='article') AS art,
           count(*) FILTER (WHERE kind='news') AS nws
         FROM page_views
-        WHERE created_at >= now() - make_interval(days => ${days})
+        WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days})
         GROUP BY 1, 2, 3
       )
       SELECT to_char(b, 'YYYY-MM-DD') AS bucket,
@@ -177,7 +177,8 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
       SELECT to_char(date_trunc(${unit}, created_at), 'YYYY-MM-DD') AS bucket,
         count(*)::int AS views
       FROM page_views
-      WHERE created_at >= now() - make_interval(days => ${days * 2})
+      WHERE is_bot = false
+        AND created_at >= now() - make_interval(days => ${days * 2})
         AND created_at < now() - make_interval(days => ${days})
       GROUP BY 1 ORDER BY 1
     `),
@@ -198,13 +199,13 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
     // Referrer sources.
     db.execute<{ source: string; n: number }>(sql`
       SELECT source, count(*)::int AS n FROM page_views
-      WHERE created_at >= now() - make_interval(days => ${days})
+      WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days})
       GROUP BY source ORDER BY n DESC
     `),
     // Devices.
     db.execute<{ device: string; n: number }>(sql`
       SELECT device, count(*)::int AS n FROM page_views
-      WHERE created_at >= now() - make_interval(days => ${days})
+      WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days})
       GROUP BY device ORDER BY n DESC
     `),
     // Top ARTICLES by traffic. Kept as its own query (not a slice of a mixed
@@ -222,7 +223,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         count(DISTINCT pv.visitor_id)::int AS visitors
       FROM page_views pv
       JOIN articles a ON a.id = pv.content_id
-      WHERE pv.kind='article' AND pv.created_at >= now() - make_interval(days => ${days})
+      WHERE pv.is_bot = false AND pv.kind='article' AND pv.created_at >= now() - make_interval(days => ${days})
       GROUP BY pv.content_id, a.title, a.slug, a.category
       ORDER BY views DESC LIMIT 12
     `),
@@ -239,7 +240,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         count(DISTINCT pv.visitor_id)::int AS visitors
       FROM page_views pv
       JOIN news n ON n.id = pv.content_id
-      WHERE pv.kind='news' AND pv.created_at >= now() - make_interval(days => ${days})
+      WHERE pv.is_bot = false AND pv.kind='news' AND pv.created_at >= now() - make_interval(days => ${days})
       GROUP BY pv.content_id, n.title, n.slug, n.category
       ORDER BY views DESC LIMIT 12
     `),
@@ -253,7 +254,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         count(DISTINCT pv.visitor_id)::int AS visitors
       FROM authors au
       LEFT JOIN page_views pv
-        ON pv.author_id = au.id AND pv.created_at >= now() - make_interval(days => ${days})
+        ON pv.author_id = au.id AND pv.is_bot = false AND pv.created_at >= now() - make_interval(days => ${days})
       GROUP BY au.id, au.name, au.username, au.avatar, au.elite, au.role, au.followers
       ORDER BY views DESC
     `),
@@ -270,7 +271,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         count(*) FILTER (WHERE kind='article')::int AS art,
         count(*) FILTER (WHERE kind='news')::int AS nws
       FROM page_views
-      WHERE created_at >= now() - make_interval(days => ${days}) AND category IS NOT NULL AND category <> ''
+      WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days}) AND category IS NOT NULL AND category <> ''
       GROUP BY category ORDER BY views DESC
     `),
     // Content counts per category (published articles + news).
@@ -436,7 +437,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
 export function getAnalytics(input: Partial<AnalyticsFilters>): Promise<AnalyticsData> {
   const filters = normalizeFilters(input);
   const key = `${filters.range}:${filters.granularity}`;
-  return unstable_cache(() => compute(filters), ["admin-analytics-v4", key], {
+  return unstable_cache(() => compute(filters), ["admin-analytics-v5", key], {
     revalidate: 900,
     tags: ["admin-analytics"],
   })();

@@ -1,7 +1,8 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { CONTENT_MODEL } from "./model";
+import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS } from "./model";
+import { recordTextUsage } from "./usage";
 import type { ArticleBlock } from "@/lib/types";
 
 export interface ArticleMeta {
@@ -46,8 +47,9 @@ export async function generateArticleMeta(input: {
 }): Promise<ArticleMeta> {
   const text = bodyToText(input.body).slice(0, 6000);
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model: CONTENT_MODEL,
+    providerOptions: CONTENT_PROVIDER_OPTIONS,
     output: Output.object({ schema }),
     system:
       "Ты SEO-редактор медиа Rusability. По готовой статье составь честное мета-описание и оцени её оптимизацию для классического поиска (SEO), ответных систем (AEO) и генеративного ИИ-поиска (GEO). Оценки должны отражать реальное качество структуры и содержания, а не быть завышенными.",
@@ -61,6 +63,7 @@ ${text}
 
 Составь мета-описание и оценки.`,
   });
+  await recordTextUsage({ workload: "article-meta", model: CONTENT_MODEL, usage, contentKind: "article" });
 
   return {
     excerpt: output.excerpt.trim(),
