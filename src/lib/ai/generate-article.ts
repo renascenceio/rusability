@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
 import { recordTextUsage } from "./usage";
 import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
+import { tidyTitle } from "./tidy-title";
 import { normalizeList } from "@/lib/article-list";
 import type { aiAuthors } from "@/lib/db/schema";
 import type { ArticleBlock, CategorySlug, FaqItem } from "@/lib/types";
@@ -53,7 +54,11 @@ const faqSchema = z.object({
 });
 
 const articleSchema = z.object({
-  title: z.string().describe("Заголовок статьи на русском, до 90 символов, с ключевым запросом"),
+  title: z
+    .string()
+    .describe(
+      "Заголовок статьи на русском, до 90 символов, с ключевым запросом. БЕЗ шаблонной приписки года в конце («в 20XX году», «20XX») — только если год и есть суть темы (тренды/прогноз/итоги).",
+    ),
   excerpt: z.string().describe("Краткое описание для анонса, 1–2 предложения, прямой ответ на вопрос темы"),
   tags: z.array(z.string()).describe("3–6 тегов на русском в нижнем регистре"),
   geoScore: z
@@ -114,6 +119,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     "Пиши заголовки, подзаголовки (h2/h3) и термины ТОЛЬКО на русском. НЕ добавляй английский перевод в скобках (например, не пиши «Воронка продаж (Sales Funnel)» — только «Воронка продаж»). Английское слово допустимо лишь если это устоявшийся термин без русского аналога или название бренда/продукта.",
     "Для списков: НЕ добавляй номера или маркеры в текст пунктов (никаких «1.», «2)», «- » в начале items). Если это последовательность шагов или рейтинг — ставь ordered:true, и платформа сама пронумерует; для обычного перечисления оставляй ordered:false.",
     `Сейчас ${new Date().getFullYear()} год. Пиши в настоящем времени и опирайся на актуальные реалии ${new Date().getFullYear()} года. Если в теме указан прошедший год — считай его опечаткой и используй ${new Date().getFullYear()}. Не упоминай прошедшие годы как «текущие» или «в этом году».`,
+    `ЗАГОЛОВОК: не приписывай год в конце («… в ${new Date().getFullYear()} году», «… ${new Date().getFullYear()}») — это шаблонно. Заголовок должен звучать вечнозелёно. Год в заголовке допустим ТОЛЬКО если сам год — суть темы (тренды/прогноз/итоги на конкретный период); тогда используй ${new Date().getFullYear()}.`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -212,7 +218,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     : [];
 
   return {
-    title: output.title.trim(),
+    title: tidyTitle(output.title),
     excerpt: output.excerpt.trim(),
     body: finalBody,
     tags: output.tags.map((t) => t.toLowerCase().trim()).filter(Boolean).slice(0, 6),
