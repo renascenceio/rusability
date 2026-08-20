@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CONTENT_MODEL, CONTENT_PROVIDER_OPTIONS, buildRequirementsPreamble } from "./model";
 import { recordTextUsage } from "./usage";
 import { getHumanizerConfig, humanizeBlocks } from "./humanizer";
+import { tidyTitle } from "./tidy-title";
 import { normalizeList } from "@/lib/article-list";
 import type { ArticleBlock } from "@/lib/types";
 
@@ -134,7 +135,7 @@ ${materials.slice(0, 8000)}
   const clamp = (n: number) => Math.min(98, Math.max(60, Math.round(n)));
 
   return {
-    title: output.title.trim(),
+    title: tidyTitle(output.title),
     subtitle: output.subtitle.trim(),
     excerpt: output.excerpt.trim(),
     body: finalBody,
