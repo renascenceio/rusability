@@ -31,6 +31,38 @@ const AEO_GEO_SEO_POLICY_RU = [
   "• Оцени материал по шкалам geoScore / seoScore / aeoScore (0–100) честно, исходя из этих критериев.",
 ].join("\n");
 
+/**
+ * Timeliness policy — anchored to the REAL current date so the model can tell a
+ * genuinely fresh story from an old one, and never fabricates a concrete year.
+ *
+ * This exists because the feed layer resurfaces old content (Google News search
+ * results, evergreen listicles dated to a past year, prior-year annual reports)
+ * and, before this, every time-bound item classified as publishable `news` and
+ * got stamped with today's date on write — so a 2023/2024 story shipped as if it
+ * happened today.
+ *
+ * The hard part it must get right: a PAST YEAR used as a factual reference inside
+ * a fresh story ("81% discount to its 2021 peak", "lowest since 2022", "iPhone X
+ * from 2017") is NOT stale — the event is current, the year is just a datum. Only
+ * the age of the EVENT ITSELF makes something stale.
+ */
+function buildTimelinessPolicy(now: Date): string {
+  const dateStr = now.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  const y = now.getFullYear();
+  return [
+    `АКТУАЛЬНОСТЬ (обязательная проверка). Сегодня ${dateStr}. Ты ведёшь ЛЕНТУ НОВОСТЕЙ — только про то, что произошло недавно (последние дни/недели).`,
+    "Определи поле timeliness:",
+    `• "current" — свежее событие: произошло/объявлено недавно, либо у новости нет явной привязки к прошедшему периоду как к главной теме.`,
+    `• "stale" — материал, ГЛАВНАЯ ТЕМА которого относится к прошлому: итоги/отчёт за прошлый год, статистика или результаты за завершённый прошлый период, вечнозелёный гайд или подборка, помеченные прошлым годом. В ленту это НЕ идёт.`,
+    `• "undated" — свежесть определить невозможно.`,
+    "ГЛАВНОЕ РАЗЛИЧИЕ — предлог перед годом:",
+    `• «В ${y - 1} году…», «за ${y - 2} год», «итоги ${y - 1} года», «в первой половине ${y - 1} года», «рынок … превысил X в ${y - 2} году» — год указывает КОГДА произошёл сам факт, и это ЗАВЕРШЁННЫЙ ПРОШЛЫЙ период → "stale".`,
+    `• «с ${y - 4} года», «минимум с ${y - 4}-го», «к пиковой оценке ${y - 5} года», «iPhone X ${y - 9} года» — год это ТОЧКА ОТСЧЁТА или характеристика объекта внутри СВЕЖЕГО события → "current". Само событие (падение индекса, сделка, снятие с поддержки) происходит сейчас.`,
+    `Практический тест: если убрать год из заголовка и новость перестаёт быть про «сейчас» — это "stale". Если год лишь уточняет свежий факт — "current".`,
+    `НИКОГДА не выдумывай конкретный год. «в этом году», «за 8 месяцев этого года», «今年», «this year» → это ${y} год. «в прошлом году», «去年», «last year» → ${y - 1} год. Не превращай относительное указание времени в другой конкретный год и не переноси год из старого источника в заголовок как признак свежести.`,
+  ].join("\n");
+}
+
 export interface RewriteNewsInput {
   sourceTitle: string;
   sourceSummary: string;
@@ -50,6 +82,8 @@ export interface RewrittenNews {
   blockReason: string | null;
   format: NewsFormat;
   geoScope: GeoScope;
+  /** Whether the event itself is fresh, clearly old, or undatable. */
+  timeliness: "current" | "stale" | "undated";
   /** AEO/GEO/SEO extras. */
   keyPoints: string[];
   faq: { q: string; a: string }[];
@@ -96,6 +130,11 @@ const newsSchema = z.object({
     .describe(
       '"in_scope" — про Россию/Казахстан/Узбекистан/Беларусь/Киргизию/Таджикистан ИЛИ глобально релевантная бизнес/тех-новость. "out_of_scope" — привязано к конкретному зарубежному рынку вне этого списка (напр. «топ маркетплейсов США»). "unclear" — не уверен.',
     ),
+  timeliness: z
+    .enum(["current", "stale", "undated"])
+    .describe(
+      '"current" — свежее событие (последние дни/недели), либо прошлый год упомянут лишь как факт-ориентир внутри свежей новости. "stale" — ГЛАВНАЯ тема материала относится к прошлому: итоги/отчёт за прошлый год, статистика за давно прошедший период, вечнозелёный гайд/подборка с прошлым годом в заголовке. "undated" — свежесть определить невозможно. Смотри блок АКТУАЛЬНОСТЬ.',
+    ),
   keyPoints: z
     .array(z.string())
     .describe(
@@ -139,6 +178,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
 
   const examplesBlock = buildClassExamplesBlock(input.examples ?? { good: [], bad: [] });
 
+  const now = new Date();
   const system = [
     "Ты — новостной редактор русскоязычного делового медиа Rusability.",
     "Ты получаешь заголовок и краткое описание из внешнего источника и пишешь СВОЮ оригинальную новостную заметку на русском.",
@@ -150,6 +190,8 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     RELEVANCE_POLICY_RU,
     "",
     FORMAT_GEO_POLICY_RU,
+    "",
+    buildTimelinessPolicy(now),
     "",
     AEO_GEO_SEO_POLICY_RU,
     ...(examplesBlock ? ["", examplesBlock] : []),
@@ -186,6 +228,7 @@ export async function rewriteNews(input: RewriteNewsInput): Promise<RewrittenNew
     blockReason: output.blockReason?.trim() || null,
     format,
     geoScope: output.geoScope,
+    timeliness: output.timeliness,
     keyPoints: (output.keyPoints ?? []).map((p) => p.trim()).filter(Boolean).slice(0, 4),
     faq: (output.faq ?? [])
       .map((f) => ({ q: f.q.trim(), a: f.a.trim() }))
@@ -252,7 +295,7 @@ export async function enrichNewsAeo(input: EnrichNewsInput): Promise<NewsAeoExtr
 Текст заметки:
 ${input.body.join("\n\n")}
 
-Сгенерируй строго на основе этого текста: keyPoints (2–4 самодостаточных тезиса-выжимки), faq (3–4 реальных вопроса с прямыми ответами), metaTitle (≤60 символов), metaDescription (140–160 символов) и честные оценки geoScore / seoScore / aeoScore (0–100).`,
+Сгенерируй строго на основе этого текста: keyPoints (2–4 самодостаточных тезиса-выжимки), faq (3–4 реальных вопроса с прямыми ответами), metaTitle (≤60 символов), metaDescription (140–160 символов) и честные оценк�� geoScore / seoScore / aeoScore (0–100).`,
   });
   await recordTextUsage({ workload: "news-enrich", model: CONTENT_MODEL, usage, contentKind: "news" });
 

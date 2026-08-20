@@ -17,6 +17,19 @@ const MAX_PER_SOURCE = 3; // cap new items ingested per source per collection ru
 const MAX_QUEUED_PER_RUN = 60; // global cap per collection run (queuing is cheap — no AI)
 
 /**
+ * Freshness ceiling for ingestion. A feed item whose own publish date is older
+ * than this is dropped at COLLECT time — before it can cost an AI write and
+ * before `writeQueuedNews` restamps `publishedAt` to "now" (which would erase
+ * the age signal and ship an old story as if it happened today). This is the
+ * cheap deterministic first line of defence; the AI `timeliness` classifier is
+ * the second, for items whose feed date looks recent but whose CONTENT is old.
+ * Items with no parseable date are NOT dropped here — they fall through to the
+ * classifier. Deliberately generous (weeks, not days) to absorb feed/timezone
+ * lag without discarding legitimately recent news.
+ */
+const MAX_ITEM_AGE_DAYS = 30;
+
+/**
  * Writing concurrency — the number of articles the engine writes SIMULTANEOUSLY.
  * This is the hard ceiling that keeps us within the model/gateway rate limit:
  * we never fire more than this many AI writes at once, no matter how deep the
@@ -153,6 +166,7 @@ export async function collectNews(): Promise<{
   let fetched = 0;
   let queued = 0;
   let blocked = 0;
+  let stale = 0;
   const errors: string[] = [];
 
   for (const src of sources) {
@@ -200,7 +214,22 @@ export async function collectNews(): Promise<{
       }
 
       const now = new Date();
-      const publishedAt = item.isoDate ? new Date(item.isoDate) : now;
+      const sourceDate = item.isoDate ? new Date(item.isoDate) : null;
+      const hasValidDate = sourceDate !== null && !Number.isNaN(sourceDate.getTime());
+
+      // Recency gate: drop feed items whose own publish date is clearly old,
+      // before they cost an AI write. Items without a parseable date fall
+      // through to the AI `timeliness` classifier at write time.
+      if (hasValidDate) {
+        const ageDays = (now.getTime() - sourceDate.getTime()) / 86_400_000;
+        if (ageDays > MAX_ITEM_AGE_DAYS) {
+          stale++;
+          seen.add(link);
+          continue;
+        }
+      }
+
+      const publishedAt = hasValidDate ? sourceDate : now;
       await db.insert(news).values({
         id: nanoid(),
         slug: await uniqueSlug(`queued-${nanoid(6).toLowerCase()}`),
@@ -232,7 +261,7 @@ export async function collectNews(): Promise<{
       .where(eq(newsbotSources.id, src.id));
   }
 
-  const base = `Собрано в очередь: ${queued}, отфильтровано ${blocked}`;
+  const base = `Собрано в очередь: ${queued}, отфильтровано ${blocked}${stale ? `, устаревших ${stale}` : ""}`;
   const notes = dedupeNotes(errors);
   const message = notes.length ? `${base}. Замечания: ${notes.join("; ")}` : base;
   await db.insert(newsbotRuns).values({
@@ -323,6 +352,16 @@ export async function writeQueuedNews(opts?: {
 
       // 3) Confident evergreen article (not a news event) — reject.
       if (rewritten.format === "article") {
+        await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, row.id));
+        rejected++;
+        return;
+      }
+
+      // 3b) Stale — the event/report itself belongs to a past period (prior-year
+      // results, old statistics, a listicle dated to a past year). A past year
+      // used merely as a reference point inside a fresh story is NOT stale and is
+      // classified "current" by the model, so this only drops genuinely old items.
+      if (rewritten.timeliness === "stale") {
         await db.update(news).set({ pipeline: "rejected" }).where(eq(news.id, row.id));
         rejected++;
         return;
