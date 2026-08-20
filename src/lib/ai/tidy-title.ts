@@ -28,8 +28,17 @@
  * stripped. So we only spare the year when an outlook word immediately precedes
  * it (allowing a short connective like "на"/"в").
  */
+// NOTE: "план"/"бюджет" are deliberately EXCLUDED — as substrings they match
+// inside common content words ("медиапланирование 2026", "бюджетирование 2026")
+// where the year is a generic tail, not the subject. Only unambiguous outlook
+// words count.
 const YEAR_SUBJECT_ADJACENT =
-  /(тренд[а-я]*|прогноз[а-я]*|итог[а-я]*|обзор[а-я]*|перспектив[а-я]*|план[а-я]*|бюджет[а-я]*|календар[ья]|дорожн[а-я]*\s+карт[а-я]*|road ?map|чего ждать|что изменится|что нас ждёт|что нас ждет)\s+(?:в|во|на|к)?\s*20\d{2}/i;
+  /(тренд[а-я]*|прогноз[а-я]*|итог[а-я]*|обзор[а-я]*|перспектив[а-я]*|календар[ья]|дорожн[а-я]*\s+карт[а-я]*|road ?map|чего ждать|что изменится|что нас ждёт|что нас ждет)\s+(?:в|во|на|к)?\s*20\d{2}/i;
+
+/** True when a year in the title is genuinely the subject (trends/forecast). */
+export function isYearSubject(title: string): boolean {
+  return YEAR_SUBJECT_ADJACENT.test(title ?? "");
+}
 
 export function tidyTitle(raw: string): string {
   let t = (raw ?? "").trim();
