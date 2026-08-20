@@ -22,6 +22,10 @@ const TEXT_RATES: Record<string, { input: number; output: number }> = {
 
 /** USD per generated image. */
 const IMAGE_RATES: Record<string, number> = {
+  // Active cover model (flat rate).
+  "xai/grok-imagine-image": 0.02,
+  // Historical — kept so old ledger rows stay priced. These Imagen ids stopped
+  // working in Aug 2026 (no Vertex access for this project) and are no longer called.
   "google/imagen-4.0-fast-generate-001": 0.02,
   "google/imagen-4.0-generate-001": 0.04,
   "google/imagen-4.0-ultra-generate-001": 0.06,

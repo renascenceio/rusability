@@ -13,15 +13,21 @@ import { storeWebp } from "@/lib/media/to-webp";
 import { recordTextUsage, recordImageUsage } from "./usage";
 
 /**
- * Cover-image generation via the Vercel AI Gateway (Google Imagen).
- *  - `fast`   → imagen-4 fast: cheap, used for bulk backfill of old articles;
- *  - default  → imagen-4: higher fidelity, used for freshly generated articles.
+ * Cover-image generation via the Vercel AI Gateway (xAI Grok Imagine).
  * Output is always transcoded to WebP and stored on the public Blob store.
  * The article title steers the concrete, topic-relevant subject and is NEVER
  * drawn as text; the rendered <img> alt equals the article title at render.
+ *
+ * ★History: this used Google Imagen 4 (fast + quality). In Aug 2026 the gateway
+ * began routing every `google/imagen-4.0-*` id to Vertex `us-east5` where this
+ * project has NO access, so EVERY cover call failed ("model was not found or
+ * your project does not have access") — and because covers never block
+ * publishing, ~19 articles shipped with a /placeholder.svg. Grok Imagine is a
+ * working flat-$0.02 replacement. Both constants point at it (the `fast` flag is
+ * kept for call-site compatibility but there is now a single model).★
  */
-export const IMAGE_MODEL_FAST = "google/imagen-4.0-fast-generate-001";
-export const IMAGE_MODEL_QUALITY = "google/imagen-4.0-generate-001";
+export const IMAGE_MODEL_FAST = "xai/grok-imagine-image";
+export const IMAGE_MODEL_QUALITY = "xai/grok-imagine-image";
 
 export interface GenerateCoverInput {
   authorId: string;
@@ -98,32 +104,39 @@ export async function generateArticleCover(input: GenerateCoverInput): Promise<s
   const prompt = await craftImagePrompt(input);
   const modelId = input.fast ? IMAGE_MODEL_FAST : IMAGE_MODEL_QUALITY;
 
-  try {
-    const { image } = await generateImage({
-      model: gateway.image(modelId),
-      prompt,
-      aspectRatio: "16:9",
-      providerOptions: {
-        // NOTE: Imagen 4 dropped `negativePrompt` support, so bans are enforced
-        // purely by NOT naming forbidden objects in the positive prompt.
-        google: { personGeneration: "allow_adult", safetySetting: "block_only_high" },
-      },
-    });
-    const bytes = image.uint8Array;
-    if (!bytes || bytes.length === 0) return null;
-    // Record the image spend only once we have a real image back.
-    await recordImageUsage({ workload: "article-cover", model: modelId, images: 1, contentKind: "article" });
-    // Prompt compliance is not trusted: Imagen sometimes returns a smaller
-    // artwork baked onto a solid (white OR black OR coloured) canvas. Strip any
-    // detected matte and force an exact 16:9 crop before the cover reaches Blob,
-    // so every stored hero is structurally full-bleed with no frame or bars.
-    return await storeWebp(bytes, {
-      prefix: "covers",
-      name: input.title,
-      normalizeCover: true,
-    });
-  } catch (err) {
-    console.log("[v0] generateArticleCover failed:", err instanceof Error ? err.message : String(err));
-    return null;
+  // Retry once on any transient failure/empty result. Because a coverless
+  // article silently ships a placeholder FOREVER (publishing never blocks on
+  // the image), a single flaky gateway call must not become a permanent gap.
+  const MAX_ATTEMPTS = 2;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { image } = await generateImage({
+        model: gateway.image(modelId),
+        prompt,
+        aspectRatio: "16:9",
+      });
+      const bytes = image.uint8Array;
+      if (!bytes || bytes.length === 0) {
+        console.log(`[v0] generateArticleCover empty image (attempt ${attempt}/${MAX_ATTEMPTS})`);
+        continue;
+      }
+      // Record the image spend only once we have a real image back.
+      await recordImageUsage({ workload: "article-cover", model: modelId, images: 1, contentKind: "article" });
+      // Prompt compliance is not trusted: the model sometimes returns a smaller
+      // artwork baked onto a solid (white OR black OR coloured) canvas. Strip any
+      // detected matte and force an exact 16:9 crop before the cover reaches Blob,
+      // so every stored hero is structurally full-bleed with no frame or bars.
+      return await storeWebp(bytes, {
+        prefix: "covers",
+        name: input.title,
+        normalizeCover: true,
+      });
+    } catch (err) {
+      console.log(
+        `[v0] generateArticleCover failed (attempt ${attempt}/${MAX_ATTEMPTS}):`,
+        err instanceof Error ? err.message : String(err),
+      );
+    }
   }
+  return null;
 }
