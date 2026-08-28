@@ -1,9 +1,10 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { articles } from "@/lib/db/schema";
-import { and, desc, eq, ne, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import type { Article, ArticleBlock } from "@/lib/types";
 import { authorsByIds } from "@/lib/data/authors";
+import { memoTTL, LIST_TTL_MS } from "@/lib/data/ttl-cache";
 
 type Row = typeof articles.$inferSelect;
 
@@ -123,24 +124,30 @@ export async function getArticle(slug: string): Promise<Article | undefined> {
 /**
  * Published articles for LIST/CARD surfaces (homepage, /articles, /search,
  * sitemap). Uses the lightweight `cardCols` projection — no article bodies are
- * transferred, so this is fast even with a large catalogue.
+ * transferred — and is memoized in-process for a few minutes.
+ *
+ * This is the single hottest read in the app (it backs the homepage, the
+ * article browser, search and the sitemap). Uncached it was ~82k full
+ * scan+sort queries returning ~122M rows and ~10,500s of compute over 20 days —
+ * the #1 line on the Neon bill. The serialized list is ~4.7 MB (authors
+ * embedded), which is why it must use the RAM memo, NOT `unstable_cache` (that
+ * silently won't store >2 MB). Every derived list below reuses this one result.
  */
 export async function publishedArticles(): Promise<Article[]> {
-  const rows = await db
-    .select(cardCols)
-    .from(articles)
-    .where(eq(articles.status, "published"))
-    .orderBy(desc(articles.publishedAt));
-  return withAuthors(rows.map(mapCard));
+  return memoTTL("articles:published", LIST_TTL_MS, async () => {
+    const rows = await db
+      .select(cardCols)
+      .from(articles)
+      .where(eq(articles.status, "published"))
+      .orderBy(desc(articles.publishedAt));
+    return withAuthors(rows.map(mapCard));
+  });
 }
 
+/** Published articles in a category. Derived from the cached published list
+ *  (same rows, same `publishedAt desc` order) so it adds no DB read. */
 export async function articlesByCategory(category: string): Promise<Article[]> {
-  const rows = await db
-    .select(cardCols)
-    .from(articles)
-    .where(and(eq(articles.status, "published"), eq(articles.category, category)))
-    .orderBy(desc(articles.publishedAt));
-  return withAuthors(rows.map(mapCard));
+  return (await publishedArticles()).filter((a) => a.category === category);
 }
 
 export async function articlesByAuthor(authorId: string): Promise<Article[]> {
@@ -197,27 +204,15 @@ export async function heroArticles(limit = 5): Promise<Article[]> {
   return rankHero(await publishedArticles(), limit);
 }
 
+/** Featured published articles. Derived from the cached published list. */
 export async function featuredArticles(): Promise<Article[]> {
-  const rows = await db
-    .select(cardCols)
-    .from(articles)
-    .where(and(eq(articles.status, "published"), eq(articles.featured, true)))
-    .orderBy(desc(articles.publishedAt));
-  return withAuthors(rows.map(mapCard));
+  return (await publishedArticles()).filter((a) => a.featured);
 }
 
+/** Related published articles (same category, excluding the current one).
+ *  Derived from the cached published list, so an article page adds no DB read. */
 export async function relatedArticles(article: Article, limit = 3): Promise<Article[]> {
-  const rows = await db
-    .select(cardCols)
-    .from(articles)
-    .where(
-      and(
-        eq(articles.status, "published"),
-        eq(articles.category, article.category),
-        ne(articles.id, article.id),
-      ),
-    )
-    .orderBy(desc(articles.publishedAt))
-    .limit(limit);
-  return withAuthors(rows.map(mapCard));
+  return (await publishedArticles())
+    .filter((a) => a.category === article.category && a.id !== article.id)
+    .slice(0, limit);
 }

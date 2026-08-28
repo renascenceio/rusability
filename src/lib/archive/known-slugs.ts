@@ -18,10 +18,14 @@ import { neon } from "@neondatabase/serverless";
 
 type Section = "articles" | "news";
 
-const SET_TTL_MS = 60_000; // refresh the known-slug set at most once a minute
+const SET_TTL_MS = 300_000; // refresh the full known-slug set at most once / 5 min
 const NEG_TTL_MS = 60_000; // remember confirmed-gone slugs for 1 minute
-// Kept short so a newly published article that shares a slug with a probed old
-// link starts serving within a minute rather than staying "gone".
+// NEG_TTL is deliberately kept short so a newly published article that shares a
+// slug with a probed old link starts serving within a minute rather than
+// staying "gone". SET_TTL can be longer: a brand-new slug missing from the
+// cached set still gets served immediately via the cheap `confirmGone` point
+// check below, so lengthening it only cuts egress (this full-set load was the
+// single largest row-count query on the DB) without delaying new content.
 
 const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 
