@@ -5,6 +5,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { articles, articleCrons, articleCronTopics } from "@/lib/db/schema";
 import { requireRole, ADMIN_ROLES } from "@/lib/auth-helpers";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 
 const guard = () => requireRole(ADMIN_ROLES);
 
@@ -71,6 +72,7 @@ export async function setArticleStatus(id: string, status: "published" | "review
     .update(articles)
     .set(status === "published" ? { status, publishedAt: new Date() } : { status })
     .where(eq(articles.id, id));
+  bustContentLists();
   revalidatePath("/admin/article-crons");
   return { ok: true as const, status };
 }
@@ -78,6 +80,7 @@ export async function setArticleStatus(id: string, status: "published" | "review
 export async function deleteArticle(id: string) {
   await guard();
   await db.delete(articles).where(eq(articles.id, id));
+  bustContentLists();
   revalidatePath("/admin/article-crons");
   return { ok: true as const };
 }
