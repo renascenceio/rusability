@@ -128,8 +128,13 @@ export async function latestNews(limit?: number): Promise<NewsItem[]> {
 }
 
 /** Most-viewed published news (optionally capped). Derived from the cached
- *  list by re-sorting on views — identical result to the old `order by views`. */
+ *  list by re-sorting on views. The old query was a bare `order by views desc`
+ *  whose ties fell back to non-deterministic heap order; we tie-break on
+ *  `publishedAt desc` (newest first) so the ranking is stable across renders —
+ *  same set, deterministic order. */
 export async function popularNews(limit?: number): Promise<NewsItem[]> {
-  const ranked = [...(await publishedNews())].sort((a, b) => b.views - a.views);
+  const ranked = [...(await publishedNews())].sort(
+    (a, b) => b.views - a.views || +new Date(b.publishedAt) - +new Date(a.publishedAt),
+  );
   return limit ? ranked.slice(0, limit) : ranked;
 }

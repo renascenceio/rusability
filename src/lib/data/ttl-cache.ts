@@ -39,6 +39,26 @@ export function memoTTL<T>(key: string, ttlMs: number, loader: () => Promise<T>)
   return value;
 }
 
+/** Drop one memo entry so the next read reloads fresh from the DB. */
+export function bustList(key: string): void {
+  store.delete(key);
+}
+
+/**
+ * Invalidate the public content list memos. Call this from every write path
+ * that changes what a public list shows (admin publish/edit/delete, the content
+ * cron, the news engine) so freshly published content appears immediately
+ * instead of waiting out the TTL. Cheap and safe to call even if a key is cold.
+ *
+ * Only busts the process that runs it (there is no cross-instance signaling);
+ * the TTL is the backstop for any instance that didn't run the write.
+ */
+export function bustContentLists(): void {
+  store.delete("articles:published");
+  store.delete("news:published");
+  store.delete("authors:all");
+}
+
 /** Shared staleness window for public list/reference reads (matches the app's
  *  existing `revalidate: 300` convention for cached config). */
 export const LIST_TTL_MS = 300_000; // 5 minutes

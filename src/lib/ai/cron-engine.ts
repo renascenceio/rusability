@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/schema";
 import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 import { generateArticle } from "./generate-article";
 import { generateArticleCover } from "./generate-image";
 import { generateTopic, isDuplicateTopic } from "./generate-topic";
@@ -461,6 +462,9 @@ export async function runDueCrons(): Promise<{ due: number; ran: number; created
     /* non-critical */
   }
 
+  // New/updated articles (and author counts) changed the public lists — drop
+  // the memo so they appear immediately rather than after the TTL.
+  if (created > 0) bustContentLists();
   return { due: dueAll.length, ran, created, planned };
 }
 
@@ -494,5 +498,6 @@ export async function promoteBuffer(): Promise<{ promoted: number }> {
     }
     promoted++;
   }
+  if (promoted > 0) bustContentLists();
   return { promoted };
 }
