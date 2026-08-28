@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 import { db } from "@/lib/db";
 import {
   aiAuthors,
@@ -158,6 +159,7 @@ export async function publishBuffered(id: string) {
     .update(articles)
     .set({ status: "published", bufferReason: null, publishedAt: new Date(), updatedAt: new Date() })
     .where(eq(articles.id, id));
+  bustContentLists();
   revalidatePath("/admin/article-crons");
   revalidatePath("/admin/articles");
   return { ok: true };

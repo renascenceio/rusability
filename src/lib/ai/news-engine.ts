@@ -8,6 +8,7 @@ import { rewriteNews } from "./generate-news";
 import { isBlockedItem, matchesBlockedTerm } from "./content-filter";
 import { getBlockedTerms } from "@/lib/data/news-blocklist";
 import { getClassExamples } from "@/lib/data/news-examples";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 import { slugify } from "@/lib/utils";
 import type { NewsCategory } from "@/lib/types";
 
@@ -424,6 +425,9 @@ export async function writeQueuedNews(opts?: {
     created: written,
     message,
   });
+  // Newly published news changed the public lists — drop the memo so it shows
+  // immediately instead of after the TTL.
+  if (published > 0) bustContentLists();
   return { written, published, rejected, disputed, remaining, message };
 }
 

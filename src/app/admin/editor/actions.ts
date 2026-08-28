@@ -9,6 +9,7 @@ import { articleScore } from "@/lib/data/articles";
 import { generateArticleCover } from "@/lib/ai/generate-image";
 import { generateUserArticle } from "@/lib/ai/generate-user-article";
 import { generateArticleMeta, fallbackExcerpt } from "@/lib/ai/generate-meta";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 import { revalidatePath } from "next/cache";
 import type { ArticleBlock, CategorySlug } from "@/lib/types";
 
@@ -162,6 +163,7 @@ export async function adminPublishArticle(input: {
     /* ignore cover failures */
   }
 
+  bustContentLists();
   revalidatePath("/admin/articles");
   revalidatePath("/");
   return { ok: true, slug };

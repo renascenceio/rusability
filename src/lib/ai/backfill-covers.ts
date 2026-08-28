@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { articles } from "@/lib/db/schema";
 import { asc, eq, or, sql } from "drizzle-orm";
 import { generateArticleCover } from "@/lib/ai/generate-image";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 
 /**
  * Fill in cover images for published articles that don't have one yet.
@@ -40,6 +41,10 @@ export async function backfillCoverlessArticles(limit = 4): Promise<{ processed:
       console.log("[v0] backfillCoverlessArticles failed for", a.id, err instanceof Error ? err.message : String(err));
     }
   }
+
+  // Filled covers changed the cached article cards — refresh the memo so the
+  // real image replaces the placeholder immediately.
+  if (done > 0) bustContentLists();
 
   const [{ n: remaining }] = await db
     .select({ n: sql<number>`count(*)::int` })

@@ -11,6 +11,7 @@ import { generateUserArticle } from "@/lib/ai/generate-user-article";
 import { generateArticleMeta, fallbackExcerpt } from "@/lib/ai/generate-meta";
 import { generateArticleCover } from "@/lib/ai/generate-image";
 import { articleScore } from "@/lib/data/articles";
+import { bustContentLists } from "@/lib/data/ttl-cache";
 import type { ArticleBlock, CategorySlug } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
@@ -313,6 +314,7 @@ export async function publishArticle(input: {
     .set({ articlesCount: (ctx.author.articlesCount ?? 0) + 1 })
     .where(eq(authors.id, ctx.author.id));
 
+  bustContentLists();
   revalidatePath("/");
   revalidatePath("/articles");
   revalidatePath(`/articles/${slug}`);
