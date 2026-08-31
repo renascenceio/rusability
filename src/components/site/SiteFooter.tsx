@@ -37,13 +37,13 @@ export function SiteFooter() {
             <img
               src="/brand/rusability-logo-black.png"
               alt="Rusability"
-              className="block h-6 w-auto dark:hidden"
+              className="block h-[29px] w-auto dark:hidden"
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/rusability-logo-white.png"
               alt="Rusability"
-              className="hidden h-6 w-auto dark:block"
+              className="hidden h-[29px] w-auto dark:block"
             />
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-[var(--muted-foreground)]">
               Издание о дизайне, маркетинге, технологиях и продуктах. Пишем для тех, кто создаёт

@@ -9,13 +9,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <img
             src="/brand/rusability-logo-black.png"
             alt="Rusability"
-            className="h-6 w-auto dark:hidden"
+            className="h-[29px] w-auto dark:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/rusability-logo-white.png"
             alt="Rusability"
-            className="hidden h-6 w-auto dark:block"
+            className="hidden h-[29px] w-auto dark:block"
           />
         </Link>
       </header>
