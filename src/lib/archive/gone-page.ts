@@ -79,7 +79,7 @@ export function goneHtml(section: Section): string {
 <body>
   <div class="wrap">
     <main class="card">
-      <div class="brand"><img src="/brand/rusability-logo-black.png" alt="Rusability" width="140" height="22" /></div>
+      <div class="brand"><img src="/brand/rusability-logo-black.png" alt="Rusability" width="135" height="22" /></div>
       <span class="badge">Материал перемещён в архив</span>
       <h1>Эта страница больше недоступна</h1>
       <p>Мы полностью обновили Rusability — переосмыслили платформу, чтобы сделать её быстрее, чище и полезнее, и привели её в соответствие с рекомендациями Роскомнадзора.</p>
