@@ -82,12 +82,12 @@ function Logo() {
       <img
         src="/brand/rusability-logo-black.png"
         alt="Rusability"
-        className="block h-5 w-auto dark:hidden"
+        className="block h-6 w-auto dark:hidden"
       />
       <img
         src="/brand/rusability-logo-white.png"
         alt="Rusability"
-        className="hidden h-5 w-auto dark:block"
+        className="hidden h-6 w-auto dark:block"
       />
     </>
   );
