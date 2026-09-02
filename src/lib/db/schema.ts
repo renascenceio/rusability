@@ -8,7 +8,9 @@ import {
   numeric,
   jsonb,
   serial,
+  bigserial,
   unique,
+  uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
 
@@ -522,6 +524,40 @@ export const pageViews = pgTable(
     contentIdx: index("page_views_content_idx").on(t.contentId),
     visitorIdx: index("page_views_visitor_idx").on(t.visitorId),
     botCreatedIdx: index("page_views_bot_created_idx").on(t.isBot, t.createdAt.desc()),
+  }),
+);
+
+/* ------------------------------------------------------------------ */
+/* Recommendation analytics — impressions and clicks on related items. */
+/* ------------------------------------------------------------------ */
+export const recommendationEvents = pgTable(
+  "recommendation_events",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    eventType: text("event_type").notNull(), // impression | click
+    surface: text("surface").notNull(), // article_related | news_related
+    sourceKind: text("source_kind").notNull(),
+    sourceContentId: integer("source_content_id").notNull(),
+    targetKind: text("target_kind").notNull(),
+    targetContentId: integer("target_content_id").notNull(),
+    visitorId: text("visitor_id").notNull(),
+    sessionId: text("session_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    dedupeIdx: uniqueIndex("recommendation_events_dedupe_idx").on(
+      t.eventType,
+      t.surface,
+      t.sourceContentId,
+      t.targetContentId,
+      t.visitorId,
+      t.sessionId,
+    ),
+    createdIdx: index("recommendation_events_created_idx").on(t.createdAt.desc()),
+    surfaceCreatedIdx: index("recommendation_events_surface_created_idx").on(
+      t.surface,
+      t.createdAt.desc(),
+    ),
   }),
 );
 
