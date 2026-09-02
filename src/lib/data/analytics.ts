@@ -6,7 +6,6 @@ import { categoryName } from "@/lib/taxonomy";
 import {
   RANGE_DAYS,
   normalizeFilters,
-  type RangeKey,
   type Granularity,
   type AnalyticsFilters,
   type KpiStat,
@@ -27,9 +26,6 @@ export * from "@/lib/data/analytics-types";
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-function fmtInt(n: number): string {
-  return Math.round(n).toLocaleString("ru-RU");
-}
 function fmtCompact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")} млн`;
   if (n >= 10_000) return `${(n / 1_000).toFixed(0)}K`;
@@ -37,7 +33,7 @@ function fmtCompact(n: number): string {
   return String(Math.round(n));
 }
 function pctDelta(cur: number, prev: number): number | null {
-  if (prev <= 0) return cur > 0 ? 100 : null;
+  if (prev <= 0) return null;
   return Math.round(((cur - prev) / prev) * 100);
 }
 
@@ -87,7 +83,6 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
   const [
     kpiRow,
     engRow,
-    subsRow,
     seriesRes,
     prevSeriesRes,
     pubsRes,
@@ -136,13 +131,6 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
         WHERE is_bot = false AND created_at >= now() - make_interval(days => ${days * 2})
         GROUP BY 1, 2
       ) t
-    `),
-    // New subscribers in period vs previous.
-    db.execute<{ cur: number; prev: number }>(sql`
-      SELECT
-        count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days}))::int AS cur,
-        count(*) FILTER (WHERE created_at >= now() - make_interval(days => ${days * 2}) AND created_at < now() - make_interval(days => ${days}))::int AS prev
-      FROM subscriptions
     `),
     // Traffic time series (all + per-kind + engaged sessions), bucketed by
     // granularity. Engaged sessions (>1 view) come from a per-session rollup so
@@ -290,8 +278,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
 
   const k = kpiRow.rows[0] ?? ({} as Record<string, number>);
   const eng = engRow.rows[0] ?? ({} as Record<string, number>);
-  const subs = subsRow.rows[0] ?? { cur: 0, prev: 0 };
-
+  
   const pvCur = k.pv_cur ?? 0;
   const visCur = k.vis_cur ?? 0;
   const sessCur = eng.sess_cur ?? 0;
@@ -306,8 +293,7 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
     { key: "visitors", label: "Уникальные посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "Отдельные посетители (по анонимному идентификатору)" },
     { key: "sessions", label: "Сессии", value: fmtCompact(sessCur), raw: sessCur, delta: pctDelta(sessCur, sessPrev), hint: "Визиты — серии просмотров одного посетителя" },
     { key: "pps", label: "Страниц за сессию", value: ppsCur.toFixed(2).replace(".", ","), raw: ppsCur, delta: pctDelta(ppsCur, ppsPrev), hint: "Средняя глубина визита", format: "ratio" },
-    { key: "engagement", label: "Вовлечённость", value: `${Math.round(engCur * 100)}%`, raw: engCur, delta: pctDelta(engCur, engPrev), hint: "Доля сессий с более чем одним просмотром", format: "pct" },
-    { key: "subs", label: "Новые подписки", value: fmtInt(subs.cur), raw: subs.cur, delta: pctDelta(subs.cur, subs.prev), hint: "Новые подписки на авторов за период" },
+ { key: "engagement", label: "Вовлечённость", value: `${Math.round(engCur * 100)}%`, raw: engCur, delta: pctDelta(engCur, engPrev), hint: "Доля сессий с более чем одним просмотром", format: "pct" },
   ];
 
   const articleKpis: KpiStat[] = [
@@ -319,8 +305,8 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
     { key: "news_share", label: "Доля трафика", value: pvCur > 0 ? `${Math.round(((k.news_cur ?? 0) / pvCur) * 100)}%` : "0%", raw: pvCur > 0 ? (k.news_cur ?? 0) / pvCur : 0, delta: null, hint: "Какую часть всех просмотров дают новости", format: "pct" },
   ];
   const audienceKpis: KpiStat[] = [
-    { key: "visitors2", label: "Посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "Уникальные посетители за период" },
-    { key: "returning", label: "Просмотров на посетителя", value: visCur > 0 ? (pvCur / visCur).toFixed(1).replace(".", ",") : "0", raw: visCur > 0 ? pvCur / visCur : 0, delta: null, hint: "Средняя активность одного посетителя", format: "ratio" },
+    { key: "visitors2", label: "Посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "У��икальные посетители за период" },
+    { key: "returning", label: "Просмотров на посетителя", value: visCur > 0 ? (pvCur / visCur).toFixed(1).replace(".", ",") : "0", raw: visCur > 0 ? pvCur / visCur : 0, delta: null, hint: "Средняя активность одного посе��ителя", format: "ratio" },
     { key: "eng2", label: "Вовлечённость", value: `${Math.round(engCur * 100)}%`, raw: engCur, delta: pctDelta(engCur, engPrev), hint: "Доля сессий с более чем одним просмотром", format: "pct" },
   ];
 

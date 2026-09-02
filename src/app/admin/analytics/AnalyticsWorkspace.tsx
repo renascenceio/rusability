@@ -40,7 +40,7 @@ function StatCard({ stat }: { stat: KpiStat }) {
   const up = (stat.delta ?? 0) >= 0;
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <div className="text-sm text-[var(--muted-foreground)]">{stat.label}</div>
+      <div className="whitespace-nowrap text-[13px] text-[var(--muted-foreground)]">{stat.label}</div>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="font-serif text-[28px] font-bold leading-none text-[var(--foreground)]">
           {stat.value}
@@ -177,7 +177,7 @@ export function AnalyticsWorkspace({ data }: { data: AnalyticsData }) {
       <div className={isPending ? "opacity-60 transition-opacity" : "transition-opacity"}>
         {tab === "overview" && (
           <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
               {data.overviewKpis.map((k) => (
                 <StatCard key={k.key} stat={k} />
               ))}
@@ -189,7 +189,7 @@ export function AnalyticsWorkspace({ data }: { data: AnalyticsData }) {
               <LineChart labels={labels} series={trafficSeries} height={300} area legend initialHidden={trafficHidden} />
             </Panel>
             <div className="grid gap-5 lg:grid-cols-3">
-              <Panel title="Публикации: статьи и новости" className="lg:col-span-2">
+              <Panel title="Публикации: с��атьи и новости" className="lg:col-span-2">
                 <StackedBarChart labels={data.publications.map((p) => p.label)} series={pubSeries} height={240} />
               </Panel>
               <Panel title="Просмотры: статьи vs новости">

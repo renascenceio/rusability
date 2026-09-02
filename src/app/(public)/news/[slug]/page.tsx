@@ -8,6 +8,7 @@ import { NewsSource } from "@/components/site/NewsShareRow";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
+import { RecommendationTracker } from "@/components/site/RecommendationTracker";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SITE_URL } from "@/lib/site";
 import {
@@ -220,22 +221,31 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
             {more.map((n) => {
               const nbar = NEWS_BAR[n.category] ?? "var(--primary)";
               return (
-                <Link key={n.id} href={`/news/${n.slug}`} className="group block py-4">
-                  <span
-                    className="mb-1.5 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em]"
-                    style={{ color: nbar }}
-                  >
+                <RecommendationTracker
+                  key={n.id}
+                  surface="news_related"
+                  sourceKind="news"
+                  sourceContentId={Number(news.id)}
+                  targetKind="news"
+                  targetContentId={Number(n.id)}
+                >
+                  <Link href={`/news/${n.slug}`} className="group block py-4">
                     <span
-                      className="inline-block h-2.5 w-[3px] rounded-full"
-                      style={{ backgroundColor: nbar }}
-                    />
-                    {newsCategoryName(n.category)}
-                  </span>
-                  <h3 className="font-serif text-base font-bold leading-snug text-foreground transition-colors group-hover:text-[var(--primary)]">
-                    {n.title}
-                  </h3>
-                  <div className="mt-1 text-xs text-muted-foreground">{n.timeLabel}</div>
-                </Link>
+                      className="mb-1.5 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em]"
+                      style={{ color: nbar }}
+                    >
+                      <span
+                        className="inline-block h-2.5 w-[3px] rounded-full"
+                        style={{ backgroundColor: nbar }}
+                      />
+                      {newsCategoryName(n.category)}
+                    </span>
+                    <h3 className="font-serif text-base font-bold leading-snug text-foreground transition-colors group-hover:text-[var(--primary)]">
+                      {n.title}
+                    </h3>
+                    <div className="mt-1 text-xs text-muted-foreground">{n.timeLabel}</div>
+                  </Link>
+                </RecommendationTracker>
               );
             })}
           </div>

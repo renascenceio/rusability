@@ -7,6 +7,7 @@ import { commentsForArticle } from "@/lib/data/comments";
 import { ArticleBody } from "@/components/site/ArticleBody";
 import { EliteArticle } from "@/components/site/EliteArticle";
 import { ArticleCard } from "@/components/site/ArticleCard";
+import { RecommendationTracker } from "@/components/site/RecommendationTracker";
 import { ArticleEngagement } from "@/components/site/ArticleEngagement";
 import { ViewCounter } from "@/components/site/ViewCounter";
 import { AnalyticsBeacon } from "@/components/site/AnalyticsBeacon";
@@ -303,7 +304,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((a) => (
-                <ArticleCard key={a.id} article={a} />
+                <RecommendationTracker
+                  key={a.id}
+                  surface="article_related"
+                  sourceKind="article"
+                  sourceContentId={Number(article.id)}
+                  targetKind="article"
+                  targetContentId={Number(a.id)}
+                >
+                  <ArticleCard article={a} />
+                </RecommendationTracker>
               ))}
             </div>
           </div>

@@ -2,10 +2,23 @@
 
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { pageViews } from "@/lib/db/schema";
+import { pageViews, recommendationEvents } from "@/lib/db/schema";
 import { isBotUserAgent } from "@/lib/analytics/bot-detection";
 
 export type TrackKind = "article" | "news" | "author" | "listing" | "other";
+export type RecommendationSurface = "article_related" | "news_related";
+export type RecommendationKind = "article" | "news";
+
+export type RecommendationEventInput = {
+  eventType: "impression" | "click";
+  surface: RecommendationSurface;
+  sourceKind: RecommendationKind;
+  sourceContentId: number;
+  targetKind: RecommendationKind;
+  targetContentId: number;
+  visitorId: string;
+  sessionId: string;
+};
 
 export type TrackInput = {
   path: string;
@@ -40,9 +53,45 @@ function classifySource(referrer: string | null | undefined, ownHost: string): s
 }
 
 /**
- * Records a single public pageview. Best-effort and fully non-blocking for the
- * reader: any failure is swallowed so tracking can never break a page.
+ * Records a deduplicated recommendation impression or click. Best-effort:
+ * tracking can never interrupt navigation or break the reader experience.
  */
+export async function trackRecommendationEvent(
+  input: RecommendationEventInput,
+): Promise<void> {
+  try {
+    if (
+      !input?.visitorId ||
+      !input?.sessionId ||
+      !["impression", "click"].includes(input.eventType) ||
+      !["article_related", "news_related"].includes(input.surface) ||
+      !["article", "news"].includes(input.sourceKind) ||
+      !["article", "news"].includes(input.targetKind) ||
+      !Number.isInteger(input.sourceContentId) ||
+      !Number.isInteger(input.targetContentId)
+    ) return;
+
+    const userAgent = (await headers()).get("user-agent");
+    if (isBotUserAgent(userAgent)) return;
+
+    await db
+      .insert(recommendationEvents)
+      .values({
+        eventType: input.eventType,
+        surface: input.surface,
+        sourceKind: input.sourceKind,
+        sourceContentId: input.sourceContentId,
+        targetKind: input.targetKind,
+        targetContentId: input.targetContentId,
+        visitorId: input.visitorId.slice(0, 64),
+        sessionId: input.sessionId.slice(0, 64),
+      })
+      .onConflictDoNothing();
+  } catch (err) {
+    console.error("Recommendation tracking failed:", (err as Error)?.message);
+  }
+}
+
 export async function trackPageView(input: TrackInput): Promise<void> {
   try {
     if (!input?.visitorId || !input?.sessionId || !input?.path) return;

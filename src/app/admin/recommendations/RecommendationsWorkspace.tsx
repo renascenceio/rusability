@@ -13,13 +13,21 @@ const WEIGHT_META: Omit<Weight, "value">[] = [
   { key: "collab", label: "Коллаборативная фильтрация", hint: "«Похожие читатели»" },
 ];
 
-const TOP_RECOMMENDED = [
-  { title: "Интерфейс как язык…", count: "12 840 рек.", tone: "success" as const },
-  { title: "ИИ-маркетолог vs живой…", count: "9 200 рек.", tone: "success" as const },
-  { title: "SEO-тренды 2026…", count: "7 600 рек.", tone: "gold" as const },
-];
+export type RecommendationMetrics = {
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  clickingSessions: number;
+  top: Array<{ title: string; impressions: number; clicks: number }>;
+};
 
-export function RecommendationsWorkspace({ initialConfig }: { initialConfig: RecConfig }) {
+export function RecommendationsWorkspace({
+  initialConfig,
+  metrics,
+}: {
+  initialConfig: RecConfig;
+  metrics: RecommendationMetrics;
+}) {
   const [weights, setWeights] = useState<Weight[]>(
     WEIGHT_META.map((m) => ({ ...m, value: initialConfig.weights[m.key] ?? 50 })),
   );
@@ -97,31 +105,34 @@ export function RecommendationsWorkspace({ initialConfig }: { initialConfig: Rec
       {/* Metrics + top */}
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-2 gap-4">
-          <KpiCard label="Кликают на рек." value="68%" />
-          <KpiCard label="Статей/сессию" value="4.2" />
-          <KpiCard label="Сред. сессия" value="7:24" />
-          <KpiCard label="Bounce rate" value="23%" />
+          <KpiCard label="Показы" value={metrics.impressions.toLocaleString("ru-RU")} />
+          <KpiCard label="Клики" value={metrics.clicks.toLocaleString("ru-RU")} />
+          <KpiCard label="CTR" value={`${metrics.ctr.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}%`} />
+          <KpiCard label="Сессии с кликом" value={metrics.clickingSessions.toLocaleString("ru-RU")} />
         </div>
 
         <Panel>
-          <h2 className="mb-4 text-lg font-semibold text-[var(--foreground)]">Топ рекомендуемых</h2>
-          <div className="flex flex-col gap-2">
-            {TOP_RECOMMENDED.map((r) => (
-              <div
-                key={r.title}
-                className="flex items-center justify-between gap-3 rounded-xl bg-[var(--surface-2)] px-4 py-3"
-              >
-                <span className="truncate text-sm text-[var(--foreground)]">{r.title}</span>
-                <span
-                  className={`shrink-0 text-sm font-semibold ${
-                    r.tone === "success" ? "text-[var(--success)]" : "text-[var(--gold)]"
-                  }`}
+          <h2 className="mb-1 text-lg font-semibold text-[var(--foreground)]">Топ рекомендуемых</h2>
+          <p className="mb-4 text-xs text-[var(--muted-foreground)]">За последние 30 дней</p>
+          {metrics.top.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {metrics.top.map((item) => (
+                <div
+                  key={item.title}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-[var(--surface-2)] px-4 py-3"
                 >
-                  {r.count}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <span className="truncate text-sm text-[var(--foreground)]">{item.title}</span>
+                  <span className="shrink-0 text-xs font-semibold text-[var(--muted-foreground)]">
+                    {item.impressions.toLocaleString("ru-RU")} показов · {item.clicks.toLocaleString("ru-RU")} кликов
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-xl bg-[var(--surface-2)] px-4 py-5 text-sm text-[var(--muted-foreground)]">
+              Данные появятся после первых показов рекомендаций.
+            </p>
+          )}
         </Panel>
       </div>
     </div>

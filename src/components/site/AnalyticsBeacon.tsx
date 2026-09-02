@@ -16,7 +16,7 @@ function uid() {
 }
 
 /** Long-lived anonymous visitor id (a unique-visitor proxy). */
-function getVisitorId(): string {
+export function getVisitorId(): string {
   try {
     let v = localStorage.getItem(VISITOR_KEY);
     if (!v) {
@@ -30,7 +30,7 @@ function getVisitorId(): string {
 }
 
 /** Per-tab-session anonymous id (a session proxy). */
-function getSessionId(): string {
+export function getSessionId(): string {
   try {
     let s = sessionStorage.getItem(SESSION_KEY);
     if (!s) {
