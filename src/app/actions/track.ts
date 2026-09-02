@@ -53,8 +53,8 @@ function classifySource(referrer: string | null | undefined, ownHost: string): s
 }
 
 /**
- * Records a single public pageview. Best-effort and fully non-blocking for the
- * reader: any failure is swallowed so tracking can never break a page.
+ * Records a deduplicated recommendation impression or click. Best-effort:
+ * tracking can never interrupt navigation or break the reader experience.
  */
 export async function trackRecommendationEvent(
   input: RecommendationEventInput,
@@ -88,7 +88,7 @@ export async function trackRecommendationEvent(
       })
       .onConflictDoNothing();
   } catch (err) {
-    console.log("[v0] trackRecommendationEvent failed:", (err as Error)?.message);
+    console.error("Recommendation tracking failed:", (err as Error)?.message);
   }
 }
 

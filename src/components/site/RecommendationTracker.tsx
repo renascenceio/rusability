@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import {
   trackRecommendationEvent,
   type RecommendationKind,
@@ -27,17 +27,20 @@ export function RecommendationTracker({
   const impressed = useRef(false);
   const clicked = useRef(false);
 
-  const send = (eventType: "impression" | "click") =>
-    trackRecommendationEvent({
-      eventType,
-      surface,
-      sourceKind,
-      sourceContentId,
-      targetKind,
-      targetContentId,
-      visitorId: getVisitorId(),
-      sessionId: getSessionId(),
-    }).catch(() => {});
+  const send = useCallback(
+    (eventType: "impression" | "click") =>
+      trackRecommendationEvent({
+        eventType,
+        surface,
+        sourceKind,
+        sourceContentId,
+        targetKind,
+        targetContentId,
+        visitorId: getVisitorId(),
+        sessionId: getSessionId(),
+      }).catch(() => {}),
+    [surface, sourceKind, sourceContentId, targetKind, targetContentId],
+  );
 
   useEffect(() => {
     const element = ref.current;
@@ -55,11 +58,12 @@ export function RecommendationTracker({
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [surface, sourceKind, sourceContentId, targetKind, targetContentId]);
+  }, [send]);
 
   return (
     <div
       ref={ref}
+      data-recommendation-tracker={surface}
       className="min-w-0"
       onClick={(event) => {
         if (clicked.current || !(event.target as Element).closest("a")) return;

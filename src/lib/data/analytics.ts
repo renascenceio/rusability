@@ -6,7 +6,6 @@ import { categoryName } from "@/lib/taxonomy";
 import {
   RANGE_DAYS,
   normalizeFilters,
-  type RangeKey,
   type Granularity,
   type AnalyticsFilters,
   type KpiStat,
@@ -27,9 +26,6 @@ export * from "@/lib/data/analytics-types";
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-function fmtInt(n: number): string {
-  return Math.round(n).toLocaleString("ru-RU");
-}
 function fmtCompact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")} млн`;
   if (n >= 10_000) return `${(n / 1_000).toFixed(0)}K`;
@@ -309,8 +305,8 @@ async function compute(filters: AnalyticsFilters): Promise<AnalyticsData> {
     { key: "news_share", label: "Доля трафика", value: pvCur > 0 ? `${Math.round(((k.news_cur ?? 0) / pvCur) * 100)}%` : "0%", raw: pvCur > 0 ? (k.news_cur ?? 0) / pvCur : 0, delta: null, hint: "Какую часть всех просмотров дают новости", format: "pct" },
   ];
   const audienceKpis: KpiStat[] = [
-    { key: "visitors2", label: "Посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "Уникальные посетители за период" },
-    { key: "returning", label: "Просмотров на посетителя", value: visCur > 0 ? (pvCur / visCur).toFixed(1).replace(".", ",") : "0", raw: visCur > 0 ? pvCur / visCur : 0, delta: null, hint: "Средняя активность одного посетителя", format: "ratio" },
+    { key: "visitors2", label: "Посетители", value: fmtCompact(visCur), raw: visCur, delta: pctDelta(visCur, k.vis_prev ?? 0), hint: "У��икальные посетители за период" },
+    { key: "returning", label: "Просмотров на посетителя", value: visCur > 0 ? (pvCur / visCur).toFixed(1).replace(".", ",") : "0", raw: visCur > 0 ? pvCur / visCur : 0, delta: null, hint: "Средняя активность одного посе��ителя", format: "ratio" },
     { key: "eng2", label: "Вовлечённость", value: `${Math.round(engCur * 100)}%`, raw: engCur, delta: pctDelta(engCur, engPrev), hint: "Доля сессий с более чем одним просмотром", format: "pct" },
   ];
 
