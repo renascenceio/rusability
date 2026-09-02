@@ -42,13 +42,13 @@ export function SiteHeader() {
           <img
             src="/brand/rusability-logo-black.png"
             alt="Rusability"
-            className="h-[22px] w-auto dark:hidden"
+            className="h-[25px] w-auto dark:hidden"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/rusability-logo-white.png"
             alt="Rusability"
-            className="hidden h-[22px] w-auto dark:block"
+            className="hidden h-[25px] w-auto dark:block"
           />
         </Link>
 
