@@ -437,6 +437,14 @@ h1, h2, h3, h4, h5 {
   --shadow-card: none;
 }
 
+/* A grid track's automatic minimum is its item's min-content width, so one
+   long truncated title or nowrap row widened the whole page on mobile.
+   Zeroing it lets tracks honour the viewport; wide tables keep their own
+   overflow-x scroller. */
+.admin-root main .grid > * {
+  min-width: 0;
+}
+
 /* Scrollbar */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

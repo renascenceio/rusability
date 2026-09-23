@@ -95,12 +95,12 @@ export function UsersWorkspace({
   return (
     <div className="space-y-5">
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-[var(--border)]">
+      <div className="no-scrollbar flex items-center gap-1 overflow-x-auto border-b border-[var(--border)]">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`relative -mb-px flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+            className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-semibold transition-colors ${
               tab === t.key
                 ? "border-b-2 border-[var(--primary)] text-[var(--foreground)]"
                 : "border-b-2 border-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)]"

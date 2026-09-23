@@ -106,7 +106,7 @@ export default async function AiCostsPage({
             <h2 className="mb-3 font-serif text-xl font-bold text-[var(--foreground)]">
               На что уходят деньги
             </h2>
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] text-left text-[var(--muted-foreground)]">
@@ -144,7 +144,7 @@ export default async function AiCostsPage({
             <h2 className="mb-3 font-serif text-xl font-bold text-[var(--foreground)]">
               По моделям
             </h2>
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] text-left text-[var(--muted-foreground)]">
@@ -202,7 +202,7 @@ export default async function AiCostsPage({
               <h2 className="mb-3 font-serif text-xl font-bold text-[var(--foreground)]">
                 По дням
               </h2>
-              <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+              <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)] text-left text-[var(--muted-foreground)]">

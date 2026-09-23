@@ -225,9 +225,9 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
                   key={n.id}
                   surface="news_related"
                   sourceKind="news"
-                  sourceContentId={Number(news.id)}
+                  sourceContentId={String(news.id)}
                   targetKind="news"
-                  targetContentId={Number(n.id)}
+                  targetContentId={String(n.id)}
                 >
                   <Link href={`/news/${n.slug}`} className="group block py-4">
                     <span

@@ -19,9 +19,9 @@ export function RecommendationTracker({
   children: ReactNode;
   surface: RecommendationSurface;
   sourceKind: RecommendationKind;
-  sourceContentId: number;
+  sourceContentId: string;
   targetKind: RecommendationKind;
-  targetContentId: number;
+  targetContentId: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const impressed = useRef(false);
