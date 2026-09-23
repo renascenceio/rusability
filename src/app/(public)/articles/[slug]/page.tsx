@@ -308,9 +308,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   key={a.id}
                   surface="article_related"
                   sourceKind="article"
-                  sourceContentId={Number(article.id)}
+                  sourceContentId={String(article.id)}
                   targetKind="article"
-                  targetContentId={Number(a.id)}
+                  targetContentId={String(a.id)}
                 >
                   <ArticleCard article={a} />
                 </RecommendationTracker>

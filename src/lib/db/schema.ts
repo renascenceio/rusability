@@ -537,9 +537,9 @@ export const recommendationEvents = pgTable(
     eventType: text("event_type").notNull(), // impression | click
     surface: text("surface").notNull(), // article_related | news_related
     sourceKind: text("source_kind").notNull(),
-    sourceContentId: integer("source_content_id").notNull(),
+    sourceContentId: text("source_content_id").notNull(),
     targetKind: text("target_kind").notNull(),
-    targetContentId: integer("target_content_id").notNull(),
+    targetContentId: text("target_content_id").notNull(),
     visitorId: text("visitor_id").notNull(),
     sessionId: text("session_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

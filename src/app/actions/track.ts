@@ -13,9 +13,9 @@ export type RecommendationEventInput = {
   eventType: "impression" | "click";
   surface: RecommendationSurface;
   sourceKind: RecommendationKind;
-  sourceContentId: number;
+  sourceContentId: string;
   targetKind: RecommendationKind;
-  targetContentId: number;
+  targetContentId: string;
   visitorId: string;
   sessionId: string;
 };
@@ -33,6 +33,7 @@ export type TrackInput = {
 };
 
 const KNOWN_KINDS: TrackKind[] = ["article", "news", "author", "listing", "other"];
+const CONTENT_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
 /** Buckets a referrer into a coarse acquisition source for reporting. */
 function classifySource(referrer: string | null | undefined, ownHost: string): string {
@@ -67,8 +68,8 @@ export async function trackRecommendationEvent(
       !["article_related", "news_related"].includes(input.surface) ||
       !["article", "news"].includes(input.sourceKind) ||
       !["article", "news"].includes(input.targetKind) ||
-      !Number.isInteger(input.sourceContentId) ||
-      !Number.isInteger(input.targetContentId)
+      !CONTENT_ID_RE.test(input.sourceContentId ?? "") ||
+      !CONTENT_ID_RE.test(input.targetContentId ?? "")
     ) return;
 
     const userAgent = (await headers()).get("user-agent");
